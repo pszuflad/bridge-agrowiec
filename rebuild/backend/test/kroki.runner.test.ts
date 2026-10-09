@@ -12,6 +12,20 @@ function baza() {
 }
 
 describe("kroki wdrożenia", () => {
+  it("krok tylkoProdukcja jest pomijany na środowisku testowym bez zapisu, a na produkcji biegnie", async () => {
+    const { sqlite, db } = baza();
+    let ile = 0;
+    const kroki: Krok[] = [{ id: "p", opis: "p", tylkoProdukcja: true, uruchom: async () => `bieg ${++ile}` }];
+
+    const testowe = await uruchomKroki(sqlite, db, kroki, { KROKI_SRODOWISKO: "testowe" });
+    expect(testowe.wykonane).toEqual([]);
+    expect(ile).toBe(0);
+    expect(sqlite.prepare("SELECT 1 FROM kroki_wdrozenia WHERE id='p'").get()).toBeUndefined();
+
+    const produkcja = await uruchomKroki(sqlite, db, kroki, {});
+    expect(produkcja.wykonane).toEqual(["p"]);
+  });
+
   it("wykonuje krok raz, zapisuje go i przy kolejnym wdrożeniu pomija", async () => {
     const { sqlite, db } = baza();
     let ile = 0;
@@ -208,5 +222,84 @@ describe("krok wdrożenia: włączenie Toru 2 i Toru 3 w .env", () => {
     } finally {
       rmSync(katalog, { recursive: true, force: true });
     }
+  });
+});
+
+describe("krok wdrożenia: reset hasła Arkadiusza", () => {
+  const ID = "2026-10-09-reset-hasla-arkadiusz";
+  const EMAIL = "arkadiusz.mielczarek@agrowiec.eu";
+  const krok = () => KROKI_WDROZENIA.find((k) => k.id === ID)!;
+
+  async function zalozKonta(db: ReturnType<typeof baza>["db"]) {
+    const { dodajUzytkownika } = await import("../src/auth/dodaj-uzytkownika.js");
+    await dodajUzytkownika(db, EMAIL, "Arkadiusz Mielczarek", "zapomniane-haslo-1");
+    await dodajUzytkownika(db, "inna.osoba@agrowiec.eu", "Inna Osoba", "haslo-innej-osoby-1");
+  }
+
+  it("ustawia hasło tymczasowe tylko Arkadiuszowi: nowe działa, stare nie, reszta konta i inni użytkownicy bez zmian", async () => {
+    const { porownajHaslo } = await import("../src/auth/password.js");
+    const { sqlite, db } = baza();
+    await zalozKonta(db);
+    const przed = pobierzUzytkownikaPoEmailu(db, EMAIL)!;
+    const innaPrzed = pobierzUzytkownikaPoEmailu(db, "inna.osoba@agrowiec.eu")!;
+
+    const w = await uruchomKroki(sqlite, db, [krok()], { HASLO_TYMCZASOWE: "Tymczasowe2026!" });
+
+    expect(w.wykonane).toEqual([ID]);
+    const po = pobierzUzytkownikaPoEmailu(db, EMAIL)!;
+    expect(await porownajHaslo("Tymczasowe2026!", po.hasloHash)).toBe(true);
+    expect(await porownajHaslo("zapomniane-haslo-1", po.hasloHash)).toBe(false);
+    expect({ ...po, hasloHash: "" }).toEqual({ ...przed, hasloHash: "" }); // id, imię, e-mail, daty — nietknięte
+    expect(pobierzUzytkownikaPoEmailu(db, "inna.osoba@agrowiec.eu")).toEqual(innaPrzed);
+  });
+
+  it("biegnie RAZ: hasło, które Arkadiusz ustawi sobie potem w /moje-konto, nie jest nadpisywane przy kolejnym wdrożeniu", async () => {
+    const { porownajHaslo, zahashujHaslo } = await import("../src/auth/password.js");
+    const { zapiszHasloUzytkownika } = await import("../src/repos/users.js");
+    const { sqlite, db } = baza();
+    await zalozKonta(db);
+    const env = { HASLO_TYMCZASOWE: "Tymczasowe2026!" };
+    await uruchomKroki(sqlite, db, [krok()], env);
+
+    // Arkadiusz ustawia własne hasło (jak w /moje-konto)
+    zapiszHasloUzytkownika(db, pobierzUzytkownikaPoEmailu(db, EMAIL)!.id, await zahashujHaslo("MojeWlasne2026"));
+    const drugi = await uruchomKroki(sqlite, db, [krok()], env);
+
+    expect(drugi.juzWykonane).toEqual([ID]);
+    const po = pobierzUzytkownikaPoEmailu(db, EMAIL)!;
+    expect(await porownajHaslo("MojeWlasne2026", po.hasloHash)).toBe(true);
+    expect(await porownajHaslo("Tymczasowe2026!", po.hasloHash)).toBe(false);
+  });
+
+  it("bez HASLO_TYMCZASOWE w .env krok jest pomijany bez zapisu i nie rusza hasła", async () => {
+    const { porownajHaslo } = await import("../src/auth/password.js");
+    const { sqlite, db } = baza();
+    await zalozKonta(db);
+
+    const w = await uruchomKroki(sqlite, db, [krok()], {});
+
+    expect(w.pominieteBrakEnv).toEqual([{ id: ID, brakuje: ["HASLO_TYMCZASOWE"] }]);
+    expect(await porownajHaslo("zapomniane-haslo-1", pobierzUzytkownikaPoEmailu(db, EMAIL)!.hasloHash)).toBe(true);
+    expect(sqlite.prepare("SELECT COUNT(*) AS n FROM kroki_wdrozenia").get()).toEqual({ n: 0 });
+  });
+
+  it("brak konta Arkadiusza → krok ODŁOŻONY (nie zapisany), wdrożenie się nie przerywa i nikt nie dostaje konta", async () => {
+    const { sqlite, db } = baza();
+
+    const w = await uruchomKroki(sqlite, db, [krok()], { HASLO_TYMCZASOWE: "Tymczasowe2026!" });
+
+    expect(w.wykonane).toEqual([]);
+    expect(w.odlozone).toEqual([{ id: ID, powod: `brak konta ${EMAIL}` }]);
+    expect(sqlite.prepare("SELECT COUNT(*) AS n FROM kroki_wdrozenia").get()).toEqual({ n: 0 });
+    expect(pobierzUzytkownikaPoEmailu(db, EMAIL)).toBeUndefined();
+  });
+
+  it("za krótkie hasło tymczasowe (< 8 znaków) przerywa krok błędem i nie zmienia hasła", async () => {
+    const { porownajHaslo } = await import("../src/auth/password.js");
+    const { sqlite, db } = baza();
+    await zalozKonta(db);
+
+    await expect(uruchomKroki(sqlite, db, [krok()], { HASLO_TYMCZASOWE: "krotkie" })).rejects.toThrow("co najmniej 8");
+    expect(await porownajHaslo("zapomniane-haslo-1", pobierzUzytkownikaPoEmailu(db, EMAIL)!.hasloHash)).toBe(true);
   });
 });

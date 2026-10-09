@@ -138,6 +138,13 @@ log "kopia bazy przed migracjami"
 ( cd rebuild/backend && DB_PATH="$DATA_DB" ETYKIETA="$SHA" node scripts/kopia-bazy.cjs 2>&1 | tee -a "$LOG" )
 
 ( cd rebuild/backend && DB_PATH="$DATA_DB" npm run migrate )   # migracje na bazie staging
+
+# --- kroki wdrożenia (jak na produkcji): jednorazowe operacje na danych, np. reset hasła ---
+# Rejestr: rebuild/backend/src/kroki/rejestr.ts. KROKI_SRODOWISKO=testowe pomija kroki oznaczone
+# `tylkoProdukcja` (np. włączenie zapisu do Selly). Krok z sekretem (HASLO_TYMCZASOWE z
+# $STAGING_ROOT/.env) pomija się z wpisem w logu, gdy sekretu brak.
+log "kroki wdrożenia (rejestr: rebuild/backend/src/kroki/rejestr.ts)"
+( cd rebuild/backend && DB_PATH="$DATA_DB" KROKI_SRODOWISKO=testowe npm run kroki-wdrozenia 2>&1 | tee -a "$LOG" )
 ln -sfn "$RELEASE" "$STAGING_ROOT/current"               # atomowa podmiana
 # zawsze uruchamiamy BIEŻĄCY release; delete+start jest odporne na (a) placeholder
 # trzymający nazwę i (b) pm2 reload trzymający starą, rozwiązaną ścieżkę skryptu po podmianie symlinku
