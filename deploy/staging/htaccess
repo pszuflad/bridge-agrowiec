@@ -8,6 +8,10 @@
 
 RewriteEngine On
 
+# Zakaz indeksowania (wyszukiwarki, boty): nagłówek na KAŻDEJ odpowiedzi (strony, API, 403/404),
+# obok robots.txt (rebuild/frontend/public/) i meta robots w index.html.
+Header always set X-Robots-Tag "noindex, nofollow, noarchive, nosnippet"
+
 # 0) Wyzwania Let's Encrypt (wystawianie/odnawianie SSL) — serwuj bez proxy/redirectu/SPA-fallbacku
 RewriteRule ^\.well-known/acme-challenge/ - [L]
 
