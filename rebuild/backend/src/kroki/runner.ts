@@ -22,6 +22,11 @@ export type Krok = {
   opis: string;
   /** Zmienne env (sekrety z `$PROD_ROOT/.env`). Brak którejkolwiek → krok POMINIĘTY, nie zapisany. */
   wymagaEnv?: string[];
+  /**
+   * Krok dotyczy wyłącznie produkcji (np. włączenie zapisu do sklepu Selly, ścieżki serwera produkcyjnego).
+   * Pomijany BEZ zapisu, gdy `KROKI_SRODOWISKO=testowe` (ustawia to `tools/deploy-staging.sh`).
+   */
+  tylkoProdukcja?: boolean;
   /** Zwrócony tekst trafia do `kroki_wdrozenia.wynik` i do logu wdrożenia. */
   uruchom: (ctx: KontekstKroku) => Promise<string | void | OdlozKrok>;
 };
@@ -88,6 +93,10 @@ export async function uruchomKroki(
   for (const krok of kroki) {
     if (zapisany.get(krok.id)) {
       wynik.juzWykonane.push(krok.id);
+      continue;
+    }
+    if (krok.tylkoProdukcja && env.KROKI_SRODOWISKO === "testowe") {
+      log(`krok ${krok.id}: POMINIĘTY — tylko produkcja`);
       continue;
     }
     const brakuje = (krok.wymagaEnv ?? []).filter((nazwa) => !env[nazwa]);

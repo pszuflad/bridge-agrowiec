@@ -41,6 +41,7 @@ export const KROKI_WDROZENIA: Krok[] = [
   },
   {
     id: "2026-10-07-zrodla-cennikow-foldery",
+    tylkoProdukcja: true,
     opis: "źródła cenników dostawców (poza MO2/MO3) → lokalne foldery MO#_ (plik://), widoczne w panelu",
     async uruchom({ db, env }) {
       const katalog = (env.IMPORTY_KATALOG as string | undefined)?.trim() || DOMYSLNY_KATALOG_IMPORTOW;
@@ -52,6 +53,7 @@ export const KROKI_WDROZENIA: Krok[] = [
   },
   {
     id: "2026-10-08-selly-tor2-tor3-wlaczone",
+    tylkoProdukcja: true, // środowisko testowe nie może dostać zapisu do sklepu Selly
     opis: "Selly: włączenie Toru 2 (pełna synchronizacja 04:30) i Toru 3 (usuwanie sierot) — SELLY_TOR2=true, SELLY_USUWANIE=true w .env",
     async uruchom({ env }) {
       // `.env` leży w `$PROD_ROOT`, a baza w `$PROD_ROOT/data/` (tools/deploy-produkcja.sh).
