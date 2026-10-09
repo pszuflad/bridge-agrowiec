@@ -200,7 +200,7 @@ export function trasyUtrzymania({ db, dbPath, sqlite }: ZaleznosciUtrzymania): R
   });
 
   /**
-   * Uzupełnienie pustych linków do zdjęć po marce+modelu — ticket 202-FEATURE-link-zdjecia-po-modelu.
+   * Uzupełnienie pustych linków do zdjęć po marce+modelu — ticket 203-FEATURE-link-zdjecia-po-modelu.
    *
    * ⚠ NOWA LOGIKA BIZNESOWA, NIE PORT. `dry_run: true` zwraca TYLKO podgląd (lista propozycji,
    * nic nie jest zapisywane); bez niego zapisuje wszystkie propozycje albo — gdy podano `ids`

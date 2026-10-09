@@ -89,7 +89,7 @@ export function SzczegolyPozycji({ id, zamknij }: WlasciwosciSzczegolow) {
     enabled: id != null,
   });
 
-  // Ticket 202 (NOWA logika): podpowiedź linku do zdjęcia (marka+model) dla pozycji bez linku.
+  // Ticket 203 (NOWA logika): podpowiedź linku do zdjęcia (marka+model) dla pozycji bez linku.
   const { data: podpowiedzZdjecia } = useQuery<{
     propozycja: { link: string; produktow: number; wariantow: number } | null;
   } | null>({
@@ -295,7 +295,7 @@ export function SzczegolyPozycji({ id, zamknij }: WlasciwosciSzczegolow) {
 
             {!jestWycofana && propozycjaZdjecia && zmiany.linkZdjecia === undefined ? (
               /*
-                Ticket 202: pozycja nie ma linku do zdjęcia. Jeśli go nie wpiszesz, akceptacja
+                Ticket 203: pozycja nie ma linku do zdjęcia. Jeśli go nie wpiszesz, akceptacja
                 uzupełni go tym linkiem (i zapisze jak poprawkę Marty); „Użyj" wstawia go do pola
                 edycji, gdzie można go jeszcze poprawić.
               */

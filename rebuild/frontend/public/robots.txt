@@ -1,0 +1,3 @@
+# Bridge to panel wewnętrzny — nie ma być indeksowany przez żadne wyszukiwarki ani boty.
+User-agent: *
+Disallow: /

@@ -1,4 +1,4 @@
-// Dziedziczenie linku do zdjęcia po marce+modelu — ticket 202-FEATURE-link-zdjecia-po-modelu.
+// Dziedziczenie linku do zdjęcia po marce+modelu — ticket 203-FEATURE-link-zdjecia-po-modelu.
 //
 // ⚠ NOWA LOGIKA BIZNESOWA, NIE PORT. Produkcja ma tylko pamięć linków (`applyLinkMemory` w
 // `legacy/bridge_ext.cjs`, po kodzie albo marce+modelu+ROZMIARZE) i tylko przy akceptacji

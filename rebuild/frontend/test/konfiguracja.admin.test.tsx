@@ -630,7 +630,7 @@ describe("Przycisk „Usuń wszystko z katalogu” (zakładka Katalog)", () => {
       await waitFor(() => expect(uniewaznienia).toEqual([["/api/products"]]));
     });
   });
-  describe("Uzupełnianie zdjęć (ticket 202)", () => {
+  describe("Uzupełnianie zdjęć (ticket 203)", () => {
     const propozycja = (id: number, kod: string) => ({
       id,
       kod,

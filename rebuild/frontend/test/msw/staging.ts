@@ -37,7 +37,7 @@ export type OpcjeHandlerowStagingu = {
   szczegol?: Record<string, unknown> | null;
   /** Materiał okna „Rozstrzygnij" — `GET /api/staging/{id}/review`. */
   przeglad?: PrzegladZgloszenia;
-  /** `GET /api/staging/{id}/propozycja-zdjecia` (ticket 202); domyślnie brak propozycji. */
+  /** `GET /api/staging/{id}/propozycja-zdjecia` (ticket 203); domyślnie brak propozycji. */
   propozycjaZdjecia?: { link: string; produktow: number; wariantow: number } | null;
   /** Gdy ustawione, `review` oddaje błąd zamiast danych. */
   bladPrzegladu?: OdpowiedzBledu;

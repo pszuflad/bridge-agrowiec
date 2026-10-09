@@ -1,5 +1,5 @@
 /**
- * Ticket 202 — warstwa HTTP: `POST /api/products/uzupelnij-zdjecia`,
+ * Ticket 203 — warstwa HTTP: `POST /api/products/uzupelnij-zdjecia`,
  * `GET /api/staging/{id}/propozycja-zdjecia` i edycja linku w `PUT /api/staging/{id}`.
  * Logika dopasowania ma osobne testy w `dziedziczenie-linkow.test.ts` — tu: autoryzacja,
  * kształt odpowiedzi, walidacja, audyt i poprawka Marty z edycji w stagingu.
@@ -72,7 +72,7 @@ describe("uzupełnianie zdjęć — trasy HTTP", () => {
     expect(odp.status).toBe(200);
     expect(odp.body).toMatchObject({ ok: true, dry_run: true, wszystkichPustych: 2 });
     expect((odp.body as { propozycje: unknown[] }).propozycje).toHaveLength(2);
-    // GATE KONTRAKTU: ścieżka/status w openapi.yaml i kształt zgodny z fixture'em (ticket 202).
+    // GATE KONTRAKTU: ścieżka/status w openapi.yaml i kształt zgodny z fixture'em (ticket 203).
     sprawdzZgodnoscZKontraktem({ metoda: "post", sciezka: "/api/products/uzupelnij-zdjecia", odpowiedz: odp });
     sprawdzZgodnoscZFixture("POST_products_uzupelnij-zdjecia.json", odp.body);
     expect(srodowisko.db.select().from(products).where(eq(products.kod, "PUSTY")).get()?.linkZdjecia).toBeNull();

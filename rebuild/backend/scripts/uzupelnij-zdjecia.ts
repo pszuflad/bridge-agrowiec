@@ -1,4 +1,4 @@
-// Ticket 202-FEATURE-link-zdjecia-po-modelu — uzupełnienie pustych linków do zdjęć w katalogu
+// Ticket 203-FEATURE-link-zdjecia-po-modelu — uzupełnienie pustych linków do zdjęć w katalogu
 // po marce+modelu. ⚠ NOWA LOGIKA BIZNESOWA, NIE PORT — patrz `src/import/dziedziczenieLinkow.ts`.
 // Cienki wrapper CLI wokół tych samych funkcji, których używa `POST /api/products/uzupelnij-zdjecia`.
 //

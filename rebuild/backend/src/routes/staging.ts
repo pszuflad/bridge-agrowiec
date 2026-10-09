@@ -117,7 +117,7 @@ export function trasyStagingu({ db }: ZaleznosciStagingu): Router {
   });
 
   /**
-   * Podpowiedź linku do zdjęcia dla pozycji stagingu — ticket 202. Pokazywana w szczegółach
+   * Podpowiedź linku do zdjęcia dla pozycji stagingu — ticket 203. Pokazywana w szczegółach
    * pozycji; `propozycja` jest `null`, gdy pozycja ma już link (także z poprawki), nie ma
    * marki/modelu albo nic w katalogu nie pasuje. Nic nie zapisuje.
    */

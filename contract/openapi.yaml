@@ -20110,7 +20110,7 @@ paths:
         "401": { description: "Nieautoryzowany" }
         "500": { description: "Baza niedostępna" }
   # ————————————————————————————————————————————————————————————————————————————————————
-  # uzupelnij-zdjecia — ticket 202 (NOWA logika, nie port). Produkcja nie ma tej trasy.
+  # uzupelnij-zdjecia — ticket 203 (NOWA logika, nie port). Produkcja nie ma tej trasy.
   # Uzupełnia puste „Link do zdjęcia" najczęstszym linkiem produktów o tej samej marce i modelu.
   # Kształt odpowiedzi zamrożony fixture'ami RĘCZNIE napisanymi (nie nagranymi z oryginału).
   # ————————————————————————————————————————————————————————————————————————————————————
@@ -20132,7 +20132,7 @@ paths:
                 dry_run: { type: boolean }
                 ids: { type: array, items: { type: integer } }
       responses:
-        "200": { description: "OK — kształt zamrożony fixture'ami (ticket 202)", content: { application/json: { schema: { $ref: "#/components/schemas/POSTProductsUzupelnijZdjeciaOdpowiedz200" } } } }
+        "200": { description: "OK — kształt zamrożony fixture'ami (ticket 203)", content: { application/json: { schema: { $ref: "#/components/schemas/POSTProductsUzupelnijZdjeciaOdpowiedz200" } } } }
         "400": { description: "ids nie jest listą liczb całkowitych" }
         "401": { description: "Nieautoryzowany" }
         "500": { description: "Baza niedostępna" }
@@ -20872,7 +20872,7 @@ paths:
         - { name: id, in: path, required: true, schema: { type: string } }
       security: [{ bearerAuth: [] }, { cookieAuth: [] }]
       requestBody:
-        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures. Od ticketu 202 dochodzi pole `linkZdjecia` (zapisuje też poprawkę Marty)."
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures. Od ticketu 203 dochodzi pole `linkZdjecia` (zapisuje też poprawkę Marty)."
         content: { application/json: { schema: { type: object } } }
       responses:
         "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
@@ -20883,13 +20883,13 @@ paths:
       tags: [staging]
       summary: "GET /api/staging/{id}/propozycja-zdjecia"
       description: >-
-        Ticket 202 (NOWA logika). Podpowiedź linku do zdjęcia dla pozycji stagingu z pustym
+        Ticket 203 (NOWA logika). Podpowiedź linku do zdjęcia dla pozycji stagingu z pustym
         linkiem (`propozycja` jest `null`, gdy pozycja ma już link albo nic nie pasuje) (najczęstszy link produktów o tej samej marce i modelu). Nic nie zapisuje.
       parameters:
         - { name: id, in: path, required: true, schema: { type: string } }
       security: [{ bearerAuth: [] }, { cookieAuth: [] }]
       responses:
-        "200": { description: "OK — kształt zamrożony fixture'em (ticket 202)", content: { application/json: { schema: { $ref: "#/components/schemas/GETStagingIdPropozycjaZdjeciaOdpowiedz200" } } } }
+        "200": { description: "OK — kształt zamrożony fixture'em (ticket 203)", content: { application/json: { schema: { $ref: "#/components/schemas/GETStagingIdPropozycjaZdjeciaOdpowiedz200" } } } }
         "400": { description: "Nieprawidłowy id" }
         "401": { description: "Nieautoryzowany" }
         "404": { description: "Nie znaleziono pozycji stagingu" }

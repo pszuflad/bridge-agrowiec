@@ -103,7 +103,7 @@ export async function oszacujWage(): Promise<WynikSzacowaniaWagi> {
   return (await odpowiedz.json()) as WynikSzacowaniaWagi;
 }
 
-/** Jedna propozycja linku do zdjęcia dla produktu z katalogu — ticket 202 (NOWA logika). */
+/** Jedna propozycja linku do zdjęcia dla produktu z katalogu — ticket 203 (NOWA logika). */
 export type PropozycjaZdjecia = {
   id: number;
   kod: string;

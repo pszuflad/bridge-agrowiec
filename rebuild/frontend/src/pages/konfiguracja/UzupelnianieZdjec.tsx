@@ -1,5 +1,5 @@
 /**
- * „Uzupełnianie zdjęć" w zakładce Katalog — ticket 202 (NOWA logika, nie port).
+ * „Uzupełnianie zdjęć" w zakładce Katalog — ticket 203 (NOWA logika, nie port).
  *
  * Najpierw PODGLĄD (nic nie jest zapisywane): lista produktów z pustym linkiem i linkiem, który
  * proponujemy (najczęstszy w katalogu dla tej samej marki i modelu). Człowiek odznacza to, co mu

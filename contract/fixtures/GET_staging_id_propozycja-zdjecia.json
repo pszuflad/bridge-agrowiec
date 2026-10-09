@@ -10,6 +10,6 @@
       "wariantow": 1
     }
   },
-  "_zrodlo": "RĘCZNIE napisane (ticket 202) — endpoint jest NOWĄ logiką biznesową, produkcja go nie ma.",
+  "_zrodlo": "RĘCZNIE napisane (ticket 203) — endpoint jest NOWĄ logiką biznesową, produkcja go nie ma.",
   "_opis": "Kształt = {propozycja: PropozycjaLinku | null}. `null`, gdy pozycja ma już link albo nic nie pasuje. Wartości ilustracyjne."
 }

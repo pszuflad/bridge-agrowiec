@@ -1,4 +1,4 @@
-# 202-FEATURE-link-zdjecia-po-modelu — Implementation report
+# 203-FEATURE-link-zdjecia-po-modelu — Implementation report
 
 ## Summary
 Puste pole „Link do zdjęcia" uzupełnia się najczęstszym linkiem produktów o tej samej marce i modelu.
@@ -13,7 +13,7 @@ katalogu (przycisk z podglądem i zapisem wybranych). Uzupełnione linki są chr
 - Frontend: `pages/konfiguracja/UzupelnianieZdjec.tsx` (nowy), `katalog.ts`, `Katalog.tsx`; `pages/staging/SzczegolyPozycji.tsx`, `dane.ts`.
 - Kontrakt: `contract/openapi.yaml` (2 ścieżki, schematy wygenerowane `tools/generate-openapi-schemas.cjs`), 2 nowe fixtures.
 - Testy: `test/dziedziczenie-linkow.test.ts` (12), `test/uzupelnij-zdjecia.routes.test.ts` (6), FE: `staging.test.tsx` (+2), `konfiguracja.admin.test.tsx` (+2), handler MSW w `test/msw/staging.ts`.
-- Docs: `docs/spec-backend/wpis-202.md`.
+- Docs: `docs/spec-backend/wpis-203.md`.
 
 ## Deviations from plan
 - Podpowiedź w stagingu pokazana tylko w szczegółach pozycji (nie w kolumnie tabeli) — jeden dodatkowy request na otwarcie okna zamiast N dla listy.

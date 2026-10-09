@@ -129,7 +129,7 @@ export function dodajProduktyBulk(
       } catch {
         /* jak `catch (_be) {}` */
       }
-      // Ticket 202 (NOWA logika): pusty link z najczęstszego linku marki+modelu (indeks budowany
+      // Ticket 203 (NOWA logika): pusty link z najczęstszego linku marki+modelu (indeks budowany
       // raz na partię — linki dodane w trakcie partii wejdą od następnej).
       let linkUzupelniony = false;
       const poprawkaLinku = { dostawca: String(rekord.dostawca), kod: String(rekord.kod) };

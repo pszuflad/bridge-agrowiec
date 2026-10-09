@@ -1,7 +1,7 @@
-# 202-FEATURE-link-zdjecia-po-modelu — Code review
+# 203-FEATURE-link-zdjecia-po-modelu — Code review
 
 > Reviewed: 2026-10-09
-> Branch: feature/202-link-zdjecia-po-modelu
+> Branch: feature/203-link-zdjecia-po-modelu
 > Diff: 26 plików (+1511/-4), 5 commitów vs origin/develop
 
 ## BLOCKER
@@ -18,7 +18,7 @@ Brak.
 - [ ] `rebuild/backend/src/import/akceptacja.ts:~214` (+ `dziedziczenieLinkow.ts:~129`) — przy akceptacji bez przekazanego indeksu `applyLinkDziedziczony` woła `zbudujIndeksLinkow(db)` = pełny skan `products` (~5,4 tys. wierszy + grupowanie w JS) dla KAŻDEJ zatwierdzanej pozycji z pustym linkiem i parą marka+model. Przy akceptacji masowej (tysiące pozycji, `allFiltered`) to O(N × katalog) w jednym żądaniu.
   - Suggestion: indeks lazy per-partia przekazywany z pętli akceptacji masowej (jak w `bulk.ts`), albo zapytanie SQL `WHERE UPPER(marka)=? AND UPPER(model)=?` dla pojedynczej pary.
 - [ ] `rebuild/backend/src/import/bulk.ts:~132` — komentarz mówi „linki dodane w trakcie partii wejdą od następnej", a indeks jest budowany raz i NIE odświeża się. Zachowanie (stały indeks) jest sensowne, komentarz wprowadza w błąd; popraw komentarz. Dodatkowo `indeksLinkow` jest budowany w transakcji — OK, ale pozycja dodana w partii z linkiem nie zasila kolejnych pustych w tej samej partii (należy to świadomie przyjąć).
-- [ ] `contract/openapi.yaml` (~l.19067) — opis „Od ticketu 202 dochodzi pole `linkZdjecia`…" został dopisany do `POST /api/ai-fallback/parse`, a dotyczy edycji pozycji stagingu (`PUT /api/staging/{id}`, `POLA_EDYTOWALNE` w `staging-mutacje.ts`). Realna zmiana kontraktu (nowe edytowalne pole + zapis poprawki) nie jest opisana przy właściwej ścieżce; opis przy ai-fallback jest błędny.
+- [ ] `contract/openapi.yaml` (~l.19067) — opis „Od ticketu 203 dochodzi pole `linkZdjecia`…" został dopisany do `POST /api/ai-fallback/parse`, a dotyczy edycji pozycji stagingu (`PUT /api/staging/{id}`, `POLA_EDYTOWALNE` w `staging-mutacje.ts`). Realna zmiana kontraktu (nowe edytowalne pole + zapis poprawki) nie jest opisana przy właściwej ścieżce; opis przy ai-fallback jest błędny.
   - Reason: GATE kontraktu — zmiana przyjmowanych pól bez opisu przy właściwym endpoincie.
 - [ ] `contract/openapi.yaml` schemat `GETStagingIdPropozycjaZdjeciaOdpowiedz200` + `contract/fixtures/GET_staging_id_propozycja-zdjecia.json` — kod zwraca `{ propozycja: null }` (brak linku/dopasowania), a schemat ma `propozycja` jako `type: object` bez `nullable`. Fixture pokazuje tylko wariant z wartością. Dopisz `nullable: true` (lub `oneOf` z null) i ewentualnie drugi fixture/test wariantu `null`.
 - [ ] Interakcja z silnikiem importu (`src/import/silnik/overrides.ts`) — uzupełniony link staje się poprawką Marty, a `poprawkiMarty` podmienia wartość z pliku BEZWARUNKOWO i zgłasza konflikt (`_srcConflict`, `naruszono`) za każdym razem, gdy dostawca poda niepusty, inny link. Produkty, którym dziedziczymy link, mają zwykle pusty link u dostawcy, więc na dziś OK; ale gdy dostawca później zacznie podawać własny link, trafi on do stagingu jako „konflikt ze źródłem" i nigdy nie wejdzie do katalogu bez ręcznego usunięcia poprawki (decyzja 5 planu, świadoma). Brakuje: (a) testu integracyjnego, że po uzupełnieniu kolejny przebieg silnika (`poprawkiMarty`) zachowuje link i zgłasza/nie zgłasza konflikt zgodnie z oczekiwaniem, (b) jakiejkolwiek metryki/wskazania w UI, ile takich poprawek powstało (audyt trasy zapisuje tylko liczby, nie id/kody — `maintenance.ts:~236`). Rozważ wpisanie listy id/kodów do `szczegoly` audytu.
@@ -41,7 +41,7 @@ Brak.
 - Wpięcie w `akceptacja.ts` i `bulk.ts` po `applyLinkMemory`, opt-in, zapis poprawki PO zapisie produktu; klucz poprawki liczony PRZED `nadajKod`/`assignKodImportu` (dostawca + kod dostawcy — zgodny z kluczem `poprawkiMarty`, bo `products.kod` = `pozycja.kod`).
 - Trasy: `POST /api/products/uzupelnij-zdjecia` (dry_run/ids, audyt), `GET /api/staging/:id/propozycja-zdjecia`; skrypt CLI + `package.json`.
 - Walidacja `ids` (lista liczb całkowitych), transakcja zapisu, przeliczenie propozycji przy zapisie (nie ufa podglądowi).
-- Podpowiedź w stagingu z możliwością edycji (`linkZdjecia` w `POLA_EDYTOWALNE` + override), podgląd/zapis w Katalogu, openapi + 2 fixtures, wpis `spec-backend/wpis-202.md`, testy BE i FE.
+- Podpowiedź w stagingu z możliwością edycji (`linkZdjecia` w `POLA_EDYTOWALNE` + override), podgląd/zapis w Katalogu, openapi + 2 fixtures, wpis `spec-backend/wpis-203.md`, testy BE i FE.
 
 ### Missing or deviating ✗
 - `fabryka.ts` (auto-zatwierdzanie) — plan pkt 2 przewidywał wpięcie; raport uzasadnia pominięcie (łata tylko istniejące produkty, lukę domyka przycisk). Odchylenie jawne, akceptowalne.

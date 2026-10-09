@@ -1,5 +1,5 @@
 /**
- * Ticket 202-FEATURE-link-zdjecia-po-modelu — uzupełnianie pustych linków do zdjęć po marce+modelu.
+ * Ticket 203-FEATURE-link-zdjecia-po-modelu — uzupełnianie pustych linków do zdjęć po marce+modelu.
  * Realna baza SQLite (bez atrap): logika dopasowania, podgląd/zapis dla katalogu, wpięcie w
  * akceptację stagingu i w `dodajProduktyBulk`, ochrona przez `manual_overrides`.
  */

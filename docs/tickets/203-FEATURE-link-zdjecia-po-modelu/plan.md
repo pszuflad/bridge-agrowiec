@@ -1,8 +1,8 @@
-# 202-FEATURE-link-zdjecia-po-modelu — automatyczne uzupełnianie linków do zdjęć po marce i modelu
+# 203-FEATURE-link-zdjecia-po-modelu — automatyczne uzupełnianie linków do zdjęć po marce i modelu
 
 > Status: Draft
-> Branch: `feature/202-link-zdjecia-po-modelu`
-> Worktree: `.worktrees/202-FEATURE-link-zdjecia-po-modelu`
+> Branch: `feature/203-link-zdjecia-po-modelu`
+> Worktree: `.worktrees/203-FEATURE-link-zdjecia-po-modelu`
 
 ## Ticket description
 „Czy da się zrobić automatyczne uzupełnianie linków do zdjęć w pustych polach produktów, dopasowując po modelu?"
@@ -37,7 +37,7 @@
 3. Trasy w `routes/maintenance.ts` (wzór `dziedzicz-wage`): `POST /api/products/uzupelnij-zdjecia` z `dry_run`/`ids`, audyt; podpowiedź dla stagingu (`GET`/`POST /api/staging/propozycje-zdjec`).
 4. Skrypt CLI `scripts/uzupelnij-zdjecia.ts` + `package.json` (jak `dziedzicz-wage`) — ta sama funkcja co trasa.
 5. FE: przycisk + okno podglądu w `Katalog.tsx`/`katalog.ts`; podpowiedź w `SzczegolyPozycji.tsx` i `staging/dane.ts`.
-6. `contract/openapi.yaml` + fixtures dla nowych tras; wpis `docs/spec-backend/wpis-202.md`.
+6. `contract/openapi.yaml` + fixtures dla nowych tras; wpis `docs/spec-backend/wpis-203.md`.
 
 ## Testing strategy
 - Testy jednostkowe `dziedziczenieLinkow` na prawdziwej bazie tymczasowej: najczęstszy link, remis, brak marki/modelu, nie nadpisuje niepustego, pomija override, idempotencja, normalizacja wielkości liter/spacji.

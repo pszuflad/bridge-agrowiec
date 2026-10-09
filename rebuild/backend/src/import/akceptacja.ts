@@ -54,7 +54,7 @@ const STARE_NADAWANIE_KODU: NadawanieKoduImportu = (db, produkt, istniejacy) => 
  *   `kod`↔EAN. Domyślnie wyłączone — harness charakteryzacyjny porównuje port z oryginałem,
  *   który tej reguły nie ma (ta sama konstrukcja co `nadajKod`); produkcyjna ścieżka Staging v2
  *   (`polityka/akceptacja.ts`) włącza ją jawnie.
- * @param uzupelnijLink ticket 202 (NOWA logika, nie port): pusty link do zdjęcia dostaje najczęstszy
+ * @param uzupelnijLink ticket 203 (NOWA logika, nie port): pusty link do zdjęcia dostaje najczęstszy
  *   link produktów o tej samej marce i modelu. Domyślnie wyłączone z tego samego powodu co
  *   `uzupelnijEan`; Staging v2 włącza je jawnie.
  * @returns `false`, gdy pozycji o tym id nie było (oryginał robi ciche `return`)
@@ -209,7 +209,7 @@ export function zatwierdzPozycjeStagingu(
   } catch {
     /* jak `catch (_be) {}` */
   }
-  // Ticket 202 (NOWA logika, `dziedziczenieLinkow.ts`): pusty link dostaje najczęstszy link
+  // Ticket 203 (NOWA logika, `dziedziczenieLinkow.ts`): pusty link dostaje najczęstszy link
   // produktów o tej samej marce i modelu. PO pamięci linków (ona wygrywa) i PRZED zapisem.
   let linkUzupelniony = false;
   const poprawkaLinku = { dostawca: String(rekord.dostawca), kod: String(rekord.kod) };
@@ -292,7 +292,7 @@ export function zatwierdzPozycjeStagingu(
   } catch {
     /* jak `catch (_be) {}` */
   }
-  // Ticket 202: uzupełniony link zapisujemy jako poprawkę, żeby kolejny import go nie nadpisał.
+  // Ticket 203: uzupełniony link zapisujemy jako poprawkę, żeby kolejny import go nie nadpisał.
   try {
     if (linkUzupelniony) {
       zapiszPoprawkeLinku(db, poprawkaLinku.dostawca, poprawkaLinku.kod, String(rekord.linkZdjecia));

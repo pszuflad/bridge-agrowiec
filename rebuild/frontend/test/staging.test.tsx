@@ -217,6 +217,46 @@ describe("Widok /staging", () => {
       expect(mutacje[0]!.body).toEqual({ allFiltered: true, typZmiany: "nowa" });
     });
 
+    it("ticket 203: „Odrzuć widoczne” przy zmianach istniejących kart pyta z liczbą, a po potwierdzeniu pokazuje, ile zapamiętano", async () => {
+      const zmiany = {
+        ...STRONA,
+        items: (STRONA.items as Record<string, unknown>[]).map((p) => ({ ...p, typZmiany: "zmiana_kluczowa" })),
+      };
+      zamockujApi(zmiany);
+      server.use(
+        http.post("*/api/staging/reject", async () =>
+          HttpResponse.json({ ok: true, rejected: 2, kept: 2 }),
+        ),
+      );
+      const uzytkownik = userEvent.setup();
+      await otworzStaging();
+      await screen.findByTestId("checkbox-select-all");
+
+      await uzytkownik.click(screen.getByTestId("button-reject-selected"));
+
+      const dialog = await screen.findByTestId("dialog-odrzuc-wybrane");
+      expect(dialog).toHaveTextContent(/poprawki Marty/);
+      expect(dialog).toHaveTextContent(new RegExp(`${(STRONA.items as unknown[]).length} z nich to zmiany`));
+      expect(mutacje).toHaveLength(0); // dopóki nie potwierdzono, nic nie idzie do backendu
+
+      await uzytkownik.click(within(dialog).getByTestId("button-potwierdz"));
+
+      expect(await screen.findByTestId("komunikat-akcji")).toHaveTextContent(
+        /2 zmian istniejących kart zapamiętano jak poprawki Marty/,
+      );
+    });
+
+    it("ticket 203: odrzucenie pozycji innego typu (bez zmian kart) idzie od razu, bez pytania", async () => {
+      const uzytkownik = userEvent.setup();
+      await otworzStaging();
+      await screen.findByTestId("checkbox-select-all");
+
+      await uzytkownik.click(screen.getByTestId("button-reject-selected"));
+
+      await waitFor(() => expect(mutacje).toHaveLength(1));
+      expect(screen.queryByTestId("dialog-odrzuc-wybrane")).not.toBeInTheDocument();
+    });
+
     it("„akceptuj wszystkie” też wysyła `allFiltered`, z aktualnym filtrem typu", async () => {
       const uzytkownik = userEvent.setup();
       await otworzStaging();
@@ -782,7 +822,7 @@ describe("Widok /staging", () => {
       expect(screen.getAllByRole("columnheader")).toHaveLength(ileKolumn);
     });
   });
-  describe("Podpowiedź linku do zdjęcia (ticket 202)", () => {
+  describe("Podpowiedź linku do zdjęcia (ticket 203)", () => {
     const PROPOZYCJA = { link: "https://foto.example/a.jpg", produktow: 3, wariantow: 2 };
 
     async function otworzSzczegoly() {
