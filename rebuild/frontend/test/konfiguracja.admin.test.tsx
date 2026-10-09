@@ -672,6 +672,10 @@ describe("Przycisk „Usuń wszystko z katalogu” (zakładka Katalog)", () => {
         "Produktów bez linku: 4. Propozycje: 2.",
       );
       expect(screen.getByTestId("button-zapisz-zdjecia")).toHaveTextContent("Zapisz wybrane (2)");
+      // Pozycje bez linku (4) mają stały link do katalogu z filtrem „Brak zdjęcia".
+      const link = screen.getByTestId("link-brak-zdjecia");
+      expect(link).toHaveAttribute("href", "/katalog?status=brak_zdjecia");
+      expect(link).toHaveTextContent("(4)");
 
       await userEvent.click(screen.getByTestId("wybor-zdjecia-12"));
       expect(screen.getByTestId("button-zapisz-zdjecia")).toHaveTextContent("Zapisz wybrane (1)");

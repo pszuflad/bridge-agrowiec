@@ -116,6 +116,16 @@ describe("filtrujStatus", () => {
     expect(filtrujStatus(zWaga, "brak_waga").map((p) => p.id)).toEqual([11, 12, 13, 14]);
   });
 
+  it("tryb brak_zdjecia łapie null, pusty string i same spacje, a pomija wypełniony link", () => {
+    const zLinkiem = [
+      produkt({ id: 20, linkZdjecia: "https://foto.example/a.jpg" }),
+      produkt({ id: 21, linkZdjecia: null }),
+      produkt({ id: 22, linkZdjecia: "" }),
+      produkt({ id: 23, linkZdjecia: "   " }),
+    ];
+    expect(filtrujStatus(zLinkiem, "brak_zdjecia").map((p) => p.id)).toEqual([21, 22, 23]);
+  });
+
   it("pozostałe tryby porównują kolumnę status dosłownie", () => {
     expect(filtrujStatus(dane, "wstrzymany").map((p) => p.id)).toEqual([2]);
     expect(filtrujStatus(dane, "aktywny").map((p) => p.id)).toEqual([1, 3, 4]);

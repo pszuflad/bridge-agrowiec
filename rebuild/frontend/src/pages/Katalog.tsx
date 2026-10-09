@@ -92,6 +92,7 @@ const OPCJE_STATUSU: { wartosc: TrybStatusu; etykieta: string }[] = [
   { wartosc: "wstrzymany", etykieta: "Wstrzymany" },
   { wartosc: "brak_ean", etykieta: "Brak EANu" },
   { wartosc: "brak_waga", etykieta: "Brak wagi" },
+  { wartosc: "brak_zdjecia", etykieta: "Brak zdjęcia" },
 ];
 
 export function Katalog() {
