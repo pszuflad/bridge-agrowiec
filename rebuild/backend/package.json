@@ -20,6 +20,7 @@
     "dodaj:uzytkownikow": "tsx scripts/dodaj-uzytkownikow.ts",
     "kroki-wdrozenia": "tsx scripts/kroki-wdrozenia.ts",
     "dziedzicz-wage": "tsx scripts/dziedzicz-wage.ts",
+    "uzupelnij-zdjecia": "tsx scripts/uzupelnij-zdjecia.ts",
     "oszacuj-wage": "tsx scripts/oszacuj-wage.ts",
     "uzupelnij-ean": "tsx scripts/uzupelnij-ean.ts",
     "napraw-nazwy-sklejone": "tsx scripts/napraw-nazwy-sklejone.ts",

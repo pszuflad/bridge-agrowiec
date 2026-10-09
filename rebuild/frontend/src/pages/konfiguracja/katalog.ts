@@ -102,3 +102,62 @@ export async function oszacujWage(): Promise<WynikSzacowaniaWagi> {
 
   return (await odpowiedz.json()) as WynikSzacowaniaWagi;
 }
+
+/** Jedna propozycja linku do zdjęcia dla produktu z katalogu — ticket 203 (NOWA logika). */
+export type PropozycjaZdjecia = {
+  id: number;
+  kod: string;
+  dostawca: string;
+  nazwa: string | null;
+  marka: string | null;
+  model: string | null;
+  link: string;
+  /** Ile produktów ma dokładnie ten link. */
+  produktow: number;
+  /** Ile RÓŻNYCH linków mają produkty tej marki i modelu (1 = jednoznacznie). */
+  wariantow: number;
+};
+
+/** Odpowiedź podglądu `POST /api/products/uzupelnij-zdjecia` z `dry_run: true`. */
+export type PodgladZdjec = {
+  ok: true;
+  dry_run: true;
+  wszystkichPustych: number;
+  pominietoPoprawka: number;
+  pominietoBrakDanych: number;
+  pominietoBrakDopasowania: number;
+  propozycje: PropozycjaZdjecia[];
+};
+
+/** Odpowiedź zapisu `POST /api/products/uzupelnij-zdjecia` (bez `dry_run`). */
+export type WynikZapisuZdjec = {
+  ok: true;
+  dry_run: false;
+  zaktualizowano: number;
+  pominiete: number;
+};
+
+async function wolajUzupelnijZdjecia<T>(cialo: object): Promise<T> {
+  // Jak `dziedziczWage()` — celowo NIE przez `zadanie()`: backend oddaje czytelne `{error}`.
+  const odpowiedz = await fetch(`${BAZA_API}/api/products/uzupelnij-zdjecia`, {
+    method: "POST",
+    headers: naglowki(true),
+    body: JSON.stringify(cialo),
+    credentials: "include",
+  });
+  if (!odpowiedz.ok) {
+    const blad = (await odpowiedz.json().catch(() => ({}))) as { error?: string };
+    throw new Error(blad.error || "Nie udało się uzupełnić zdjęć");
+  }
+  return (await odpowiedz.json()) as T;
+}
+
+/** Podgląd propozycji — niczego nie zapisuje. */
+export function podgladZdjec(): Promise<PodgladZdjec> {
+  return wolajUzupelnijZdjecia<PodgladZdjec>({ dry_run: true });
+}
+
+/** Zapis wybranych w podglądzie propozycji (`ids` = id produktów). */
+export function zapiszZdjecia(ids: number[]): Promise<WynikZapisuZdjec> {
+  return wolajUzupelnijZdjecia<WynikZapisuZdjec>({ ids });
+}

@@ -1,0 +1,15 @@
+{
+  "endpoint": "/api/staging/{id}/propozycja-zdjecia",
+  "method": "GET",
+  "status": 200,
+  "json": true,
+  "body": {
+    "propozycja": {
+      "link": "https://foto.example/bkt-agrimax-rt-765.jpg",
+      "produktow": 2,
+      "wariantow": 1
+    }
+  },
+  "_zrodlo": "RĘCZNIE napisane (ticket 203) — endpoint jest NOWĄ logiką biznesową, produkcja go nie ma.",
+  "_opis": "Kształt = {propozycja: PropozycjaLinku | null}. `null`, gdy pozycja ma już link albo nic nie pasuje. Wartości ilustracyjne."
+}

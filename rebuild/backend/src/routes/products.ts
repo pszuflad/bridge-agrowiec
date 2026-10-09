@@ -177,7 +177,7 @@ export function trasyProduktow({ db }: ZaleznosciProduktow): Router {
       ? (cialo as PozycjaBulku[])
       : (((cialo as { items?: PozycjaBulku[] } | null)?.items ?? []) as PozycjaBulku[]);
 
-    const dodano = dodajProduktyBulk(db, pozycje, { uzupelnijEan: true });
+    const dodano = dodajProduktyBulk(db, pozycje, { uzupelnijEan: true, uzupelnijLink: true });
 
     zapiszAudyt(db, {
       uzytkownikId: req.user?.id ?? null,

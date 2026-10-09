@@ -90,7 +90,7 @@ export function zatwierdzPozycjeZPolityka(
       eanSourceStatus: sv.status,
     });
 
-    zatwierdzPozycjeStagingu(db, id, uzytkownikId, nadajKodImportu, true);
+    zatwierdzPozycjeStagingu(db, id, uzytkownikId, nadajKodImportu, true, true);
 
     // ——— Poprawka Marty wygrywa z pamięcią nazw (odstępstwo 2026-10-06) ———
     // Bazowa akceptacja nakłada `nazwa_pamiec` PO poprawkach, więc mogła zapisać inną nazwę,

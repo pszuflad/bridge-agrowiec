@@ -15,6 +15,7 @@ import { tylkoKolumnyProduktu } from "../repos/products.js";
 import { applyDims, applyLinkMemory, assignKodImportu, applyNazwaPamiec, applyWagaPamiec, rememberLink, uchwytSqlite } from "./silnik/bridge-ext.js";
 import { uzupelnijEanRekordu } from "../ean-pary/uzupelnianie.js";
 import { applyKategoriaDziedziczona, zachowajKategorieZastosowanie } from "./dziedziczenieKategorii.js";
+import { applyLinkDziedziczony, zapiszPoprawkeLinku } from "./dziedziczenieLinkow.js";
 import { applyWagaDziedziczona } from "./dziedziczenieWagi.js";
 import { nazwaZDemo } from "./polityka/nazwa-demo.js";
 
@@ -53,6 +54,9 @@ const STARE_NADAWANIE_KODU: NadawanieKoduImportu = (db, produkt, istniejacy) => 
  *   `kod`↔EAN. Domyślnie wyłączone — harness charakteryzacyjny porównuje port z oryginałem,
  *   który tej reguły nie ma (ta sama konstrukcja co `nadajKod`); produkcyjna ścieżka Staging v2
  *   (`polityka/akceptacja.ts`) włącza ją jawnie.
+ * @param uzupelnijLink ticket 203 (NOWA logika, nie port): pusty link do zdjęcia dostaje najczęstszy
+ *   link produktów o tej samej marce i modelu. Domyślnie wyłączone z tego samego powodu co
+ *   `uzupelnijEan`; Staging v2 włącza je jawnie.
  * @returns `false`, gdy pozycji o tym id nie było (oryginał robi ciche `return`)
  */
 export function zatwierdzPozycjeStagingu(
@@ -61,6 +65,7 @@ export function zatwierdzPozycjeStagingu(
   uzytkownikId: number,
   nadajKod: NadawanieKoduImportu = STARE_NADAWANIE_KODU,
   uzupelnijEan = false,
+  uzupelnijLink = false,
 ): boolean {
   const pozycja = db.select().from(stagingItems).where(eq(stagingItems.id, id)).get();
   if (!pozycja) return false;
@@ -204,6 +209,15 @@ export function zatwierdzPozycjeStagingu(
   } catch {
     /* jak `catch (_be) {}` */
   }
+  // Ticket 203 (NOWA logika, `dziedziczenieLinkow.ts`): pusty link dostaje najczęstszy link
+  // produktów o tej samej marce i modelu. PO pamięci linków (ona wygrywa) i PRZED zapisem.
+  let linkUzupelniony = false;
+  const poprawkaLinku = { dostawca: String(rekord.dostawca), kod: String(rekord.kod) };
+  try {
+    if (uzupelnijLink) linkUzupelniony = applyLinkDziedziczony(db, rekord);
+  } catch {
+    /* nie blokuj zapisu pozycji błędem dziedziczenia linku */
+  }
   try {
     nadajKod(db, rekord, istniejacy);
   } catch {
@@ -277,6 +291,15 @@ export function zatwierdzPozycjeStagingu(
     rememberLink(sqlite, rekord);
   } catch {
     /* jak `catch (_be) {}` */
+  }
+  // Ticket 203: uzupełniony link zapisujemy jako poprawkę, żeby kolejny import go nie nadpisał.
+  try {
+    if (linkUzupelniony) {
+      zapiszPoprawkeLinku(db, poprawkaLinku.dostawca, poprawkaLinku.kod, String(rekord.linkZdjecia));
+    }
+  } catch (err) {
+    // Nie blokuje akceptacji, ale zostawia ślad: bez poprawki następny import może nadpisać link.
+    console.error("uzupelnij-link: nie zapisano poprawki linku", err);
   }
 
   // ——— Propagacja `uwagaCena` (backlog #4, plan.md D4) ———

@@ -89,6 +89,15 @@ export function SzczegolyPozycji({ id, zamknij }: WlasciwosciSzczegolow) {
     enabled: id != null,
   });
 
+  // Ticket 203 (NOWA logika): podpowiedź linku do zdjęcia (marka+model) dla pozycji bez linku.
+  const { data: podpowiedzZdjecia } = useQuery<{
+    propozycja: { link: string; produktow: number; wariantow: number } | null;
+  } | null>({
+    queryKey: ["/api/staging", String(id), "propozycja-zdjecia"],
+    enabled: id != null && !!pozycja && pozycja.typZmiany !== "wycofana",
+  });
+  const propozycjaZdjecia = podpowiedzZdjecia?.propozycja ?? null;
+
   // NOWE (2026-10-02): pozycji nie udało się pobrać — najczęściej 404, bo każdy import (także
   // automatyczny) zastępuje zgłoszenia NOWYMI, więc wiersz na liście trzyma numer, którego już nie
   // ma. Wcześniej okno zostawało puste (sam tytuł „Pozycja stagingu” i „Zamknij”). Odświeżamy listę
@@ -281,6 +290,38 @@ export function SzczegolyPozycji({ id, zamknij }: WlasciwosciSzczegolow) {
                     ),
                   )}
                 </dl>
+              </section>
+            ) : null}
+
+            {!jestWycofana && propozycjaZdjecia && zmiany.linkZdjecia === undefined ? (
+              /*
+                Ticket 203: pozycja nie ma linku do zdjęcia. Jeśli go nie wpiszesz, akceptacja
+                uzupełni go tym linkiem (i zapisze jak poprawkę Marty); „Użyj" wstawia go do pola
+                edycji, gdzie można go jeszcze poprawić.
+              */
+              <section
+                className="rounded-md border border-sky-300 bg-sky-50 p-3"
+                data-testid="szczegoly-propozycja-zdjecia"
+              >
+                <h3 className="mb-1 text-sm font-medium text-sky-900">Podpowiedź: link do zdjęcia</h3>
+                <p className="break-all text-sm text-sky-900">{propozycjaZdjecia.link}</p>
+                <p className="mt-1 text-xs text-sky-900">
+                  {propozycjaZdjecia.wariantow > 1
+                    ? `Najczęstszy z ${propozycjaZdjecia.wariantow} różnych linków tej marki i modelu w katalogu (${propozycjaZdjecia.produktow} produktów). `
+                    : `Ma go ${propozycjaZdjecia.produktow} produktów tej marki i modelu w katalogu. `}
+                  Bez zmian akceptacja wpisze ten link; możesz go poprawić w polu „Link do zdjęcia" niżej.
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-2"
+                  data-testid="button-uzyj-propozycji-zdjecia"
+                  onClick={() =>
+                    ustawZmiany((poprzednie) => ({ ...poprzednie, linkZdjecia: propozycjaZdjecia.link }))
+                  }
+                >
+                  Wstaw do edycji
+                </Button>
               </section>
             ) : null}
 
