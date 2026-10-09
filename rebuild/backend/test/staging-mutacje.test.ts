@@ -180,7 +180,7 @@ describe("Mutacje stagingu i poprawek Marty — przez HTTP", () => {
 
       const odp = await post("/api/staging/reject", { ids: [a!.id] });
 
-      expect(odp.body).toEqual({ ok: true, rejected: 1 });
+      expect(odp.body).toEqual({ ok: true, rejected: 1, kept: 0 });
       expect(staging()).toHaveLength(0);
       expect(katalog(), "odrzucenie nie może niczego dodać do katalogu").toHaveLength(0);
     });
