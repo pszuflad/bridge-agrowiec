@@ -8,28 +8,29 @@ Puste pole „Link do zdjęcia" uzupełnia się najczęstszym linkiem produktów
 Pamięć linków uzupełniała tylko po kodzie lub marce+modelu+rozmiarze i tylko przy akceptacji stagingu; produkty już w katalogu nie miały jak dostać zdjęcia.
 
 ## Solution
--  — dopasowanie marka+model (bez rozmiaru), najczęstszy link, remis alfabetycznie; tylko linki z katalogu.
-- Wpięcie po  w akceptacji stagingu (Staging v2) i  (opt-in, harness charakteryzacyjny bez zmian).
--  ( = podgląd,  = wybrane), skrypt , sekcja w Konfiguracja → Katalog.
--  + edytowalne  w , podpowiedź w szczegółach pozycji.
+- `src/import/dziedziczenieLinkow.ts` — dopasowanie marka+model (bez rozmiaru), najczęstszy link, remis alfabetycznie; tylko linki z katalogu.
+- Wpięcie po `applyLinkMemory` w akceptacji stagingu (Staging v2) i `POST /api/products` (opt-in, harness charakteryzacyjny bez zmian).
+- `POST /api/products/uzupelnij-zdjecia` (`dry_run` = podgląd, `ids` = wybrane), skrypt `npm run uzupelnij-zdjecia`, sekcja w Konfiguracja → Katalog.
+- `GET /api/staging/{id}/propozycja-zdjecia` + edytowalne `linkZdjecia` w `PUT /api/staging/{id}`, podpowiedź w szczegółach pozycji.
 
 ## Design decisions
 - Dopasowanie po marce+modelu (bez rozmiaru), najczęstszy link; wiele wariantów jest sygnalizowane w UI.
 - Staging i katalog; w katalogu podgląd przed zapisem.
-- Uzupełniony link zapisany jako poprawka Marty () — import go nie nadpisze; produkty z poprawką linku (także pustą) pomijane.
-- Bez nowej kolumny i bez zmian ; ślad w audycie.
+- Uzupełniony link zapisany jako poprawka Marty (`manual_overrides`) — import go nie nadpisze; produkty z poprawką linku (także pustą) pomijane.
+- Bez nowej kolumny i bez zmian `schema.ts`; ślad w audycie.
 
 ## Tests
-Backend: lint, typecheck, build, 2296 testów ✓. Frontend: lint, typecheck, 1078 testów ✓. Gate kontraktu: nowe ścieżki zgodne z openapi i fixtures; istniejące fixtures bez zmian. Selly: kształt CSV/REST bez zmian (zmieniają się tylko wartości kolumny ). Bramki po synchronizacji z .
+Backend: lint, typecheck, build, 2296 testów ✓. Frontend: lint, typecheck, 1078 testów ✓. Gate kontraktu: nowe ścieżki zgodne z openapi i fixtures; istniejące fixtures bez zmian. Selly: kształt CSV/REST bez zmian (zmieniają się tylko wartości kolumny `Link-do-zdjecia`). Bramki po synchronizacji z `develop`.
 
 ## Breaking changes
 None.
 
 ## Follow-up
-- Test integracyjny silnik importu × poprawka linku i ; lista kodów w audycie.
+- Test integracyjny silnik importu × poprawka linku i `zatwierdzPozycjeZPolityka`; lista kodów w audycie.
 - Ręcznie wpisany link w katalogu nie trafia do pamięci linków do akceptacji stagingu.
 - Poprawka linku może dawać „konflikt ze źródłem" przy imporcie, gdy dostawca poda inny link.
 - Skali (ile pustych/dopasowalnych) nie zmierzono — brak kopii bazy; podgląd to pokaże.
+- Numer ticketu zmieniony z 202 na 203 (202 zajęła inna karta).
 
 ## Review
 <details>
@@ -105,8 +106,8 @@ Czysta, dobrze udokumentowana implementacja zgodna z wzorcem dziedziczenia wagi;
 </details>
 
 ---
-Ticket docs: 
-Zsynchronizowane z  (); bramki przebiegnięte po synchronizacji.
+Ticket docs: `docs/tickets/203-FEATURE-link-zdjecia-po-modelu/`
+Zsynchronizowane z `develop` (`3782ed6`); bramki przebiegnięte po synchronizacji.
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 
