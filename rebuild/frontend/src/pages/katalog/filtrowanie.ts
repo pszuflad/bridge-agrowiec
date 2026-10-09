@@ -70,7 +70,19 @@ export const POLA_SZUKAJKI = [
  * zostaje bez wagi (brak pasującego „bliźniaka" tej samej marki/rozmiaru/bieżnika w katalogu)
  * — ten filtr daje do nich bezpośrednie wejście, żeby Ania mogła uzupełnić je ręcznie.
  */
-export type TrybStatusu = "all" | "dostepne" | "aktywny" | "wstrzymany" | "brak_ean" | "brak_waga";
+/**
+ * ⚠ `brak_zdjecia` jest NOWĄ opcją (ticket 204, nie port) — cel nawigacji z podsumowania
+ * „Uzupełnianie zdjęć" (Konfiguracja → Katalog, ticket 203): pokazuje produkty z pustym
+ * `linkZdjecia`, tym samym progiem pustości co backend (`jestPustyLink()`: null albo tylko spacje).
+ */
+export type TrybStatusu =
+  | "all"
+  | "dostepne"
+  | "aktywny"
+  | "wstrzymany"
+  | "brak_ean"
+  | "brak_waga"
+  | "brak_zdjecia";
 export type KierunekSortowania = "asc" | "desc";
 
 /**
@@ -100,6 +112,7 @@ export function filtrujSzukajka(produkty: Produkt[], fraza: string): Produkt[] {
  *  - `brak_ean`  → puste albo brakujące `ean`,
  *  - `brak_waga` → NOWA opcja (ticket 166, nie port) — puste albo zerowe `waga`, ten sam próg
  *    pustości co backendowe `jestPustaWaga()` (`src/import/dziedziczenieWagi.ts`, ticket 155),
+ *  - `brak_zdjecia` → NOWA opcja (ticket 204, nie port) — puste albo składające się ze spacji `linkZdjecia`,
  *  - pozostałe   → dosłowne porównanie z kolumną `status`.
  */
 export function filtrujStatus(produkty: Produkt[], tryb: TrybStatusu): Produkt[] {
@@ -117,6 +130,9 @@ export function filtrujStatus(produkty: Produkt[], tryb: TrybStatusu): Produkt[]
       const n = Number(w);
       return Number.isNaN(n) || n === 0;
     });
+  }
+  if (tryb === "brak_zdjecia") {
+    return produkty.filter((p) => p.linkZdjecia == null || String(p.linkZdjecia).trim() === "");
   }
   return produkty.filter((p) => p.status === tryb);
 }
