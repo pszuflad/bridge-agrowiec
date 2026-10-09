@@ -12,6 +12,20 @@ function baza() {
 }
 
 describe("kroki wdrożenia", () => {
+  it("krok tylkoProdukcja jest pomijany na środowisku testowym bez zapisu, a na produkcji biegnie", async () => {
+    const { sqlite, db } = baza();
+    let ile = 0;
+    const kroki: Krok[] = [{ id: "p", opis: "p", tylkoProdukcja: true, uruchom: async () => `bieg ${++ile}` }];
+
+    const testowe = await uruchomKroki(sqlite, db, kroki, { KROKI_SRODOWISKO: "testowe" });
+    expect(testowe.wykonane).toEqual([]);
+    expect(ile).toBe(0);
+    expect(sqlite.prepare("SELECT 1 FROM kroki_wdrozenia WHERE id='p'").get()).toBeUndefined();
+
+    const produkcja = await uruchomKroki(sqlite, db, kroki, {});
+    expect(produkcja.wykonane).toEqual(["p"]);
+  });
+
   it("wykonuje krok raz, zapisuje go i przy kolejnym wdrożeniu pomija", async () => {
     const { sqlite, db } = baza();
     let ile = 0;
