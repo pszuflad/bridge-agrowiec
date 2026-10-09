@@ -42,6 +42,7 @@ const POLA_EDYTOWALNE = [
   "ean",
   "cenaZakupuNowa",
   "magazyn",
+  "linkZdjecia",
 ];
 
 /**
@@ -61,6 +62,7 @@ const POLE_NA_OVERRIDE: Record<string, string> = {
   ean: "ean",
   cenaZakupuNowa: "cenaZakupu",
   magazyn: "magazyn",
+  linkZdjecia: "linkZdjecia",
 };
 
 /** Filtry masowej operacji `allFiltered` — wspólne dla `accept` i `reject` (`:48540`). */

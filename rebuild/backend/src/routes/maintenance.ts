@@ -6,6 +6,7 @@ import { basename, dirname, join } from "node:path";
 import { Router } from "express";
 
 import type { Baza, BazaSqlite } from "../db/index.js";
+import { proponujLinkiKatalogu, uzupelnijLinkiWstecznie } from "../import/dziedziczenieLinkow.js";
 import { dziedziczWageWstecznie, oszacujWageWstecznie } from "../import/dziedziczenieWagi.js";
 import { czyOpona } from "../import/silnik/klasyfikator.js";
 import { requireAuth } from "../middleware/auth.js";
@@ -196,6 +197,48 @@ export function trasyUtrzymania({ db, dbPath, sqlite }: ZaleznosciUtrzymania): R
     });
 
     res.json({ ok: true });
+  });
+
+  /**
+   * Uzupełnienie pustych linków do zdjęć po marce+modelu — ticket 202-FEATURE-link-zdjecia-po-modelu.
+   *
+   * ⚠ NOWA LOGIKA BIZNESOWA, NIE PORT. `dry_run: true` zwraca TYLKO podgląd (lista propozycji,
+   * nic nie jest zapisywane); bez niego zapisuje wszystkie propozycje albo — gdy podano `ids`
+   * — tylko wybrane w podglądzie. Zapis przelicza propozycje od nowa i woła tę samą funkcję
+   * co skrypt CLI `npm run uzupelnij-zdjecia`. Uzupełniony link ląduje w `manual_overrides`.
+   */
+  router.post("/api/products/uzupelnij-zdjecia", requireAuth, (req, res) => {
+    if (!sqlite) {
+      res.status(500).json({ error: "Baza nie jest dostępna do operacji wstecznej." });
+      return;
+    }
+    const cialo = (req.body ?? {}) as { dry_run?: unknown; ids?: unknown };
+
+    if (cialo.dry_run === true) {
+      res.json({ ok: true, dry_run: true, ...proponujLinkiKatalogu(db) });
+      return;
+    }
+
+    let ids: number[] | undefined;
+    if (cialo.ids !== undefined) {
+      if (!Array.isArray(cialo.ids) || !cialo.ids.every((n) => Number.isInteger(n))) {
+        res.status(400).json({ error: "Pole ids musi być listą liczb całkowitych." });
+        return;
+      }
+      ids = cialo.ids as number[];
+    }
+
+    const user = req.user!;
+    const wynik = uzupelnijLinkiWstecznie(db, sqlite, { ids, uzytkownikId: user.id });
+    zapiszAudyt(db, {
+      uzytkownikId: user.id,
+      uzytkownikImie: user.imieNazwisko,
+      akcja: "uzupelnienie_linkow_zdjec",
+      encjaTyp: "produkt",
+      encjaId: "wszystkie",
+      szczegoly: wynik,
+    });
+    res.json({ ok: true, dry_run: false, ...wynik });
   });
 
   /**
