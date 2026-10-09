@@ -47,3 +47,12 @@ Nie zrobione (świadomie): test z pełnym silnikiem `poprawkiMarty` i ścieżką
 - Test integracyjny import-silnik × poprawka linku oraz `zatwierdzPozycjeZPolityka`.
 - Lista kodów zmienionych produktów w audycie `uzupelnienie_linkow_zdjec`.
 - Brak sprawdzenia roli w trasie (jak `dziedzicz-wage`).
+
+## Zmiana numeru ticketu
+Numer 202 zajęła w międzyczasie inna karta (`202-odrzuc-lista-zapamietuje`, merge do `develop`), więc ten ticket ma numer **203** (katalog ticketa, wpis `spec-backend/wpis-203.md`, branch `feature/203-link-zdjecia-po-modelu`).
+
+## Po synchronizacji z develop (`3782ed6`)
+Bramki przebiegnięte PO merge'u: backend lint/typecheck/build/test ✓ (2296 testów), frontend lint/typecheck/test ✓ (1078), `generate-openapi-schemas --sprawdz` ✓.
+
+## Docs updates
+`docs/spec-backend/wpis-203.md` (nowy, zgodnie z regułą plików-per-ticket). Pozostałe dokumenty żywe nie opisują tej funkcji — bez zmian.
