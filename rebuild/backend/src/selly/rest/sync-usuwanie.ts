@@ -108,7 +108,7 @@ function nadalSierota(db: Baza, s: Sierota): boolean {
 }
 
 /**
- * Ticket 203: ile sierot sprawdzamy w Selly w JEDNYM przebiegu (każde sprawdzenie = `GET` do sklepu), niezależnie od tego,
+ * Ticket 205: ile sierot sprawdzamy w Selly w JEDNYM przebiegu (każde sprawdzenie = `GET` do sklepu), niezależnie od tego,
  * ile z nich faktycznie usuniemy (`LIMIT_NA_PRZEBIEG` dotyczy USUNIĘĆ).
  */
 export const LIMIT_SPRAWDZEN_NA_PRZEBIEG = 60;

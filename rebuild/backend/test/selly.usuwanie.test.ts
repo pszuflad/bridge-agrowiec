@@ -98,7 +98,7 @@ describe("Tor 3 — usuwanie sierot z Selly", () => {
     expect(String(szczegoly.wpisy[0]!.czas)).toMatch(/^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d$/);
   });
 
-  it("ticket 203: sieroty pomijane przez kontrolę tożsamości nie zagłodzą reszty — kursor rusza dalej", async () => {
+  it("ticket 205: sieroty pomijane przez kontrolę tożsamości nie zagłodzą reszty — kursor rusza dalej", async () => {
     tlo(100);
     const sklep: NonNullable<OpcjeAtrapy["sklep"]> = [];
     // 25 pierwszych: w Selly inna nazwa i EAN → pomijane (brak potwierdzenia tożsamości), potem 3 do usunięcia.
