@@ -33,6 +33,7 @@ import { trasyEksportuShoper } from "./routes/export-shoper.js";
 import { trasySpedycji } from "./routes/spedycja.js";
 import { trasyWagiGabarytowej } from "./routes/waga-gabarytowa.js";
 import { trasyEanPary } from "./routes/ean-pary.js";
+import { trasyNieobecne } from "./routes/nieobecne.js";
 import type { OpcjeSynchronizacji, WynikSynchronizacji } from "./import/synchronizuj.js";
 import { stworzKlientaSelly, type KlientSelly } from "./selly/klient.js";
 import { opakujKlientaTrybem } from "./selly/tryb.js";
@@ -250,6 +251,7 @@ export function stworzApp({
   app.use(trasyEksportuShoper({ db }));
   app.use(trasyWagiGabarytowej({ db }));
   app.use(trasyEanPary({ db }));
+  app.use(trasyNieobecne({ db }));
   app.use(trasyAtrybutow({ db }));
 
   app.use(nieZnalezionoHandler);

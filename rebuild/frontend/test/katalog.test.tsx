@@ -36,6 +36,7 @@ function zamockujApi(produkty: Produkt[] = PRODUKTY) {
   server.use(
     http.get("*/api/products", () => HttpResponse.json(produkty)),
     http.get("*/api/suppliers", () => HttpResponse.json(DOSTAWCY)),
+    http.get("*/api/nieobecne", () => HttpResponse.json({ progDniDomyslny: 7, progDniDostawcow: {}, items: [] })),
     // Widok pobiera KOMPLET swoich tras przy każdym wejściu, niezależnie od tego, co dany
     // test sprawdza, a `onUnhandledRequest:"error"` nie wybacza braków — stąd oba mocki niżej.
     //
