@@ -5,6 +5,7 @@ import {
   podmienZrodla,
 } from "../import/podmien-zrodla.js";
 import { dirname, join } from "node:path";
+import { usunWszystkieKartyAuto } from "../import/migracje/scal-karty-auto.js";
 import { ustawWEnvPliku } from "./env-plik.js";
 import type { Krok } from "./runner.js";
 
@@ -60,6 +61,15 @@ export const KROKI_WDROZENIA: Krok[] = [
       const opis = ustawWEnvPliku(sciezka, { SELLY_TOR2: "true", SELLY_USUWANIE: "true" });
       if (!opis) return { odloz: `brak pliku ${sciezka}` };
       return `${opis.join("; ")} — zacznie działać przy następnym wdrożeniu/restarcie (zmienne są czytane z .env przy starcie skryptu wdrożenia)`;
+    },
+  },
+  {
+    id: "2026-10-09-usun-karty-auto",
+    opis: "usunięcie wszystkich wstrzymanych kart MO*_AUTO_<hash> (decyzja użytkowniczki); jeśli są w pliku dostawcy, wpadną jako nowe",
+    async uruchom({ sqlite }) {
+      const w = usunWszystkieKartyAuto(sqlite);
+      const pominiete = w.pominiete.length ? `; pominięte ${w.pominiete.map((p) => `${p.kod} (${p.powod})`).join(", ")}` : "";
+      return `usunięto ${w.usuniete.length}: ${w.usuniete.join(", ") || "—"}${pominiete}`;
     },
   },
 ];
