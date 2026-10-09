@@ -227,6 +227,21 @@ describe("katalog — szukajka i filtry", () => {
     expect(screen.getByTestId("select-status")).toHaveTextContent("Brak wagi");
   });
 
+  /** Ticket 204 (NOWA logika, nie port): deep link `?status=brak_zdjecia` z podsumowania „Uzupełnianie zdjęć". */
+  it("link ?status=brak_zdjecia otwiera katalog z produktami bez linku do zdjęcia", async () => {
+    const bezZdjecia: Produkt = { ...(PRODUKTY[0] as Produkt), id: 999_003, linkZdjecia: null, kod: "BEZ_ZDJECIA" };
+    const zeZdjeciem = PRODUKTY.map((p) => ({ ...(p as Produkt), linkZdjecia: "https://foto.example/a.jpg" }));
+    zamockujApi([...zeZdjeciem, bezZdjecia]);
+    window.history.pushState({}, "", "/katalog?status=brak_zdjecia");
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("text-licznik")).toHaveTextContent("wyświetlono 1 / 1");
+    });
+    expect(screen.getByTestId("row-product-999003")).toBeInTheDocument();
+    expect(screen.getByTestId("select-status")).toHaveTextContent("Brak zdjęcia");
+  });
+
   /**
    * NOWE (2026-09-30, nie port): okno „Sprawdź dopasowanie opony" w stagingu linkuje do
    * istniejącej pozycji katalogu przez `?szukaj=<kod>` — szukajka ma być już wypełniona.
