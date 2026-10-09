@@ -18799,6 +18799,54 @@ components:
       oneOf:
         - {"$ref":"#/components/schemas/POSTProductsClearZadanie"}
         - {"$ref":"#/components/schemas/POSTMaintenanceUsunNieoponyZadanie"}
+    POSTProductsUzupelnijZdjeciaOdpowiedz200:
+      description: >-
+        Ticket 202 (NOWA logika). Dwa kształty zależnie od `dry_run`: podgląd (`dry_run: true`)
+        niesie liczniki i `propozycje`; zapis (`dry_run: false`) niesie `zaktualizowano` i `pominiete`.
+      type: "object"
+      properties:
+        ok:
+          type: "boolean"
+        dry_run:
+          type: "boolean"
+        wszystkichPustych:
+          type: "integer"
+        pominietoPoprawka:
+          type: "integer"
+        pominietoBrakDanych:
+          type: "integer"
+        pominietoBrakDopasowania:
+          type: "integer"
+        propozycje:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              id: { type: "integer" }
+              kod: { type: "string" }
+              dostawca: { type: "string" }
+              nazwa: { type: ["string", "null"] }
+              marka: { type: ["string", "null"] }
+              model: { type: ["string", "null"] }
+              link: { type: "string" }
+              produktow: { type: "integer" }
+              wariantow: { type: "integer" }
+        zaktualizowano:
+          type: "integer"
+        pominiete:
+          type: "integer"
+    GETStagingIdPropozycjaZdjeciaOdpowiedz200:
+      type: "object"
+      properties:
+        propozycja:
+          description: "Propozycja linku albo null, gdy pozycja ma już link / brak dopasowania."
+          oneOf:
+            - type: "null"
+            - type: "object"
+              properties:
+                link: { type: "string" }
+                produktow: { type: "integer" }
+                wariantow: { type: "integer" }
     POSTProductsDziedziczWageOdpowiedz200:
       type: "object"
       properties:
@@ -18993,7 +19041,7 @@ paths:
       summary: "POST /api/ai-fallback/parse"
       security: [{ bearerAuth: [] }, { cookieAuth: [] }]
       requestBody:
-        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures. Od ticketu 202 dochodzi pole `linkZdjecia` (zapisuje też poprawkę Marty)."
         content: { application/json: { schema: { type: object } } }
       responses:
         "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
@@ -20036,6 +20084,33 @@ paths:
         "401": { description: "Nieautoryzowany" }
         "500": { description: "Baza niedostępna" }
   # ————————————————————————————————————————————————————————————————————————————————————
+  # uzupelnij-zdjecia — ticket 202 (NOWA logika, nie port). Produkcja nie ma tej trasy.
+  # Uzupełnia puste „Link do zdjęcia" najczęstszym linkiem produktów o tej samej marce i modelu.
+  # Kształt odpowiedzi zamrożony fixture'ami RĘCZNIE napisanymi (nie nagranymi z oryginału).
+  # ————————————————————————————————————————————————————————————————————————————————————
+  /api/products/uzupelnij-zdjecia:
+    post:
+      tags: [products]
+      summary: "POST /api/products/uzupelnij-zdjecia"
+      description: >-
+        `dry_run: true` zwraca podgląd propozycji (nic nie zapisuje). Bez `dry_run` zapisuje
+        propozycje — wszystkie albo wybrane przez `ids` (id produktów z podglądu). Zapisane linki
+        trafiają też do `manual_overrides` (import dostawcy ich nie nadpisze).
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                dry_run: { type: boolean }
+                ids: { type: array, items: { type: integer } }
+      responses:
+        "200": { description: "OK — kształt zamrożony fixture'ami (ticket 202)", content: { application/json: { schema: { $ref: "#/components/schemas/POSTProductsUzupelnijZdjeciaOdpowiedz200" } } } }
+        "400": { description: "ids nie jest listą liczb całkowitych" }
+        "401": { description: "Nieautoryzowany" }
+        "500": { description: "Baza niedostępna" }
+  # ————————————————————————————————————————————————————————————————————————————————————
   # oszacuj-wage — ticket 167 (NOWA logika, nie port; nadbudowa nad 155/156). Produkcja nie ma
   # tej trasy — przycisk „Oszacuj pozostałe wagi" w Konfiguracji → Katalog woła dokładnie tę
   # samą funkcję co skrypt CLI `npm run oszacuj-wage`. Kształt odpowiedzi zamrożony fixture'em
@@ -20777,6 +20852,21 @@ paths:
         "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
         "401": { description: "Nieautoryzowany" }
         "400": { description: "Błędne żądanie" }
+  /api/staging/{id}/propozycja-zdjecia:
+    get:
+      tags: [staging]
+      summary: "GET /api/staging/{id}/propozycja-zdjecia"
+      description: >-
+        Ticket 202 (NOWA logika). Podpowiedź linku do zdjęcia dla pozycji stagingu z pustym
+        linkiem (najczęstszy link produktów o tej samej marce i modelu). Nic nie zapisuje.
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      security: [{ bearerAuth: [] }, { cookieAuth: [] }]
+      responses:
+        "200": { description: "OK — kształt zamrożony fixture'em (ticket 202)", content: { application/json: { schema: { $ref: "#/components/schemas/GETStagingIdPropozycjaZdjeciaOdpowiedz200" } } } }
+        "400": { description: "Nieprawidłowy id" }
+        "401": { description: "Nieautoryzowany" }
+        "404": { description: "Nie znaleziono pozycji stagingu" }
   /api/staging/{id}/choose-absence-card:
     post:
       tags: [staging]

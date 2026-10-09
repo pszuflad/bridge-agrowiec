@@ -1,0 +1,30 @@
+{
+  "endpoint": "/api/products/uzupelnij-zdjecia",
+  "method": "POST",
+  "status": 200,
+  "json": true,
+  "body": {
+    "ok": true,
+    "dry_run": true,
+    "wszystkichPustych": 3,
+    "pominietoPoprawka": 1,
+    "pominietoBrakDanych": 0,
+    "pominietoBrakDopasowania": 0,
+    "propozycje": [
+      {
+        "id": 101,
+        "kod": "MO1_ABC",
+        "dostawca": "MO1",
+        "nazwa": "Opona 480/70R28 BKT AGRIMAX RT 765",
+        "marka": "BKT",
+        "model": "AGRIMAX RT 765",
+        "link": "https://foto.example/bkt-agrimax-rt-765.jpg",
+        "produktow": 2,
+        "wariantow": 1
+      }
+    ]
+  },
+  "request": { "dry_run": true },
+  "_zrodlo": "RĘCZNIE napisane (ticket 202) — endpoint jest NOWĄ logiką biznesową, produkcja go nie ma, więc nie ma czego nagrywać z oryginału.",
+  "_opis": "Kształt = PodgladUzupelnieniaLinkow (src/import/dziedziczenieLinkow.ts) plus {ok:true, dry_run:true}. Zapis (dry_run:false) oddaje {ok, dry_run:false, zaktualizowano, pominiete}. Wartości ilustracyjne."
+}

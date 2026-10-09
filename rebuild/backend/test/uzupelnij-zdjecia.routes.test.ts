@@ -10,6 +10,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import { auditLog, manualOverrides, products, stagingItems } from "../src/db/schema.js";
 import { stworzSrodowiskoTestowe, type NowyProdukt, type SrodowiskoTestowe } from "./gate/index.js";
+import { sprawdzZgodnoscZFixture, sprawdzZgodnoscZKontraktem } from "./gate/asercje.js";
 import { pozycja } from "./charakteryzacja/akceptacja/scenariusze.mjs";
 
 const LINK = "https://foto.example/a.jpg";
@@ -71,6 +72,9 @@ describe("uzupełnianie zdjęć — trasy HTTP", () => {
     expect(odp.status).toBe(200);
     expect(odp.body).toMatchObject({ ok: true, dry_run: true, wszystkichPustych: 2 });
     expect((odp.body as { propozycje: unknown[] }).propozycje).toHaveLength(2);
+    // GATE KONTRAKTU: ścieżka/status w openapi.yaml i kształt zgodny z fixture'em (ticket 202).
+    sprawdzZgodnoscZKontraktem({ metoda: "post", sciezka: "/api/products/uzupelnij-zdjecia", odpowiedz: odp });
+    sprawdzZgodnoscZFixture("POST_products_uzupelnij-zdjecia.json", odp.body);
     expect(srodowisko.db.select().from(products).where(eq(products.kod, "PUSTY")).get()?.linkZdjecia).toBeNull();
     expect(srodowisko.db.select().from(manualOverrides).all()).toHaveLength(0);
   });
@@ -102,6 +106,8 @@ describe("uzupełnianie zdjęć — trasy HTTP", () => {
     const przed = await request(srodowisko.app).get(`/api/staging/${id}/propozycja-zdjecia`).set(auth);
     expect(przed.status).toBe(200);
     expect(przed.body).toEqual({ propozycja: { link: LINK, produktow: 1, wariantow: 1 } });
+    sprawdzZgodnoscZKontraktem({ metoda: "get", sciezka: "/api/staging/{id}/propozycja-zdjecia", odpowiedz: przed });
+    sprawdzZgodnoscZFixture("GET_staging_id_propozycja-zdjecia.json", przed.body);
 
     const edycja = await request(srodowisko.app)
       .put(`/api/staging/${id}`)
