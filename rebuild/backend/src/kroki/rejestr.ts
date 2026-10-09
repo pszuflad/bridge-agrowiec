@@ -1,4 +1,5 @@
 import { dodajUzytkownika } from "../auth/dodaj-uzytkownika.js";
+import { ustawHasloTymczasowe } from "../auth/reset-hasla.js";
 import {
   czyKatalogIstnieje,
   DOMYSLNY_KATALOG_IMPORTOW,
@@ -61,6 +62,21 @@ export const KROKI_WDROZENIA: Krok[] = [
       const opis = ustawWEnvPliku(sciezka, { SELLY_TOR2: "true", SELLY_USUWANIE: "true" });
       if (!opis) return { odloz: `brak pliku ${sciezka}` };
       return `${opis.join("; ")} — zacznie działać przy następnym wdrożeniu/restarcie (zmienne są czytane z .env przy starcie skryptu wdrożenia)`;
+    },
+  },
+  {
+    id: "2026-10-09-reset-hasla-arkadiusz",
+    opis: "reset hasła Arkadiusza Mielczarka do hasła tymczasowego z HASLO_TYMCZASOWE (zapomniał hasła)",
+    wymagaEnv: ["HASLO_TYMCZASOWE"],
+    async uruchom({ db, env }) {
+      const haslo = env.HASLO_TYMCZASOWE as string;
+      if (haslo.length < 8) throw new Error("HASLO_TYMCZASOWE musi mieć co najmniej 8 znaków");
+      const email = "arkadiusz.mielczarek@agrowiec.eu";
+      // Brak konta nie zatrzymuje wdrożenia — krok zostaje odłożony (nie zapisany) i ruszy, gdy konto się pojawi.
+      if ((await ustawHasloTymczasowe(db, email, haslo)) === "brak_konta") {
+        return { odloz: `brak konta ${email}` };
+      }
+      return `${email}: hasło ustawione na tymczasowe — użytkownik zmienia je w /moje-konto`;
     },
   },
   {
