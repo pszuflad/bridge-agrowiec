@@ -156,22 +156,25 @@ export async function zatwierdzWszystkie(typZmiany: string): Promise<number> {
   return wynik.accepted ?? 0;
 }
 
+/** Wynik odrzucenia: `zapamietane` = ile zmian istniejących kart zapisano jak poprawki Marty (ticket 202). */
+export type WynikOdrzucenia = { ile: number; zapamietane: number };
+
 /** Odrzucenie wskazanych pozycji — `POST /api/staging/reject` z listą id. */
-export async function odrzucPozycje(ids: number[]): Promise<number> {
-  if (!ids.length) return 0;
+export async function odrzucPozycje(ids: number[]): Promise<WynikOdrzucenia> {
+  if (!ids.length) return { ile: 0, zapamietane: 0 };
   const odpowiedz = await zadanie("POST", "/api/staging/reject", { ids });
-  const wynik = (await odpowiedz.json()) as { rejected?: number };
-  return wynik.rejected ?? ids.length;
+  const wynik = (await odpowiedz.json()) as { rejected?: number; kept?: number };
+  return { ile: wynik.rejected ?? ids.length, zapamietane: wynik.kept ?? 0 };
 }
 
 /** Odrzucenie wszystkich pasujących do filtru — port `vbAll()` (`fe.js:9141`). */
-export async function odrzucWszystkie(typZmiany: string): Promise<number> {
+export async function odrzucWszystkie(typZmiany: string): Promise<WynikOdrzucenia> {
   const odpowiedz = await zadanie("POST", "/api/staging/reject", {
     allFiltered: true,
     typZmiany: typZmiany || "all",
   });
-  const wynik = (await odpowiedz.json()) as { rejected?: number };
-  return wynik.rejected ?? 0;
+  const wynik = (await odpowiedz.json()) as { rejected?: number; kept?: number };
+  return { ile: wynik.rejected ?? 0, zapamietane: wynik.kept ?? 0 };
 }
 
 /**

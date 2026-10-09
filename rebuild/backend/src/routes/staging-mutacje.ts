@@ -18,6 +18,8 @@ import {
   wyczyscStaging,
 } from "../import/akceptacja.js";
 import { zatwierdzPozycjeZPolityka } from "../import/polityka/akceptacja.js";
+import { BladPolityki } from "../import/polityka/helpery.js";
+import { odrzucZmianeKarty } from "../import/polityka/odrzucenie-zmiany.js";
 import { zaktualizujZgloszenie } from "../import/polityka/zgloszenia.js";
 import { skanujNoweWartosci } from "../repos/atrybuty-pending.js";
 import { PustyImportBlad, silnikStagingu, type SilnikStagingu } from "../import/tk.js";
@@ -221,12 +223,34 @@ export function trasyMutacjiStagingu({ db, silnik }: ZaleznosciMutacjiStagingu):
     return res.json({ ok: true, accepted: identyfikatory.length });
   });
 
-  /** Odrzucenie pozycji — ta sama mechanika co `accept` (`:48561`). */
+  /**
+   * Odrzucenie pozycji — ta sama mechanika co `accept` (`:48561`).
+   *
+   * ⚠ ODSTĘPSTWO OD PRODUKCJI (decyzja użytkowniczki 2026-10-08, ticket 202, wpis #187.1): dla zmiany istniejącej
+   * karty (`zmiana_kluczowa`) „Odrzuć” z listy robi to samo, co „Odrzuć” w szczegółach — karta zostaje, a różnice
+   * zapisują się jak poprawka Marty (`odrzucZmianeKarty`), więc ta sama propozycja nie wraca po następnym imporcie.
+   * Pozycje innych typów oraz zmiany, których nie da się zapamiętać (puste pola karty, brak różnic, brak karty),
+   * są kasowane jak dotąd. `kept` w odpowiedzi = ile pozycji zapamiętano poprawką.
+   */
   router.post("/api/staging/reject", requireAuth, (req, res) => {
     const cialo = (req.body ?? {}) as FiltryMasowe;
     const identyfikatory = wybierzId(db, cialo);
 
-    for (const id of identyfikatory) odrzucPozycjeStagingu(db, id);
+    let zachowane = 0;
+    for (const id of identyfikatory) {
+      const pozycja = pozycjaStaginguPoId(db, id);
+      if (pozycja?.typZmiany === "zmiana_kluczowa") {
+        try {
+          odrzucZmianeKarty(db, id, req.user!.id);
+          zachowane++;
+          continue;
+        } catch (e) {
+          if (!(e instanceof BladPolityki)) throw e;
+          // nie da się zapamiętać → zwykłe odrzucenie poniżej
+        }
+      }
+      odrzucPozycjeStagingu(db, id);
+    }
 
     zapiszAudyt(db, {
       uzytkownikId: req.user?.id ?? null,
@@ -234,10 +258,10 @@ export function trasyMutacjiStagingu({ db, silnik }: ZaleznosciMutacjiStagingu):
       akcja: "odrzucenie_stagingu",
       encjaTyp: "staging",
       encjaId: cialo.allFiltered ? "wszystkie_filtrowane" : identyfikatory.join(","),
-      szczegoly: szczegolyMasowe(cialo, identyfikatory.length),
+      szczegoly: { ...szczegolyMasowe(cialo, identyfikatory.length), zapamietane_poprawka: zachowane },
     });
 
-    return res.json({ ok: true, rejected: identyfikatory.length });
+    return res.json({ ok: true, rejected: identyfikatory.length, kept: zachowane });
   });
 
   /** Wyczyszczenie całego stagingu (`:48592`). */
