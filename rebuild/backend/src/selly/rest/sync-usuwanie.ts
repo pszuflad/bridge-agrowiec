@@ -107,6 +107,31 @@ function nadalSierota(db: Baza, s: Sierota): boolean {
     .get(s.id);
 }
 
+/**
+ * Ticket 205: ile sierot sprawdzamy w Selly w JEDNYM przebiegu (każde sprawdzenie = `GET` do sklepu), niezależnie od tego,
+ * ile z nich faktycznie usuniemy (`LIMIT_NA_PRZEBIEG` dotyczy USUNIĘĆ).
+ */
+export const LIMIT_SPRAWDZEN_NA_PRZEBIEG = 60;
+
+/**
+ * Kursor rotacji po sierotach, osobno dla każdej bazy. Wcześniej każdy przebieg brał te same 20 najstarszych sierot
+ * (`ORDER BY id LIMIT 20`); jeśli wszystkie były pomijane (brak potwierdzenia tożsamości), zostawały w tabeli i blokowały
+ * kolejne — reszta sierot nigdy nie była sprawdzana. Teraz każdy przebieg rusza od miejsca, w którym skończył poprzedni.
+ */
+const kursory = new WeakMap<object, number>();
+
+/** Następni kandydaci po kursorze (zawijając na początek), bez duplikatów. */
+function kandydaciPoKursorze(db: Baza, ile: number): Sierota[] {
+  const sqlite = db.$client;
+  const kursor = kursory.get(db) ?? 0;
+  const dalej = sqlite.prepare(`${CZESC_SELECT} AND sp.id > ? ORDER BY sp.id LIMIT ?`).all(kursor, ile) as Sierota[];
+  if (dalej.length >= ile) return dalej;
+  const odPoczatku = sqlite
+    .prepare(`${CZESC_SELECT} AND sp.id <= ? ORDER BY sp.id LIMIT ?`)
+    .all(kursor, ile - dalej.length) as Sierota[];
+  return [...dalej, ...odPoczatku];
+}
+
 /** Sieroty (bez sprawdzania w Selly) — najstarsze mapowania pierwsze. */
 export function znajdzSieroty(db: Baza, limit = LIMIT_NA_PRZEBIEG): { sieroty: Sierota[]; wszystkie: number } {
   const sqlite = db.$client;
@@ -478,7 +503,7 @@ let przebiegWToku = false;
 export async function usunSierotyZSelly(
   db: Baza,
   discovery: Discovery,
-  opcje: { tryb: TrybSelly; limit?: number; maksUdzial?: number; limitDobowy?: number } = { tryb: "pelny" },
+  opcje: { tryb: TrybSelly; limit?: number; maksUdzial?: number; limitDobowy?: number; sprawdzenia?: number } = { tryb: "pelny" },
 ): Promise<WynikUsuwania | null> {
   if (opcje.tryb !== "pelny") return null;
   // Przebiegi nie mogą się nakładać (dwa równoległe dałyby decyzje oparte na nieaktualnym odczycie i dubel wpisów).
@@ -497,13 +522,13 @@ export async function usunSierotyZSelly(
 async function przebieg(
   db: Baza,
   discovery: Discovery,
-  opcje: { tryb: TrybSelly; limit?: number; maksUdzial?: number; limitDobowy?: number },
+  opcje: { tryb: TrybSelly; limit?: number; maksUdzial?: number; limitDobowy?: number; sprawdzenia?: number },
 ): Promise<WynikUsuwania | null> {
   const maksUdzial = opcje.maksUdzial ?? MAKS_UDZIAL_SIEROT;
   const limitDobowy = opcje.limitDobowy ?? LIMIT_DOBOWY;
   const zostaloNaDobe = Math.max(0, limitDobowy - usunieciaWOstatniejDobie(db));
   const limit = Math.min(opcje.limit ?? LIMIT_NA_PRZEBIEG, zostaloNaDobe);
-  const { sieroty, wszystkie } = znajdzSieroty(db, limit);
+  const { wszystkie } = znajdzSieroty(db, 0);
   if (wszystkie === 0) {
     // cichy przebieg: nic do zrobienia — żadnego wpisu w dzienniku (ale stan w pamięci, żeby panel pokazał, że Tor 3 żyje)
     zapiszStanTor3({ wynik: "brak_sierot", opis: "Przebieg wykonany — nie ma produktów do usunięcia z Selly", sieroty: 0 });
@@ -557,7 +582,10 @@ async function przebieg(
   const logId = otworzLog(db);
   wynik.logId = logId;
   try {
-    for (const s of sieroty) {
+    let dokonane = 0;
+    for (const s of kandydaciPoKursorze(db, opcje.sprawdzenia ?? LIMIT_SPRAWDZEN_NA_PRZEBIEG)) {
+      if (dokonane >= limit) break;
+      kursory.set(db, s.id);
       let wpis: WpisUsuniecia;
       try {
         wpis = await usunJedna(db, discovery, s);
@@ -582,6 +610,7 @@ async function przebieg(
       else if (wpis.akcja === "blad") wynik.bledy++;
       else wynik.pominiete++;
       if (wpis.akcja === "usunieto_wariant" || wpis.akcja === "usunieto_produkt" || wpis.akcja === "juz_nie_istnial") {
+        dokonane++;
         try {
           zapiszHistorie(db, wpis);
         } catch (e) {
