@@ -6,6 +6,7 @@ import {
   podmienZrodla,
 } from "../import/podmien-zrodla.js";
 import { dirname, join } from "node:path";
+import { usunWszystkieKartyAuto } from "../import/migracje/scal-karty-auto.js";
 import { ustawWEnvPliku } from "./env-plik.js";
 import type { Krok } from "./runner.js";
 
@@ -41,6 +42,7 @@ export const KROKI_WDROZENIA: Krok[] = [
   },
   {
     id: "2026-10-07-zrodla-cennikow-foldery",
+    tylkoProdukcja: true,
     opis: "źródła cenników dostawców (poza MO2/MO3) → lokalne foldery MO#_ (plik://), widoczne w panelu",
     async uruchom({ db, env }) {
       const katalog = (env.IMPORTY_KATALOG as string | undefined)?.trim() || DOMYSLNY_KATALOG_IMPORTOW;
@@ -52,6 +54,7 @@ export const KROKI_WDROZENIA: Krok[] = [
   },
   {
     id: "2026-10-08-selly-tor2-tor3-wlaczone",
+    tylkoProdukcja: true, // środowisko testowe nie może dostać zapisu do sklepu Selly
     opis: "Selly: włączenie Toru 2 (pełna synchronizacja 04:30) i Toru 3 (usuwanie sierot) — SELLY_TOR2=true, SELLY_USUWANIE=true w .env",
     async uruchom({ env }) {
       // `.env` leży w `$PROD_ROOT`, a baza w `$PROD_ROOT/data/` (tools/deploy-produkcja.sh).
@@ -76,6 +79,15 @@ export const KROKI_WDROZENIA: Krok[] = [
         return { odloz: `brak konta ${email}` };
       }
       return `${email}: hasło ustawione na tymczasowe — użytkownik zmienia je w /moje-konto`;
+    },
+  },
+  {
+    id: "2026-10-09-usun-karty-auto",
+    opis: "usunięcie wszystkich wstrzymanych kart MO*_AUTO_<hash> (decyzja użytkowniczki); jeśli są w pliku dostawcy, wpadną jako nowe",
+    async uruchom({ sqlite }) {
+      const w = usunWszystkieKartyAuto(sqlite);
+      const pominiete = w.pominiete.length ? `; pominięte ${w.pominiete.map((p) => `${p.kod} (${p.powod})`).join(", ")}` : "";
+      return `usunięto ${w.usuniete.length}: ${w.usuniete.join(", ") || "—"}${pominiete}`;
     },
   },
 ];
