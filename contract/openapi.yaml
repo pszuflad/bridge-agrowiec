@@ -18332,6 +18332,24 @@ components:
         - "utworzono"
         - "zatwierdzilUzytkownikId"
         - "zatwierdzonoData"
+    GETStagingIdPropozycjaZdjeciaOdpowiedz200:
+      type: "object"
+      properties:
+        propozycja:
+          type: "object"
+          properties:
+            link:
+              type: "string"
+            produktow:
+              type: "integer"
+            wariantow:
+              type: "integer"
+          required:
+            - "link"
+            - "produktow"
+            - "wariantow"
+      required:
+        - "propozycja"
     GETStagingOdpowiedz200:
       type: "object"
       properties:
@@ -18799,54 +18817,6 @@ components:
       oneOf:
         - {"$ref":"#/components/schemas/POSTProductsClearZadanie"}
         - {"$ref":"#/components/schemas/POSTMaintenanceUsunNieoponyZadanie"}
-    POSTProductsUzupelnijZdjeciaOdpowiedz200:
-      description: >-
-        Ticket 202 (NOWA logika). Dwa kształty zależnie od `dry_run`: podgląd (`dry_run: true`)
-        niesie liczniki i `propozycje`; zapis (`dry_run: false`) niesie `zaktualizowano` i `pominiete`.
-      type: "object"
-      properties:
-        ok:
-          type: "boolean"
-        dry_run:
-          type: "boolean"
-        wszystkichPustych:
-          type: "integer"
-        pominietoPoprawka:
-          type: "integer"
-        pominietoBrakDanych:
-          type: "integer"
-        pominietoBrakDopasowania:
-          type: "integer"
-        propozycje:
-          type: "array"
-          items:
-            type: "object"
-            properties:
-              id: { type: "integer" }
-              kod: { type: "string" }
-              dostawca: { type: "string" }
-              nazwa: { type: ["string", "null"] }
-              marka: { type: ["string", "null"] }
-              model: { type: ["string", "null"] }
-              link: { type: "string" }
-              produktow: { type: "integer" }
-              wariantow: { type: "integer" }
-        zaktualizowano:
-          type: "integer"
-        pominiete:
-          type: "integer"
-    GETStagingIdPropozycjaZdjeciaOdpowiedz200:
-      type: "object"
-      properties:
-        propozycja:
-          description: "Propozycja linku albo null, gdy pozycja ma już link / brak dopasowania."
-          oneOf:
-            - type: "null"
-            - type: "object"
-              properties:
-                link: { type: "string" }
-                produktow: { type: "integer" }
-                wariantow: { type: "integer" }
     POSTProductsDziedziczWageOdpowiedz200:
       type: "object"
       properties:
@@ -18901,6 +18871,62 @@ components:
         - "pominietoOverride"
         - "pominietoBrakDanych"
         - "pominietoBrakSredniej"
+    POSTProductsUzupelnijZdjeciaOdpowiedz200:
+      type: "object"
+      properties:
+        ok:
+          type: "boolean"
+        dry_run:
+          type: "boolean"
+        wszystkichPustych:
+          type: "integer"
+        pominietoPoprawka:
+          type: "integer"
+        pominietoBrakDanych:
+          type: "integer"
+        pominietoBrakDopasowania:
+          type: "integer"
+        propozycje:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              id:
+                type: "integer"
+              kod:
+                type: "string"
+              dostawca:
+                type: "string"
+              nazwa:
+                type: "string"
+              marka:
+                type: "string"
+              model:
+                type: "string"
+              link:
+                type: "string"
+              produktow:
+                type: "integer"
+              wariantow:
+                type: "integer"
+            required:
+              - "id"
+              - "kod"
+              - "dostawca"
+              - "nazwa"
+              - "marka"
+              - "model"
+              - "link"
+              - "produktow"
+              - "wariantow"
+      required:
+        - "ok"
+        - "dry_run"
+        - "wszystkichPustych"
+        - "pominietoPoprawka"
+        - "pominietoBrakDanych"
+        - "pominietoBrakDopasowania"
+        - "propozycje"
     POSTProductsZadanie:
       type: "array"
       items:

@@ -782,4 +782,49 @@ describe("Widok /staging", () => {
       expect(screen.getAllByRole("columnheader")).toHaveLength(ileKolumn);
     });
   });
+  describe("Podpowiedź linku do zdjęcia (ticket 202)", () => {
+    const PROPOZYCJA = { link: "https://foto.example/a.jpg", produktow: 3, wariantow: 2 };
+
+    async function otworzSzczegoly() {
+      const uzytkownik = userEvent.setup();
+      await otworzStaging();
+      const pierwsza = STRONA.items[0] as { id: number };
+      await uzytkownik.click(await screen.findByTestId(`button-details-${pierwsza.id}`));
+      return { uzytkownik, dialog: await screen.findByTestId("dialog-staging"), id: pierwsza.id };
+    }
+
+    it("pokazuje podpowiedź, a „Wstaw do edycji” wpisuje link do pola i wysyła go w PUT", async () => {
+      server.use(
+        ...handleryStagingu({
+          strona: STRONA,
+          propozycjaZdjecia: PROPOZYCJA,
+          naMutacje: (wpis) => mutacje.push(wpis),
+        }),
+      );
+      const { uzytkownik, dialog, id } = await otworzSzczegoly();
+
+      const sekcja = await within(dialog).findByTestId("szczegoly-propozycja-zdjecia");
+      expect(sekcja).toHaveTextContent(PROPOZYCJA.link);
+      expect(sekcja).toHaveTextContent("Najczęstszy z 2 różnych linków");
+
+      await uzytkownik.click(within(dialog).getByTestId("button-uzyj-propozycji-zdjecia"));
+      expect(within(dialog).getByTestId("input-linkZdjecia")).toHaveValue(PROPOZYCJA.link);
+      // Po wstawieniu podpowiedź znika — link jest już w edycji.
+      expect(within(dialog).queryByTestId("szczegoly-propozycja-zdjecia")).toBeNull();
+
+      await uzytkownik.click(within(dialog).getByTestId("button-save-details"));
+      await waitFor(() => expect(mutacje).toHaveLength(1));
+      expect(mutacje[0]!.url).toContain(`/api/staging/${id}`);
+      expect(mutacje[0]!.body).toEqual({ linkZdjecia: PROPOZYCJA.link });
+    });
+
+    it("bez propozycji sekcji nie ma, a pole „Link do zdjęcia” jest edytowalne", async () => {
+      server.use(...handleryStagingu({ strona: STRONA }));
+      const { dialog } = await otworzSzczegoly();
+
+      await within(dialog).findByTestId("szczegoly-snapshot");
+      expect(within(dialog).queryByTestId("szczegoly-propozycja-zdjecia")).toBeNull();
+      expect(within(dialog).getByTestId("input-linkZdjecia")).toBeInTheDocument();
+    });
+  });
 });

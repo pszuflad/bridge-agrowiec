@@ -117,6 +117,7 @@ export const POLA_EDYTOWALNE = [
   { klucz: "ean", etykieta: "EAN" },
   { klucz: "cenaZakupuNowa", etykieta: "Cena zakupu" },
   { klucz: "magazyn", etykieta: "Magazyn" },
+  { klucz: "linkZdjecia", etykieta: "Link do zdjęcia" },
 ] as const;
 
 /** Adres `/paged` z parametrami — te same nazwy, których używa oryginał (`fe.js:20621`). */

@@ -40,6 +40,7 @@ import {
   type WynikDziedziczeniaWagi,
   type WynikSzacowaniaWagi,
 } from "./katalog";
+import { UzupelnianieZdjec } from "./UzupelnianieZdjec";
 
 export function Katalog() {
   const [wybrane, ustawWybrane] = useState<Set<string>>(new Set(KOLUMNY_DOMYSLNE));
@@ -342,6 +343,8 @@ export function Katalog() {
               ) : null}
             </div>
           </div>
+
+          <UzupelnianieZdjec />
 
           <div className="border-t pt-3">
             <Button

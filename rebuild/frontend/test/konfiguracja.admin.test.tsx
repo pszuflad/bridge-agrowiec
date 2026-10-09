@@ -630,4 +630,70 @@ describe("Przycisk „Usuń wszystko z katalogu” (zakładka Katalog)", () => {
       await waitFor(() => expect(uniewaznienia).toEqual([["/api/products"]]));
     });
   });
+  describe("Uzupełnianie zdjęć (ticket 202)", () => {
+    const propozycja = (id: number, kod: string) => ({
+      id,
+      kod,
+      dostawca: "MO1",
+      nazwa: `Opona ${kod}`,
+      marka: "BKT",
+      model: "AGRIMAX RT 765",
+      link: "https://foto.example/a.jpg",
+      produktow: 3,
+      wariantow: 1,
+    });
+    const PODGLAD = {
+      ok: true,
+      dry_run: true,
+      wszystkichPustych: 4,
+      pominietoPoprawka: 1,
+      pominietoBrakDanych: 0,
+      pominietoBrakDopasowania: 1,
+      propozycje: [propozycja(11, "A1"), propozycja(12, "A2")],
+    };
+
+    it("najpierw pokazuje podgląd (bez zapisu), potem zapisuje tylko zaznaczone", async () => {
+      const ciala: Record<string, unknown>[] = [];
+      server.use(
+        http.post("*/api/products/uzupelnij-zdjecia", async ({ request }) => {
+          const cialo = (await request.json()) as Record<string, unknown>;
+          ciala.push(cialo);
+          return cialo.dry_run
+            ? HttpResponse.json(PODGLAD)
+            : HttpResponse.json({ ok: true, dry_run: false, zaktualizowano: 1, pominiete: 0 });
+        }),
+      );
+      await otworzZakladke("katalog");
+
+      await userEvent.click(await screen.findByTestId("button-podglad-zdjec"));
+      await screen.findByTestId("propozycja-zdjecia-11");
+      expect(ciala).toEqual([{ dry_run: true }]);
+      expect(screen.getByTestId("podglad-zdjec-podsumowanie")).toHaveTextContent(
+        "Produktów bez linku: 4. Propozycje: 2.",
+      );
+      expect(screen.getByTestId("button-zapisz-zdjecia")).toHaveTextContent("Zapisz wybrane (2)");
+
+      await userEvent.click(screen.getByTestId("wybor-zdjecia-12"));
+      expect(screen.getByTestId("button-zapisz-zdjecia")).toHaveTextContent("Zapisz wybrane (1)");
+      await userEvent.click(screen.getByTestId("button-zapisz-zdjecia"));
+
+      await waitFor(() => expect(ciala).toEqual([{ dry_run: true }, { ids: [11] }]));
+      expect(await screen.findByText("Zdjęcia uzupełnione")).toBeInTheDocument();
+      expect(screen.queryByTestId("podglad-zdjec")).toBeNull();
+    });
+
+    it("pokazuje błąd podglądu z backendu", async () => {
+      server.use(
+        http.post("*/api/products/uzupelnij-zdjecia", () =>
+          HttpResponse.json({ error: "Baza niedostępna" }, { status: 500 }),
+        ),
+      );
+      await otworzZakladke("katalog");
+
+      await userEvent.click(await screen.findByTestId("button-podglad-zdjec"));
+
+      expect(await screen.findByText("Błąd podglądu zdjęć")).toBeInTheDocument();
+      expect(screen.getByText("Baza niedostępna")).toBeInTheDocument();
+    });
+  });
 });

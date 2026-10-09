@@ -37,6 +37,8 @@ export type OpcjeHandlerowStagingu = {
   szczegol?: Record<string, unknown> | null;
   /** Materiał okna „Rozstrzygnij" — `GET /api/staging/{id}/review`. */
   przeglad?: PrzegladZgloszenia;
+  /** `GET /api/staging/{id}/propozycja-zdjecia` (ticket 202); domyślnie brak propozycji. */
+  propozycjaZdjecia?: { link: string; produktow: number; wariantow: number } | null;
   /** Gdy ustawione, `review` oddaje błąd zamiast danych. */
   bladPrzegladu?: OdpowiedzBledu;
   /** Gdy ustawione, `POST /api/staging/accept` oddaje błąd — blokada polityki (409). */
@@ -60,6 +62,7 @@ export function handleryStagingu(opcje: OpcjeHandlerowStagingu = {}) {
     strona = stronaStaginguZFixtura() as unknown as Record<string, unknown>,
     szczegol = null,
     przeglad,
+    propozycjaZdjecia = null,
     bladPrzegladu,
     bladAkceptacji,
     bladRozstrzygniecia,
@@ -85,6 +88,9 @@ export function handleryStagingu(opcje: OpcjeHandlerowStagingu = {}) {
       if (bladPrzegladu) return odpowiedzBledu(bladPrzegladu);
       return HttpResponse.json(przeglad ?? { ...przegladDopasowania(), id: Number(params.id) });
     }),
+    http.get("*/api/staging/:id/propozycja-zdjecia", () =>
+      HttpResponse.json({ propozycja: propozycjaZdjecia }),
+    ),
     http.post("*/api/staging/:id/resolve-source-conflict", async ({ request }) => {
       await zapiszMutacje(request);
       return HttpResponse.json({ ok: true, kody: ["520196", "520197"] });
