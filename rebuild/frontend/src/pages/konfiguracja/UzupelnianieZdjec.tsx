@@ -9,6 +9,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Image as IkonaZdjecia } from "lucide-react";
 import { useState } from "react";
+import { Link } from "wouter";
 
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
@@ -102,6 +103,18 @@ export function UzupelnianieZdjec() {
             bez marki lub modelu, {podglad.pominietoBrakDopasowania} bez pasującego produktu z
             linkiem.
           </p>
+          {podglad.wszystkichPustych > 0 ? (
+            <p className="text-[11px] text-muted-foreground">
+              <Link
+                href="/katalog?status=brak_zdjecia"
+                className="underline hover:text-foreground"
+                data-testid="link-brak-zdjecia"
+              >
+                Zobacz w katalogu produkty bez linku do zdjęcia ({podglad.wszystkichPustych})
+              </Link>{" "}
+              — do uzupełnienia ręcznie.
+            </p>
+          ) : null}
 
           {podglad.propozycje.length ? (
             <>
