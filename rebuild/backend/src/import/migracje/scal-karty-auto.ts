@@ -817,3 +817,59 @@ export async function usunDuplikatySelly(
   }
   return wynik;
 }
+
+/**
+ * Ticket 206 (decyzja użytkowniczki 2026-10-09): usunięcie WSZYSTKICH wstrzymanych kart `MO*_AUTO_<hash>` bez scalania.
+ * Jeśli dana pozycja jest w pliku dostawcy, wpadnie jako nowa karta i przejdzie zwykłą weryfikację w stagingu.
+ *
+ * Bezpieczniki: tylko `status = 'wstrzymany'` (aktywnej karty nie ruszamy — trafia do `pominiete`), twardy próg
+ * `MAKS_USUNIEC_AUTO` (wynik dalekie od ośmiu z audytu = coś jest nie tak → wyjątek, nic nie usunięto), pełny wiersz karty
+ * i jej poprawki do `products_scalone` (odtwarzalność), wpis w `audit_log`. Mapowanie Selly (`selly_products`) zostaje:
+ * po usunięciu karty staje się sierotą i zajmie się nią Tor 3 z kontrolą tożsamości.
+ */
+export const MAKS_USUNIEC_AUTO = 30;
+
+export type WynikUsunieciaAuto = { usuniete: string[]; pominiete: { kod: string; powod: string }[] };
+
+export function usunWszystkieKartyAuto(sqlite: BazaSqlite, teraz: string = new Date().toISOString()): WynikUsunieciaAuto {
+  const karty = (sqlite.prepare("SELECT * FROM products").all() as Wiersz[]).filter((p) => AUTO_RE.test(s(p.kod)));
+  const wynik: WynikUsunieciaAuto = { usuniete: [], pominiete: [] };
+  const doUsuniecia = karty.filter((p) => {
+    if (s(p.status) === "wstrzymany") return true;
+    wynik.pominiete.push({ kod: s(p.kod), powod: `status ${s(p.status) || "brak"} — usuwamy tylko wstrzymane` });
+    return false;
+  });
+  if (doUsuniecia.length > MAKS_USUNIEC_AUTO) {
+    throw new Error(
+      `usunWszystkieKartyAuto: ${doUsuniecia.length} wstrzymanych kart AUTO (próg ${MAKS_USUNIEC_AUTO}) — przerywam, nic nie usunięto`,
+    );
+  }
+  for (const auto of doUsuniecia) {
+    const kod = s(auto.kod);
+    const dostawca = s(auto.dostawca);
+    sqlite.transaction(() => {
+      const poprawki = sqlite
+        .prepare("SELECT * FROM manual_overrides WHERE supplier_kod=? AND supplier_product_id=?")
+        .all(dostawca, kod) as Wiersz[];
+      sqlite
+        .prepare("INSERT INTO products_scalone (kod, dostawca, scalono_do, scalono_at, wiersz_json) VALUES (?,?,?,?,?)")
+        .run(kod, dostawca, "USUNIĘTA (bez scalania)", teraz, JSON.stringify({ produkt: auto, poprawki, usunietaKartaAuto: true }));
+      sqlite.prepare("DELETE FROM manual_overrides WHERE supplier_kod=? AND supplier_product_id=?").run(dostawca, kod);
+      sqlite.prepare("DELETE FROM product_auto_suspensions WHERE supplier=? AND product_code=?").run(dostawca, kod);
+      sqlite.prepare("DELETE FROM staging_matches WHERE supplier=? AND product_code=?").run(dostawca, kod);
+      sqlite
+        .prepare("DELETE FROM staging_absence_decisions WHERE supplier=? AND (product_code=? OR selected_source_code=?)")
+        .run(dostawca, kod, kod);
+      sqlite.prepare("DELETE FROM staging_items WHERE dostawca=? AND kod=?").run(dostawca, kod);
+      sqlite
+        .prepare(
+          "INSERT INTO audit_log (uzytkownik_id, uzytkownik_imie, akcja, encja_typ, encja_id, szczegoly_json, kiedy) " +
+            "VALUES (NULL, 'usun-karty-auto', 'usuniecie_karty_auto', 'product', ?, ?, ?)",
+        )
+        .run(kod, JSON.stringify({ kod, dostawca, nazwa: auto.nazwa ?? null, ean: auto.ean ?? null }), teraz);
+      sqlite.prepare("DELETE FROM products WHERE id=?").run(auto.id);
+    })();
+    wynik.usuniete.push(kod);
+  }
+  return wynik;
+}
