@@ -21,6 +21,7 @@
 // klientem, więc testy nigdy nie wołają prawdziwego sklepu.
 
 import type { BazaSqlite } from "../../db/index.js";
+import { usunKarteZArchiwum } from "../usun-karte.js";
 import type { KlientSelly } from "../../selly/klient.js";
 import { compatibility, norm } from "../polityka/helpery.js";
 import { codeKey } from "../polityka/podstawy.js";
@@ -845,31 +846,14 @@ export function usunWszystkieKartyAuto(sqlite: BazaSqlite, teraz: string = new D
     );
   }
   for (const auto of doUsuniecia) {
-    const kod = s(auto.kod);
-    const dostawca = s(auto.dostawca);
-    sqlite.transaction(() => {
-      const poprawki = sqlite
-        .prepare("SELECT * FROM manual_overrides WHERE supplier_kod=? AND supplier_product_id=?")
-        .all(dostawca, kod) as Wiersz[];
-      sqlite
-        .prepare("INSERT INTO products_scalone (kod, dostawca, scalono_do, scalono_at, wiersz_json) VALUES (?,?,?,?,?)")
-        .run(kod, dostawca, "USUNIĘTA (bez scalania)", teraz, JSON.stringify({ produkt: auto, poprawki, usunietaKartaAuto: true }));
-      sqlite.prepare("DELETE FROM manual_overrides WHERE supplier_kod=? AND supplier_product_id=?").run(dostawca, kod);
-      sqlite.prepare("DELETE FROM product_auto_suspensions WHERE supplier=? AND product_code=?").run(dostawca, kod);
-      sqlite.prepare("DELETE FROM staging_matches WHERE supplier=? AND product_code=?").run(dostawca, kod);
-      sqlite
-        .prepare("DELETE FROM staging_absence_decisions WHERE supplier=? AND (product_code=? OR selected_source_code=?)")
-        .run(dostawca, kod, kod);
-      sqlite.prepare("DELETE FROM staging_items WHERE dostawca=? AND kod=?").run(dostawca, kod);
-      sqlite
-        .prepare(
-          "INSERT INTO audit_log (uzytkownik_id, uzytkownik_imie, akcja, encja_typ, encja_id, szczegoly_json, kiedy) " +
-            "VALUES (NULL, 'usun-karty-auto', 'usuniecie_karty_auto', 'product', ?, ?, ?)",
-        )
-        .run(kod, JSON.stringify({ kod, dostawca, nazwa: auto.nazwa ?? null, ean: auto.ean ?? null }), teraz);
-      sqlite.prepare("DELETE FROM products WHERE id=?").run(auto.id);
-    })();
-    wynik.usuniete.push(kod);
+    usunKarteZArchiwum(sqlite, auto, {
+      teraz,
+      scalonoDo: "USUNIĘTA (bez scalania)",
+      akcjaAudytu: "usuniecie_karty_auto",
+      uzytkownikImie: "usun-karty-auto",
+      flaga: "usunietaKartaAuto",
+    });
+    wynik.usuniete.push(s(auto.kod));
   }
   return wynik;
 }

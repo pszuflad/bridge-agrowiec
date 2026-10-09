@@ -58,6 +58,7 @@ function zamockujApi(opcje: { produkty?: Produkt[]; config?: Record<string, stri
   server.use(
     http.get("*/api/products", () => HttpResponse.json(opcje.produkty ?? PRODUKTY)),
     http.get("*/api/suppliers", () => HttpResponse.json(DOSTAWCY)),
+    http.get("*/api/nieobecne", () => HttpResponse.json({ progDniDomyslny: 7, progDniDostawcow: {}, items: [] })),
     http.get("*/api/config", () => HttpResponse.json(opcje.config ?? {})),
     // Od sesji 7c katalog czyta też słownik atrybutów (listy filtrów marek i kategorii).
     // Ten test go nie dotyczy, ale widok pobiera KOMPLET swoich tras przy każdym wejściu,

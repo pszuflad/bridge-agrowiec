@@ -43,6 +43,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { KLUCZ_KOLUMN_KATALOGU, odczytajKV, zapiszKV } from "@/lib/magazynKV";
 import { pobierzSlownik, type OdpowiedzSlownika } from "@/pages/atrybuty/api";
 import { KLUCZ_KONFIGURACJI, type Konfiguracja } from "./konfiguracja/config";
+import { KLUCZ_NIEOBECNE, NieobecneWImporcie, type PozycjaNieobecna } from "./katalog/NieobecneWImporcie";
 import {
   listaKategorii,
   listaMarek,
@@ -100,6 +101,8 @@ export function Katalog() {
     queryKey: ["/api/products"],
   });
   const { data: dostawcy = [] } = useQuery<Dostawca[]>({ queryKey: ["/api/suppliers"] });
+  // Ticket 207: licznik na zakładce „Nieobecne w imporcie”.
+  const { data: nieobecne } = useQuery<{ items: PozycjaNieobecna[] }>({ queryKey: KLUCZ_NIEOBECNE });
   // Konfiguracja czytana DEFENSYWNIE: produkcja nie ma ani `shoper.kolumny`, ani
   // `shoper.separator` (`contract/fixtures/GET_config.json`), więc brak wartości to
   // normalny stan, a nie awaria — wpadamy wtedy w fallbacki `TT` i `";"`.
@@ -452,9 +455,23 @@ export function Katalog() {
               </Badge>
             </TabsTrigger>
           ))}
+          <TabsTrigger
+            value="nieobecne"
+            data-testid="tab-nieobecne"
+            className="data-[state=active]:bg-background gap-2"
+            title="Pozycje, których od dni nie ma w cenniku dostawcy — do decyzji: usuń albo przywróć"
+          >
+            <span className="font-medium">Nieobecne w imporcie</span>
+            <Badge variant="secondary" className="font-mono text-[10px] h-5">
+              {nieobecne?.items.length ?? 0}
+            </Badge>
+          </TabsTrigger>
         </TabsList>
       </Tabs>
 
+      {zakladka === "nieobecne" ? <NieobecneWImporcie /> : null}
+
+      <div className={zakladka === "nieobecne" ? "hidden" : undefined}>
       <Card className="border-card-border mb-4">
         <CardContent className="p-4 flex flex-wrap gap-2.5 items-center">
           <div className="relative flex-1 min-w-[200px]">
@@ -629,6 +646,8 @@ export function Katalog() {
           </CardContent>
         </Card>
       )}
+
+      </div>
 
       <DialogEdycjiProduktu
         produkt={edytowany}

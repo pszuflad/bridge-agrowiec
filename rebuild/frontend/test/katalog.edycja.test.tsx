@@ -60,6 +60,7 @@ function zamockujApi(opcje: { produkty?: Produkt[]; overrides?: Override[] } = {
   server.use(
     http.get("*/api/products", () => HttpResponse.json(produkty)),
     http.get("*/api/suppliers", () => HttpResponse.json(DOSTAWCY)),
+    http.get("*/api/nieobecne", () => HttpResponse.json({ progDniDomyslny: 7, progDniDostawcow: {}, items: [] })),
     http.get("*/api/config", () => HttpResponse.json({})),
     http.get("*/api/atrybuty", () => HttpResponse.json(SLOWNIK)),
     http.get("*/api/overrides", ({ request }) => {
