@@ -26,6 +26,12 @@ import {
 } from "./silnik/bridge-ext.js";
 import { uzupelnijEanRekordu } from "../ean-pary/uzupelnianie.js";
 import { applyKategoriaDziedziczona } from "./dziedziczenieKategorii.js";
+import {
+  applyLinkDziedziczony,
+  zbudujIndeksLinkow,
+  zapiszPoprawkeLinku,
+  type IndeksLinkow,
+} from "./dziedziczenieLinkow.js";
 import { applyWagaDziedziczona } from "./dziedziczenieWagi.js";
 import { nazwaZDemo } from "./polityka/nazwa-demo.js";
 
@@ -46,12 +52,13 @@ export function dodajProduktyBulk(
   pozycje: PozycjaBulku[],
   // Ticket 168 (NOWA logika, nie port): uzupełnianie pustego EAN z tabeli par kod↔EAN. Domyślnie
   // wyłączone (harness charakteryzacyjny porównuje z oryginałem); `POST /api/products` włącza.
-  opcje: { uzupelnijEan?: boolean } = {},
+  opcje: { uzupelnijEan?: boolean; uzupelnijLink?: boolean } = {},
 ): number {
   // ⚠ Znacznik czasu liczony RAZ, przed transakcją (`:44747`) — cała partia dostaje ten sam
   // `dataAktualizacji`, nawet jeśli zapis potrwa. Odtworzone dosłownie.
   const teraz = new Date().toISOString();
   const sqlite = uchwytSqlite(db);
+  let indeksLinkow: IndeksLinkow | undefined;
 
   const przetworz = sqlite.transaction((wejscie: PozycjaBulku[]) => {
     let ile = 0;
@@ -122,6 +129,18 @@ export function dodajProduktyBulk(
       } catch {
         /* jak `catch (_be) {}` */
       }
+      // Ticket 203 (NOWA logika): pusty link z najczęstszego linku marki+modelu (indeks budowany
+      // raz na partię — linki dodane w trakcie partii wejdą od następnej).
+      let linkUzupelniony = false;
+      const poprawkaLinku = { dostawca: String(rekord.dostawca), kod: String(rekord.kod) };
+      try {
+        if (opcje.uzupelnijLink) {
+          indeksLinkow ??= zbudujIndeksLinkow(db);
+          linkUzupelniony = applyLinkDziedziczony(db, rekord, indeksLinkow);
+        }
+      } catch {
+        /* nie blokuj zapisu wiersza błędem dziedziczenia linku */
+      }
       try {
         assignKodImportu(sqlite, rekord, istniejacy);
       } catch {
@@ -178,6 +197,14 @@ export function dodajProduktyBulk(
         rememberLink(sqlite, rekord);
       } catch {
         /* jak `catch (_be) {}` */
+      }
+      try {
+        if (linkUzupelniony) {
+          zapiszPoprawkeLinku(db, poprawkaLinku.dostawca, poprawkaLinku.kod, String(rekord.linkZdjecia));
+        }
+      } catch (err) {
+        // Nie blokuje zapisu wiersza, ale zostawia ślad: bez poprawki następny import może nadpisać link.
+        console.error("uzupelnij-link: nie zapisano poprawki linku", err);
       }
 
       ile++;

@@ -1,5 +1,6 @@
 import { Router } from "express";
 import type { Baza } from "../db/index.js";
+import { propozycjaLinkuDlaPozycji } from "../import/dziedziczenieLinkow.js";
 import { requireAuth } from "../middleware/auth.js";
 import {
   listaStagingu,
@@ -113,6 +114,25 @@ export function trasyStagingu({ db }: ZaleznosciStagingu): Router {
       return;
     }
     res.json(pozycja);
+  });
+
+  /**
+   * Podpowiedź linku do zdjęcia dla pozycji stagingu — ticket 203. Pokazywana w szczegółach
+   * pozycji; `propozycja` jest `null`, gdy pozycja ma już link (także z poprawki), nie ma
+   * marki/modelu albo nic w katalogu nie pasuje. Nic nie zapisuje.
+   */
+  router.get("/api/staging/:id/propozycja-zdjecia", requireAuth, (req, res) => {
+    const id = parseInt(String(req.params.id), 10);
+    if (!Number.isFinite(id)) {
+      res.status(400).json({ error: "Nieprawidłowy id" });
+      return;
+    }
+    const pozycja = pozycjaStaginguPoId(db, id);
+    if (!pozycja) {
+      res.status(404).json({ error: "Nie znaleziono pozycji stagingu" });
+      return;
+    }
+    res.json({ propozycja: propozycjaLinkuDlaPozycji(db, pozycja) });
   });
 
   return router;

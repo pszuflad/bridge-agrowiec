@@ -44,6 +44,7 @@ const POLA_EDYTOWALNE = [
   "ean",
   "cenaZakupuNowa",
   "magazyn",
+  "linkZdjecia",
 ];
 
 /**
@@ -63,6 +64,7 @@ const POLE_NA_OVERRIDE: Record<string, string> = {
   ean: "ean",
   cenaZakupuNowa: "cenaZakupu",
   magazyn: "magazyn",
+  linkZdjecia: "linkZdjecia",
 };
 
 /** Filtry masowej operacji `allFiltered` — wspólne dla `accept` i `reject` (`:48540`). */
@@ -226,7 +228,7 @@ export function trasyMutacjiStagingu({ db, silnik }: ZaleznosciMutacjiStagingu):
   /**
    * Odrzucenie pozycji — ta sama mechanika co `accept` (`:48561`).
    *
-   * ⚠ ODSTĘPSTWO OD PRODUKCJI (decyzja użytkowniczki 2026-10-08, ticket 202, wpis #187.1): dla zmiany istniejącej
+   * ⚠ ODSTĘPSTWO OD PRODUKCJI (decyzja użytkowniczki 2026-10-08, ticket 203, wpis #187.1): dla zmiany istniejącej
    * karty (`zmiana_kluczowa`) „Odrzuć” z listy robi to samo, co „Odrzuć” w szczegółach — karta zostaje, a różnice
    * zapisują się jak poprawka Marty (`odrzucZmianeKarty`), więc ta sama propozycja nie wraca po następnym imporcie.
    * Pozycje innych typów oraz zmiany, których nie da się zapamiętać (puste pola karty, brak różnic, brak karty),
