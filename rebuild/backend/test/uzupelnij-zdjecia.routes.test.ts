@@ -90,6 +90,11 @@ describe("uzupełnianie zdjęć — trasy HTTP", () => {
     ).toHaveLength(1);
   });
 
+  it("odrzuca dry_run, który nie jest wartością logiczną (np. \"true\"), zamiast zapisywać", async () => {
+    expect((await uzupelnij({ dry_run: "true" })).status).toBe(400);
+    expect(srodowisko.db.select().from(manualOverrides).all()).toHaveLength(0);
+  });
+
   it("odrzuca ids, które nie są listą liczb", async () => {
     expect((await uzupelnij({ ids: "1,2" })).status).toBe(400);
     expect((await uzupelnij({ ids: [1, "x"] })).status).toBe(400);
@@ -121,6 +126,20 @@ describe("uzupełnianie zdjęć — trasy HTTP", () => {
       .get();
     expect(poprawka?.overrideValue).toBe("https://foto.example/reczny.jpg");
 
+    const po = await request(srodowisko.app).get(`/api/staging/${id}/propozycja-zdjecia`).set(auth);
+    expect(po.body).toEqual({ propozycja: null });
+  });
+
+  it("wyczyszczenie linku w edycji stagingu zakłada pustą poprawkę i wyłącza podpowiedź", async () => {
+    srodowisko.db
+      .insert(stagingItems)
+      .values(pozycja({ kod: "NOWY", dostawca: "MO5", snapshot: { marka: "BKT", model: "AGRIMAX RT 765" } }) as never)
+      .run();
+    const id = srodowisko.db.select().from(stagingItems).get()!.id;
+    const auth = { Authorization: `Bearer ${token}` };
+
+    const edycja = await request(srodowisko.app).put(`/api/staging/${id}`).set(auth).send({ linkZdjecia: "" });
+    expect(edycja.status).toBe(200);
     const po = await request(srodowisko.app).get(`/api/staging/${id}/propozycja-zdjecia`).set(auth);
     expect(po.body).toEqual({ propozycja: null });
   });

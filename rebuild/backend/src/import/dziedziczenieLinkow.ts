@@ -12,7 +12,7 @@
 // z `akceptacja.ts`/`bulk.ts` TUŻ PO `applyLinkMemory`, więc pamięć linków wygrywa z tym
 // dopasowaniem — ta funkcja działa tylko, gdy `rekord.linkZdjecia` jest nadal pusty.
 
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, sql, type SQL } from "drizzle-orm";
 
 import type { Baza, BazaSqlite } from "../db/index.js";
 import { manualOverrides, products } from "../db/schema.js";
@@ -47,11 +47,12 @@ export type PropozycjaLinku = {
 export type IndeksLinkow = Map<string, Map<string, number>>;
 
 /** Buduje indeks z linków, które już są w katalogu. */
-export function zbudujIndeksLinkow(db: Baza): IndeksLinkow {
+export function zbudujIndeksLinkow(db: Baza, dodatkowyWarunek?: SQL): IndeksLinkow {
+  const warunek = sql`${products.linkZdjecia} IS NOT NULL AND TRIM(${products.linkZdjecia}) <> ''`;
   const wiersze = db
     .select({ marka: products.marka, model: products.model, link: products.linkZdjecia })
     .from(products)
-    .where(sql`${products.linkZdjecia} IS NOT NULL AND TRIM(${products.linkZdjecia}) <> ''`)
+    .where(dodatkowyWarunek ? and(warunek, dodatkowyWarunek) : warunek)
     .all();
 
   const indeks: IndeksLinkow = new Map();
@@ -67,6 +68,18 @@ export function zbudujIndeksLinkow(db: Baza): IndeksLinkow {
     linki.set(link, (linki.get(link) ?? 0) + 1);
   }
   return indeks;
+}
+
+/**
+ * Indeks zawężony do produktów, których model zaczyna się od tego samego pierwszego słowa —
+ * tani odpowiednik {@link zbudujIndeksLinkow} dla JEDNEJ pary (akceptacja pojedynczej pozycji
+ * nie skanuje całego katalogu). Dokładne dopasowanie robi dalej `kluczMarkaModel` w JS.
+ */
+export function zbudujIndeksLinkowDlaPary(db: Baza, model: unknown): IndeksLinkow {
+  const pierwszeSlowo = String(model ?? "").trim().split(/\s+/)[0] ?? "";
+  if (!pierwszeSlowo) return new Map();
+  const wzorzec = `${pierwszeSlowo.replace(/[\\%_]/g, "\\$&")}%`;
+  return zbudujIndeksLinkow(db, sql`${products.model} LIKE ${wzorzec} ESCAPE '\\'`);
 }
 
 /** Najczęstszy link pary; remis rozstrzyga najmniejszy alfabetycznie (wynik deterministyczny). */
@@ -121,7 +134,11 @@ export function applyLinkDziedziczony(
   if (kluczMarkaModel(rekord.marka, rekord.model) === null) return false;
   if (maPoprawkeLinku(db, rekord.dostawca, rekord.kod)) return false;
 
-  const propozycja = znajdzPropozycje(indeks ?? zbudujIndeksLinkow(db), rekord.marka, rekord.model);
+  const propozycja = znajdzPropozycje(
+    indeks ?? zbudujIndeksLinkowDlaPary(db, rekord.model),
+    rekord.marka,
+    rekord.model,
+  );
   if (!propozycja) return false;
   rekord.linkZdjecia = propozycja.link;
   return true;
@@ -270,5 +287,5 @@ export function propozycjaLinkuDlaPozycji(
   }
   if (!jestPustyLink(snapshot.linkZdjecia)) return null;
   if (maPoprawkeLinku(db, pozycja.dostawca, pozycja.kod)) return null;
-  return znajdzPropozycje(zbudujIndeksLinkow(db), snapshot.marka, snapshot.model);
+  return znajdzPropozycje(zbudujIndeksLinkowDlaPary(db, snapshot.model), snapshot.marka, snapshot.model);
 }

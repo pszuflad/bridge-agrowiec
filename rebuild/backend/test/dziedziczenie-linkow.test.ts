@@ -239,6 +239,29 @@ describe("dziedziczenie linków — wpięcie w zapis", () => {
     expect(db.select().from(products).where(eq(products.kod, "B1")).get()?.linkZdjecia).toBe(LINK_A);
   });
 
+  it("dopasowanie pojedynczej pary (bez pełnego indeksu) działa tak samo, także przy innej wielkości liter i spacjach", () => {
+    db.insert(products).values(produkt({ kod: "DAWCA2", model: "Agrimax  RT 765", linkZdjecia: LINK_B })).run();
+    const rekord: Record<string, unknown> = { dostawca: "MO1", kod: "N9", marka: "bkt", model: "AGRIMAX RT 765" };
+    expect(applyLinkDziedziczony(db, rekord)).toBe(true);
+    // dwa różne linki (A z DAWCA, B z DAWCA2), po jednym produkcie → remis → alfabetycznie A
+    expect(rekord.linkZdjecia).toBe(LINK_A);
+  });
+
+  it("bulk: istniejący produkt bez linku też dostaje link, a z linkiem go zachowuje", () => {
+    const wiersz = { dostawca: "MO1", nazwa: "x", marka: "BKT", model: "AGRIMAX RT 765", cenaZakupu: 10 };
+    db.insert(products).values([produkt({ kod: "E1" }), produkt({ kod: "E2", linkZdjecia: LINK_B })]).run();
+    dodajProduktyBulk(db, [{ ...wiersz, kod: "E1" }, { ...wiersz, kod: "E2", linkZdjecia: LINK_B }], {
+      uzupelnijLink: true,
+    });
+    expect(db.select().from(products).where(eq(products.kod, "E1")).get()?.linkZdjecia).toBe(LINK_A);
+    expect(db.select().from(products).where(eq(products.kod, "E2")).get()?.linkZdjecia).toBe(LINK_B);
+  });
+
+  it("zapis z pustą listą ids niczego nie zmienia", () => {
+    db.insert(products).values(produkt({ kod: "P1" })).run();
+    expect(uzupelnijLinkiWstecznie(db, baza.sqlite, { ids: [] })).toEqual({ zaktualizowano: 0, pominiete: 0 });
+  });
+
   it("podpowiedź dla stagingu: jest, dopóki pozycja nie ma linku ani poprawki", () => {
     const bazowa = {
       dostawca: "MO5",

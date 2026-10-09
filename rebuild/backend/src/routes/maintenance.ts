@@ -213,6 +213,10 @@ export function trasyUtrzymania({ db, dbPath, sqlite }: ZaleznosciUtrzymania): R
       return;
     }
     const cialo = (req.body ?? {}) as { dry_run?: unknown; ids?: unknown };
+    if (cialo.dry_run !== undefined && typeof cialo.dry_run !== "boolean") {
+      res.status(400).json({ error: "Pole dry_run musi być wartością logiczną (true/false)." });
+      return;
+    }
 
     if (cialo.dry_run === true) {
       res.json({ ok: true, dry_run: true, ...proponujLinkiKatalogu(db) });

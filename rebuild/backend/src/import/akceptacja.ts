@@ -297,8 +297,9 @@ export function zatwierdzPozycjeStagingu(
     if (linkUzupelniony) {
       zapiszPoprawkeLinku(db, poprawkaLinku.dostawca, poprawkaLinku.kod, String(rekord.linkZdjecia));
     }
-  } catch {
-    /* nie blokuj akceptacji błędem zapisu poprawki */
+  } catch (err) {
+    // Nie blokuje akceptacji, ale zostawia ślad: bez poprawki następny import może nadpisać link.
+    console.error("uzupelnij-link: nie zapisano poprawki linku", err);
   }
 
   // ——— Propagacja `uwagaCena` (backlog #4, plan.md D4) ———

@@ -202,8 +202,9 @@ export function dodajProduktyBulk(
         if (linkUzupelniony) {
           zapiszPoprawkeLinku(db, poprawkaLinku.dostawca, poprawkaLinku.kod, String(rekord.linkZdjecia));
         }
-      } catch {
-        /* nie blokuj zapisu wiersza błędem zapisu poprawki */
+      } catch (err) {
+        // Nie blokuje zapisu wiersza, ale zostawia ślad: bez poprawki następny import może nadpisać link.
+        console.error("uzupelnij-link: nie zapisano poprawki linku", err);
       }
 
       ile++;

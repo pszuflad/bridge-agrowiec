@@ -19067,7 +19067,7 @@ paths:
       summary: "POST /api/ai-fallback/parse"
       security: [{ bearerAuth: [] }, { cookieAuth: [] }]
       requestBody:
-        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures. Od ticketu 202 dochodzi pole `linkZdjecia` (zapisuje też poprawkę Marty)."
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures.."
         content: { application/json: { schema: { type: object } } }
       responses:
         "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
@@ -20872,7 +20872,7 @@ paths:
         - { name: id, in: path, required: true, schema: { type: string } }
       security: [{ bearerAuth: [] }, { cookieAuth: [] }]
       requestBody:
-        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures."
+        description: "Pola: patrz 01_ENDPOINTY.md; do zamrożenia w 2.4 fixtures. Od ticketu 202 dochodzi pole `linkZdjecia` (zapisuje też poprawkę Marty)."
         content: { application/json: { schema: { type: object } } }
       responses:
         "200": { description: "OK — kształt do zamrożenia w 2.4 (fixtures)" }
@@ -20884,7 +20884,7 @@ paths:
       summary: "GET /api/staging/{id}/propozycja-zdjecia"
       description: >-
         Ticket 202 (NOWA logika). Podpowiedź linku do zdjęcia dla pozycji stagingu z pustym
-        linkiem (najczęstszy link produktów o tej samej marce i modelu). Nic nie zapisuje.
+        linkiem (`propozycja` jest `null`, gdy pozycja ma już link albo nic nie pasuje) (najczęstszy link produktów o tej samej marce i modelu). Nic nie zapisuje.
       parameters:
         - { name: id, in: path, required: true, schema: { type: string } }
       security: [{ bearerAuth: [] }, { cookieAuth: [] }]

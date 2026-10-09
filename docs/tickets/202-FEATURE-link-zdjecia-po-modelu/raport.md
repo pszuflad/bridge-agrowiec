@@ -33,3 +33,17 @@ None. (Domyślnie wyłączone w ścieżkach używanych przez harness charakteryz
 - Ręcznie wpisany link w katalogu nie trafia do pamięci linków do czasu akceptacji stagingu (luka z badania).
 - Poprawka linku może wywołać „konflikt ze źródłem" przy imporcie, gdy dostawca poda inny link — zachowanie istniejącego mechanizmu.
 - Brak testów na `link_pamiec_mr` i wyjątek MO9 (stan sprzed ticketu).
+
+## Review fixes applied
+Review: `review.md` (0 BLOCKER, 7 SHOULD-FIX). Naprawione:
+- `dry_run` inny niż boolean → 400 (nie zapisuje po cichu).
+- Akceptacja pojedynczej pozycji nie skanuje całego katalogu: `zbudujIndeksLinkowDlaPary` (zawężenie po pierwszym słowie modelu); pełny indeks tylko dla partii i podglądu.
+- Błąd zapisu poprawki linku loguje `console.error` zamiast być połykany.
+- `openapi.yaml`: opis pola `linkZdjecia` przeniesiony na właściwe `PUT /api/staging/{id}`; opis `propozycja: null` dopisany w opisie trasy (generator schematów wywodzi schemat z fixture'a, który ma wariant niepusty).
+- Testy: pojedyncza para (wielkość liter/spacje), bulk dla istniejącego produktu, `ids: []`, `dry_run: "true"`, wyczyszczenie linku w stagingu.
+Nie zrobione (świadomie): test z pełnym silnikiem `poprawkiMarty` i ścieżką `zatwierdzPozycjeZPolityka` — zob. Follow-up; lista kodów w audycie.
+
+## Follow-up (uzupełnienie po review)
+- Test integracyjny import-silnik × poprawka linku oraz `zatwierdzPozycjeZPolityka`.
+- Lista kodów zmienionych produktów w audycie `uzupelnienie_linkow_zdjec`.
+- Brak sprawdzenia roli w trasie (jak `dziedzicz-wage`).
