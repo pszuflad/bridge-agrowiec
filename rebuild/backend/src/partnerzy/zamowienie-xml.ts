@@ -5,7 +5,7 @@
 // zginąć tutaj. `CODE` zostaje TEKSTEM — zera wiodące są znaczące (`011200284`).
 //
 // Własny, mały czytnik XML zamiast biblioteki: wejście pochodzi od partnera, więc DOCTYPE/ENTITY są ODRZUCANE (brak XXE i „billion laughs”),
-// a z encji obsługujemy tylko pięć predefiniowanych i numeryczne. Atrybuty są ignorowane (format ich nie używa).
+// a z encji obsługujemy tylko pięć predefiniowanych i numeryczne. Atrybuty są ignorowane (format ich nie używa). Skaner jest liniowy (bez regexów po wejściu).
 
 export class BladZamowienia extends Error {
   constructor(public readonly bledy: string[]) {
@@ -43,34 +43,82 @@ function dekoduj(s: string): string {
   });
 }
 
-/** Czyta XML do drzewa. Rzuca `BladZamowienia` przy niepoprawnej strukturze lub DOCTYPE/ENTITY. */
+/** Maksymalny rozmiar pliku zamówienia (znaki) i liczba pozycji — chroni przed plikiem z kosmosu i rozdęciem bazy (`surowy_xml` zapisujemy w całości). */
+export const MAKS_ROZMIAR_XML = 2_000_000;
+export const MAKS_POZYCJI = 5_000;
+
+const bladXml = (opis: string): BladZamowienia => new BladZamowienia([`Niepoprawny XML (${opis}).`]);
+const ZNAK_NAZWY = /[^\s/>=<"'!?]/;
+
+/**
+ * Czyta XML do drzewa. Skaner ręczny (indexOf), liniowy — żadnego regexu po niezaufanym wejściu (ReDoS).
+ * Rzuca `BladZamowienia` przy niepoprawnej strukturze, DOCTYPE/ENTITY, tekście poza elementem głównym i przekroczeniu limitu rozmiaru.
+ */
 function czytajXml(xml: string): Wezel {
-  const tekst = xml.replace(/^\uFEFF/, "");
-  if (/<!DOCTYPE|<!ENTITY/i.test(tekst)) throw new BladZamowienia(["Plik zawiera DOCTYPE/ENTITY — odrzucony ze względów bezpieczeństwa."]);
+  if (xml.length > MAKS_ROZMIAR_XML) throw new BladZamowienia([`Plik jest za duży (limit ${MAKS_ROZMIAR_XML} znaków).`]);
+  const tekst = xml.charCodeAt(0) === 0xfeff ? xml.slice(1) : xml;
   const korzen: Wezel = { nazwa: "#korzen", dzieci: [], tekst: "" };
   const stos: Wezel[] = [korzen];
-  const wzor = /<!--[\s\S]*?-->|<\?[\s\S]*?\?>|<!\[CDATA\[([\s\S]*?)\]\]>|<\/\s*([^\s>]+)\s*>|<([^\s/>!?]+)((?:[^>"']|"[^"]*"|'[^']*')*?)(\/?)>|([^<]+)/g;
-  let m: RegExpExecArray | null;
-  let ostatni = 0;
-  while ((m = wzor.exec(tekst)) !== null) {
-    if (m.index !== ostatni) throw new BladZamowienia(["Niepoprawny XML (nieoczekiwany znak)."]);
-    ostatni = wzor.lastIndex;
-    const [, cdata, zamykajacy, otwierajacy, , samozamykajacy, zwykly] = m;
+  const n = tekst.length;
+  let i = 0;
+  while (i < n) {
     const biezacy = stos[stos.length - 1]!;
-    if (cdata !== undefined) biezacy.tekst += cdata;
-    else if (zwykly !== undefined) biezacy.tekst += dekoduj(zwykly);
-    else if (zamykajacy !== undefined) {
-      if (stos.length < 2 || biezacy.nazwa !== zamykajacy) throw new BladZamowienia([`Niepoprawny XML (zamknięcie </${zamykajacy}> bez pasującego otwarcia).`]);
+    if (tekst[i] !== "<") {
+      const koniec = tekst.indexOf("<", i);
+      const kawalek = tekst.slice(i, koniec === -1 ? n : koniec);
+      if (stos.length === 1 && kawalek.trim() !== "") throw bladXml("tekst poza elementem głównym");
+      biezacy.tekst += dekoduj(kawalek);
+      i = koniec === -1 ? n : koniec;
+      continue;
+    }
+    if (tekst.startsWith("<!--", i)) {
+      const k = tekst.indexOf("-->", i + 4);
+      if (k === -1) throw bladXml("niezamknięty komentarz");
+      i = k + 3;
+    } else if (tekst.startsWith("<![CDATA[", i)) {
+      const k = tekst.indexOf("]]>", i + 9);
+      if (k === -1) throw bladXml("niezamknięta sekcja CDATA");
+      if (stos.length === 1) throw bladXml("CDATA poza elementem głównym");
+      biezacy.tekst += tekst.slice(i + 9, k);
+      i = k + 3;
+    } else if (tekst.startsWith("<?", i)) {
+      const k = tekst.indexOf("?>", i + 2);
+      if (k === -1) throw bladXml("niezamknięta instrukcja przetwarzania");
+      i = k + 2;
+    } else if (tekst.startsWith("<!", i)) {
+      // <!DOCTYPE …>, <!ENTITY …> i każda inna deklaracja — nie przyjmujemy (XXE, „billion laughs”).
+      throw new BladZamowienia(["Plik zawiera DOCTYPE/ENTITY — odrzucony ze względów bezpieczeństwa."]);
+    } else if (tekst[i + 1] === "/") {
+      const k = tekst.indexOf(">", i + 2);
+      if (k === -1) throw bladXml("niezamknięty znacznik");
+      const nazwa = tekst.slice(i + 2, k).trim();
+      if (stos.length < 2 || biezacy.nazwa !== nazwa) throw bladXml(`zamknięcie </${nazwa}> bez pasującego otwarcia`);
       stos.pop();
-    } else if (otwierajacy !== undefined) {
-      const w: Wezel = { nazwa: otwierajacy, dzieci: [], tekst: "" };
+      i = k + 1;
+    } else {
+      // Znacznik otwierający: nazwa, atrybuty (ignorowane; cudzysłowy mogą zawierać „>”), opcjonalne „/”.
+      let p = i + 1;
+      while (p < n && ZNAK_NAZWY.test(tekst[p]!)) p++;
+      const nazwa = tekst.slice(i + 1, p);
+      if (nazwa === "") throw bladXml("pusta nazwa znacznika");
+      let cudzyslow: string | null = null;
+      while (p < n && (cudzyslow !== null || tekst[p] !== ">")) {
+        const c = tekst[p]!;
+        if (cudzyslow !== null) {
+          if (c === cudzyslow) cudzyslow = null;
+        } else if (c === '"' || c === "'") cudzyslow = c;
+        p++;
+      }
+      if (p >= n) throw bladXml("niezamknięty znacznik");
+      const samozamykajacy = tekst[p - 1] === "/" && cudzyslow === null;
+      const w: Wezel = { nazwa, dzieci: [], tekst: "" };
       biezacy.dzieci.push(w);
       if (!samozamykajacy) stos.push(w);
+      i = p + 1;
     }
   }
-  if (ostatni !== tekst.length) throw new BladZamowienia(["Niepoprawny XML (nieoczekiwany znak)."]);
-  if (stos.length !== 1) throw new BladZamowienia([`Niepoprawny XML (niezamknięty element <${stos[stos.length - 1]!.nazwa}>).`]);
-  if (korzen.dzieci.length !== 1) throw new BladZamowienia(["Niepoprawny XML (oczekiwano jednego elementu głównego)."]);
+  if (stos.length !== 1) throw bladXml(`niezamknięty element <${stos[stos.length - 1]!.nazwa}>`);
+  if (korzen.dzieci.length !== 1) throw bladXml("oczekiwano jednego elementu głównego");
   return korzen.dzieci[0]!;
 }
 
@@ -102,6 +150,7 @@ export function parsujZamowienie(xml: string): Zamowienie {
 
   const pozycje: PozycjaZamowienia[] = [];
   const produkty = (dziecko(korzen, "PRODUCTS")?.dzieci ?? []).filter((p) => p.nazwa === "PRODUCT");
+  if (produkty.length > MAKS_POZYCJI) throw new BladZamowienia([`Za dużo pozycji (${produkty.length}, limit ${MAKS_POZYCJI}).`]);
   if (produkty.length === 0) bledy.push("Brak pozycji zamówienia (PRODUCTS/PRODUCT).");
   produkty.forEach((p, i) => {
     const lp = i + 1;
@@ -109,7 +158,7 @@ export function parsujZamowienie(xml: string): Zamowienie {
     if (!kod) bledy.push(`Pozycja ${lp}: brak CODE.`);
     const iloscTekst = tekstDziecka(p, "ORDERQUANTITY");
     const ilosc = iloscTekst === null ? null : liczba(iloscTekst);
-    if (ilosc === null || !Number.isInteger(ilosc) || ilosc < 1) bledy.push(`Pozycja ${lp}: ORDERQUANTITY musi być liczbą całkowitą ≥ 1.`);
+    if (ilosc === null || !Number.isSafeInteger(ilosc) || ilosc < 1) bledy.push(`Pozycja ${lp}: ORDERQUANTITY musi być liczbą całkowitą ≥ 1.`);
     const cenaTekst = tekstDziecka(p, "SELL_PRICE");
     const cena = cenaTekst === null ? null : liczba(cenaTekst);
     if (cenaTekst !== null && (cena === null || cena < 0)) bledy.push(`Pozycja ${lp}: SELL_PRICE nie jest poprawną ceną.`);

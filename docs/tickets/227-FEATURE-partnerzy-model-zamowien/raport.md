@@ -22,3 +22,10 @@ None.
 ## Follow-up
 - Wpis ticketu 226 (krok z partnerami startowymi) jest sprzeczny z decyzją użytkownika z 2026-10-10 — zob. `decyzje-do-konsultacji-marty.md`.
 - Format `INVOICE`/`DELIVERY` poznajemy tylko z jednego przykładu (karta ma „…”); pola zapisane jako płaska mapa, do doprecyzowania z prawdziwymi plikami partnerów.
+
+## Review fixes applied (review.md, 2 BLOCKER / 6 SHOULD-FIX)
+- **BLOCKER ReDoS** — regex znacznika zastąpiony liniowym skanerem ręcznym (`indexOf`); test na 500 tys. znaków ucięnego znacznika i 100 tys. zagnieżdżeń kończy się w <2 s.
+- **BLOCKER brak limitów** — `MAKS_ROZMIAR_XML` (2 mln znaków) i `MAKS_POZYCJI` (5000), z testami.
+- SHOULD-FIX: transakcja `immediate` (zapis współbieżny z innym połączeniem); skrót liczony z SPARSOWANEJ treści (białe znaki/BOM nie są „zmianą”); tekst/CDATA poza elementem głównym odrzucany;
+  `ORDERQUANTITY` sprawdzane `isSafeInteger`; testy odporności (niedomknięty komentarz/CDATA/znacznik, DOCTYPE w CDATA).
+- Pozostałe NICE-TO-HAVE z review.md: nie wdrożone (zob. plik). Drugi przebieg reviewera nie był uruchamiany — poprawki są pokryte testami powyżej.

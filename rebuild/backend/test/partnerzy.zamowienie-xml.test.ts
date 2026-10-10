@@ -1,7 +1,7 @@
 /** Parser zamówienia partnera `DOCUMENTORDER` (ticket 227, PRT-7.1). */
 import { describe, expect, it } from "vitest";
 
-import { BladZamowienia, parsujZamowienie } from "../src/partnerzy/zamowienie-xml.js";
+import { BladZamowienia, MAKS_POZYCJI, MAKS_ROZMIAR_XML, parsujZamowienie } from "../src/partnerzy/zamowienie-xml.js";
 import { XML_PRZYKLAD } from "./partnerzy.zamowienie-przyklad.js";
 
 const blad = (xml: string): string[] => {
@@ -77,5 +77,31 @@ describe("parsujZamowienie", () => {
   it("nie sprawdza biznesu: nieznany kod i dowolna cena przechodzą parser (to zadanie PRT-7.4)", () => {
     const xml = `<DOCUMENTORDER><NUMBER>1</NUMBER><PRODUCTS><PRODUCT><CODE>NIEISTNIEJE</CODE><ORDERQUANTITY>99999</ORDERQUANTITY><SELL_PRICE>0.01</SELL_PRICE></PRODUCT></PRODUCTS></DOCUMENTORDER>`;
     expect(parsujZamowienie(xml).pozycje).toHaveLength(1);
+  });
+
+  it("odrzuca tekst poza elementem głównym i niedomknięte konstrukcje", () => {
+    expect(blad("śmieci<DOCUMENTORDER><NUMBER>1</NUMBER></DOCUMENTORDER>")[0]).toMatch(/poza elementem/);
+    expect(blad("<DOCUMENTORDER><!-- bez końca")[0]).toMatch(/komentarz/);
+    expect(blad("<DOCUMENTORDER><NUMBER><![CDATA[x</NUMBER></DOCUMENTORDER>")[0]).toMatch(/CDATA/);
+    expect(blad("<DOCUMENTORDER><NUMBER a=\"x>1</NUMBER></DOCUMENTORDER>")[0]).toMatch(/niezamknięty/);
+  });
+
+  it("DOCTYPE wewnątrz CDATA jest zwykłym tekstem; goły DOCTYPE jest odrzucany", () => {
+    const xml = `<DOCUMENTORDER><NUMBER><![CDATA[<!DOCTYPE x>]]></NUMBER><PRODUCTS><PRODUCT><CODE>1</CODE><ORDERQUANTITY>1</ORDERQUANTITY></PRODUCT></PRODUCTS></DOCUMENTORDER>`;
+    expect(parsujZamowienie(xml).numerPartnera).toBe("<!DOCTYPE x>");
+  });
+
+  it("jest liniowy: ucięty znacznik i duży plik nie blokują procesu (ReDoS)", () => {
+    const start = Date.now();
+    expect(blad("<DOCUMENTORDER><" + "a".repeat(500_000))[0]).toMatch(/niezamknięty/);
+    expect(blad("<DOCUMENTORDER>" + "<a>".repeat(100_000))[0]).toMatch(/niezamknięty/);
+    expect(blad("x".repeat(MAKS_ROZMIAR_XML + 1))[0]).toMatch(/za duży/);
+    expect(Date.now() - start).toBeLessThan(2000);
+  });
+
+  it("limituje liczbę pozycji i odrzuca ilość spoza zakresu bezpiecznych liczb całkowitych", () => {
+    const poz = "<PRODUCT><CODE>1</CODE><ORDERQUANTITY>1</ORDERQUANTITY></PRODUCT>".repeat(MAKS_POZYCJI + 1);
+    expect(blad(`<DOCUMENTORDER><NUMBER>1</NUMBER><PRODUCTS>${poz}</PRODUCTS></DOCUMENTORDER>`)[0]).toMatch(/Za dużo pozycji/);
+    expect(blad("<DOCUMENTORDER><NUMBER>1</NUMBER><PRODUCTS><PRODUCT><CODE>1</CODE><ORDERQUANTITY>99999999999999999999</ORDERQUANTITY></PRODUCT></PRODUCTS></DOCUMENTORDER>")[0]).toMatch(/ORDERQUANTITY/);
   });
 });

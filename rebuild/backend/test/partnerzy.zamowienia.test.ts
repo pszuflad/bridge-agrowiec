@@ -46,6 +46,11 @@ describe("repo zamówień partnerów", () => {
     expect(szczegolyZamowienia(s.db, a.id)!.pozycje[0]!.ilosc).toBe(2);
   });
 
+  it("zmiana samych białych znaków nie jest zmianą zamówienia", () => {
+    const a = zapiszZamowienie(s.db, partnerA, XML_PRZYKLAD);
+    expect(zapiszZamowienie(s.db, partnerA, "\n" + XML_PRZYKLAD.replace(/>\s+</g, "><") + "\n")).toEqual({ id: a.id, nowe: false, zmieniony: false });
+  });
+
   it("numer jest unikalny per partner: ten sam numer u innego partnera to osobne zamówienie", () => {
     const a = zapiszZamowienie(s.db, partnerA, XML_PRZYKLAD);
     const b = zapiszZamowienie(s.db, partnerB, XML_PRZYKLAD);

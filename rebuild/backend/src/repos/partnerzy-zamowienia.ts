@@ -22,7 +22,8 @@ export type WynikZapisu = {
  */
 export function zapiszZamowienie(db: Baza, partnerId: number, xml: string, teraz: Date = new Date()): WynikZapisu {
   const z = parsujZamowienie(xml);
-  const skrot = createHash("sha256").update(xml).digest("hex");
+  // Skrót z TREŚCI (sparsowanej), nie z bajtów — białe znaki, BOM i kolejność deklaracji nie udają zmiany zamówienia.
+  const skrot = createHash("sha256").update(JSON.stringify(z)).digest("hex");
   return db.transaction((tx) => {
     const istniejace = tx
       .select({ id: partnerZamowienia.id, skrot: partnerZamowienia.skrotXml })
@@ -54,7 +55,7 @@ export function zapiszZamowienie(db: Baza, partnerId: number, xml: string, teraz
       tx.insert(partnerZamowieniaPozycje).values({ zamowienieId: id, lp: p.lp, kod: p.kod, nazwa: p.nazwa, ilosc: p.ilosc, cenaSprzedazy: p.cenaSprzedazy }).run();
     }
     return { id, nowe: true, zmieniony: false };
-  });
+  }, { behavior: "immediate" });
 }
 
 /** Zamówienia partnera, najnowsze pobrane najpierw (bez surowego XML — jest duży). */
