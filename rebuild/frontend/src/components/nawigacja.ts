@@ -20,6 +20,7 @@ import {
   Archive,
   Bell,
   History,
+  Handshake,
   Inbox,
   LayoutDashboard,
   Package,
@@ -57,4 +58,6 @@ export const POZYCJE_NAWIGACJI: PozycjaNawigacji[] = [
   // Ikona: oryginał miał własne SVG „karton"; bierzemy najbliższą z lucide, bo `Package`
   // zajmuje już „Katalog" (decyzja D7).
   { href: "/selly", label: "Selly", icon: PackageOpen },
+  // Moduł partnerów B2B (karta PARTNERZY, ticket 221) — NOWA funkcjonalność, nie ma jej w oryginale.
+  { href: "/partnerzy", label: "Partnerzy", icon: Handshake },
 ];
