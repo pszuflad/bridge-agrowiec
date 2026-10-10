@@ -1,8 +1,8 @@
 # PARTNERZY — moduł partnerów B2B (cenniki EUR, zamówienia, tracking)
 
-> **Stan:** ⏸ specyfikacja zebrana 2026-10-06; podział na tickety: `podzial-na-tickety.md` (2026-10-10), czeka na zatwierdzenie i start F0
+> **Stan:** 🟡 w trakcie (2026-10-10) — zrobione poziomy 1–5 (bez numeracji katalogowej) + krok wdrożenia (tickety 208–226); zostają numeracja, serwer plików, zamówienia, tracking — czekają na decyzje użytkownika (sekcja „Do koordynatora”)
 > **Iteracja:** poza planem odbudowy — NOWA funkcjonalność · **Wpisy backlogu:** — · **Zależy od:** —
-> **Ticket:** —
+> **Tickety:** 208–227 (plan podziału: `podzial-na-tickety.md`; instrukcja testów: `docs/instrukcja-testow-PARTNERZY.md`)
 
 **To NIE jest odtworzenie produkcji.** Moduł jest świadomym odstępstwem od reguły „wierna
 odbudowa 1:1" (`CLAUDE.md`) — decyzja użytkownika, 2026-10-06. Nie zmienia niczego z
@@ -182,7 +182,19 @@ Katalog ma pola do wagi gabarytowej: `waga`, `dlugosc`, `szerokoscPaczki`, `wyso
 
 ## Dowiezione
 
-—
+Stan na 2026-10-10 (wszystko na `develop`, PR-y #323–#342; **nic nie jest jeszcze na produkcji** — wymaga merge'u `develop` → `main`):
+
+| Poziom | Co jest | Ticket |
+|---|---|---|
+| 1 | model danych partnera (migracja 024), REST ustawień partnera (`/api/partnerzy`) | 208, 209 |
+| 2 | kurs EUR (NBP tabela A / ręczny, rezerwa przy awarii), parser formuł pól obliczeniowych, tabele GEIS + paliwo z historią (migracje 025–026), kalkulator ceny | 210–213 |
+| 3 | selekcja pozycji (magazyny, wykluczenia, stan min.), szablony CSV i XML (Ceneo), generator z zapisem atomowym i archiwum 30 dni, test zgodności z układem plików wzorcowych (dane syntetyczne) | 214–218 |
+| 4 | logi operacji i błędów z retencją 30 dni (migracja 027), harmonogram per partner (domyślnie wyłączony) i ręczne „generuj teraz” | 219, 220 |
+| 5 | panel: lista, konfiguracja, kolumny i pola obliczeniowe z podglądem, logi i „Generuj teraz” | 221–225 |
+| 9 | krok wdrożenia: partnerzy TyreWorld i Adtyres jako nieaktywni | 226 |
+
+Założenia wykonawcze do potwierdzenia: przesyłka GEIS w EUR (nie dzielona przez kurs), narzut w %, koszty dodatkowe w PLN; do pliku tylko produkty `status='aktywny'`; nazwy plików robocze; struktura XML wg publicznego formatu Ceneo.
+Trasy `/api/partnerzy*` są poza `contract/openapi.yaml` (jak `/api/ean-pary`).
 
 ## Do koordynatora
 
@@ -195,3 +207,18 @@ Katalog ma pola do wagi gabarytowej: `waga`, `dlugosc`, `szerokoscPaczki`, `wyso
   5–7 niosą największe ryzyko.
 - Numeracja katalogowa (`KK PP NNNNN`, unikalność per pozycja) dotyka też Optimy i Selly —
   osobna decyzja, jak ją nadawać w Bridge i kto jest właścicielem generatora numerów.
+
+### Stan na 2026-10-10 — co zostaje i pytania do użytkownika
+
+**Niezrobione tickety** (kolejność wg `podzial-na-tickety.md`): PRT-1.2 (numer katalogowy `KK PP NNNNN`), poziom 6 (konta FTP i publikacja plików), poziom 7 (zamówienia: odbiór FTP/e-mail, walidacja, wysyłka do Selly, panel), poziom 8 (tracking). Każdy zaczyna od pytań poniżej.
+
+**Pytania, które blokują dalsze tickety:**
+1. **Numeracja `KK PP NNNNN`** (PRT-1.2): kto ma generator, wpływ na Optimę i Selly, reguła „stary numer przy najtańszej pozycji", 10-cyfrowe numery marki Gri, kategoria 05, producenci > 63.
+2. **Serwer plików** (poziom 6): protokół (FTP/FTPS/SFTP), zakładanie kont, izolacja do własnego katalogu — wymaga odczytu z serwera Bridge.
+3. **Zamówienia** (PRT-7.4): wartość tolerancji cenowej (%), zasada dla ceny wyższej niż w cenniku, potwierdzenie „bez powiadomienia partnera" także dla nieznanego kodu i braku stanu.
+4. **Selly — tworzenie zamówień przez API** (PRT-7.5): endpoint, pola, adres dostawy klienta końcowego, numer zewnętrzny; wymaga dokumentacji Selly lub konta testowego. Tracking (poziom 8) zależy od tego wyniku.
+5. **Dane do wgrania:** `GEIS_tabele_13_krajow.xlsx` (importer przyjmuje JSON, `npm run importuj-geis`), pliki wzorcowe `tyreworld_agrowiec.csv` i `adtyres_agrowiec_at.csv` (do porównania liczbowego), wzorzec XML od partnera.
+6. **Schematy nazw plików** (cennik, archiwum, tracking) — dziś robocze.
+7. **Potwierdzenie założeń kalkulatora** (rozdział 2 instrukcji testów) i statusu `aktywny`.
+8. **Harmonogram:** czy i kiedy włączyć `PARTNERZY_SCHEDULER` (krok wdrożenia zmieniający `.env`, tylko za zgodą).
+9. **Wdrożenie:** zgoda na `develop` → `main` (opis w PR #342: dwa puste, nieaktywne wiersze partnerów, puste tabele, nowa pozycja menu, harmonogram wyłączony).
