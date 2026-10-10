@@ -13,6 +13,7 @@ Dodano model zamówień partnerów (migracja 028, dwie tabele) oraz bezzależno�
 Brak. Praca w gałęzi wskazanej przez środowisko (`claude/peaceful-gates-a8yebr`), bez osobnego worktree — gałąź zresetowana do `origin/develop` (nie miała własnych commitów).
 
 ## Test results
+- **Bramki po synchronizacji z `develop` (89ae083): lint, typecheck, build, `npm test` ✓ — 172 pliki, 2446 testów.**
 - **Gate kontraktu:** N/D — ticket nie dotyka API (nowe tabele i moduł wewnętrzny; brak tras, brak zmian w `openapi.yaml`/fixtures).
 - Lint, typecheck, build: ✓. `npm test`: ✓ 172 pliki / 2437 testów (12 pominiętych, istniejące). Szum stderr `DB_PATH` jest oczekiwany (CLAUDE.md).
 
