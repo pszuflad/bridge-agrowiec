@@ -4,7 +4,7 @@
 Dodano odbiór zamówień partnerów przez e-mail: IMAP za interfejsem, zapis załączników XML przez model z ticketu 228, logi, pomijanie kanału bez sekretu i harmonogram domyślnie wyłączony.
 
 ## Changes
-- **Nowe:** `src/partnerzy/{poczta,poczta-imap,odbior-email}.ts`, `test/partnerzy.odbior-email.test.ts` (12 testów na atrapie skrzynki)
+- **Nowe:** `src/partnerzy/{poczta,poczta-imap,odbior-email}.ts`, `test/partnerzy.odbior-email.test.ts` (20 testów na atrapie skrzynki), `test/partnerzy.poczta-imap.test.ts` (4 testy adaptera na atrapie `imapflow`)
 - `src/config/env.ts` (4 zmienne `PARTNERZY_ODBIOR_EMAIL*`/`PARTNERZY_IMAP_*`), `src/server.ts` (timer za flagą), `.env.example`, `package.json`/`package-lock.json` (imapflow, mailparser, @types/mailparser)
 - Docs: `docs/spec-backend/wpis-229.md`, `docs/karty/PARTNERZY/karta.md`
 
@@ -13,7 +13,7 @@ Brak.
 
 ## Test results
 - **Gate kontraktu:** N/D — ticket nie dotyka API (brak tras, brak zmian w `openapi.yaml`/fixtures).
-- Unit/integracja: 12 nowych testów ✓ (atrapa skrzynki). Pełne bramki: zob. PR.
+- Unit/integracja: 24 nowe testy ✓ (atrapa skrzynki i atrapa `imapflow`). Pełne bramki: zob. PR.
 - **Nie przetestowano** realnego połączenia IMAP (`poczta-imap.ts`) — brak serwera z chmury. Sprawdzono tylko, że moduł się buduje i ładuje (`dist/`).
 
 ## Breaking changes
@@ -22,3 +22,10 @@ None. Nowe zmienne env są opcjonalne, odbiór domyślnie wyłączony.
 ## Follow-up
 - Pierwszy odbiór na prawdziwej skrzynce (środowisko testowe), w tym zachowanie `imapflow` przy dużych wiadomościach i utracie połączenia.
 - Czy mailbox partnera ma być na naszym serwerze IMAP, czy zewnętrznym — ustala się przy konfiguracji (host jest wspólny dla wszystkich partnerów).
+
+## Review fixes applied (review.md, 2 BLOCKER / 7 SHOULD-FIX)
+- **BLOCKER handler `error`** — adapter IMAP zawsze rejestruje nasłuch `error` (zerwana sesja nie wywraca procesu); test.
+- **BLOCKER izolacja wiadomości** — wiadomości ładowane po jednej (`wczytaj`), każda w osobnym try/catch; uszkodzona nie blokuje reszty; wyjątek `oznaczPrzetworzona` nie przerywa pętli; testy.
+- SHOULD-FIX: limit rozmiaru sprawdzany PRZED pobraniem treści; `logout` po błędzie `getMailboxLock`; ostrzeżenie o braku konfiguracji raz na dobę; retencja logów czyszczona w odbiorze; `odbierzDlaWszystkich` izoluje partnerów;
+  timeout przebiegu harmonogramu (10 min) i timeouty gniazda; hasło wycinane z komunikatów; nowe testy (wyjątek listy, błąd oznaczenia, wiele wiadomości, dwa XML, adapter).
+- Nie wdrożone (NICE-TO-HAVE): zob. review.md. Drugi przebieg reviewera nie był uruchamiany — poprawki pokryte testami.
