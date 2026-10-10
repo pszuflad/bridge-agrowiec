@@ -8,6 +8,7 @@ import { Router, type Request, type Response } from "express";
 import type { Baza } from "../db/index.js";
 import { requireAuth } from "../middleware/auth.js";
 import { zapiszAudyt } from "../repos/audit.js";
+import { pobierzBledy, pobierzLogi } from "../partnerzy/logi.js";
 import {
   czyBlad,
   dodajPartnera,
@@ -54,6 +55,28 @@ export function trasyPartnerzy({ db }: ZaleznosciPartnerzy): Router {
   router.get("/api/partnerzy/:id", requireAuth, (req, res) => {
     const id = idZParametru(req, res);
     if (id !== null) res.json(szczegolyPartnera(db, id));
+  });
+
+  const stronicowanie = (req: Request): { limit: number; offset: number } => ({
+    limit: Math.min(Math.max(Number(req.query.limit) || 100, 1), 1000),
+    offset: Math.max(Number(req.query.offset) || 0, 0),
+  });
+
+  /** Log operacji (jedna linia na operację), najnowsze pierwsze; `limit` (domyślnie 100, max 1000) i `offset`. */
+  router.get("/api/partnerzy/:id/logi", requireAuth, (req, res) => {
+    const id = idZParametru(req, res);
+    if (id === null) return;
+    const { limit, offset } = stronicowanie(req);
+    res.json({ logi: pobierzLogi(db, id, limit, offset) });
+  });
+
+  /** Log błędów i ostrzeżeń ze szczegółami; opcjonalnie `?poziom=blad|ostrzezenie`. */
+  router.get("/api/partnerzy/:id/error-log", requireAuth, (req, res) => {
+    const id = idZParametru(req, res);
+    if (id === null) return;
+    const poziom = req.query.poziom === "blad" || req.query.poziom === "ostrzezenie" ? req.query.poziom : undefined;
+    const { limit, offset } = stronicowanie(req);
+    res.json({ bledy: pobierzBledy(db, id, limit, offset, poziom) });
   });
 
   router.post("/api/partnerzy", requireAuth, (req, res) => {

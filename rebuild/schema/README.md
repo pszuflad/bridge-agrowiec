@@ -27,6 +27,7 @@ danych dla odbudowy backendu.
 | `024_partnerzy.sql` | **Ticket 208** (`208-FEATURE-partnerzy-model-danych`, PRT-1.1, karta PARTNERZY): osiem nowych tabel modułu partnerów B2B (`partnerzy`, `partner_magazyny`, `partner_wykluczenia`, `partner_kraje`, `partner_kolumny`, `partner_pola_obliczeniowe`, `paliwo_historia`, `partner_kursy`) + indeks. ⚠ **NOWE tabele, nie odtworzenie produkcji**; na wdrożeniu powstają puste, bez kroków ręcznych. Sam model, bez logiki. |
 | `025_kursy_nbp.sql` | **Ticket 210** (`210-FEATURE-partnerzy-kurs-nbp`, PRT-2.1): tabela `kursy_nbp` — ostatnie znane kursy EUR z NBP (rezerwa na awarię NBP). ⚠ **NOWA tabela, nie odtworzenie produkcji**; powstaje pusta. |
 | `026_geis.sql` | **Ticket 212** (`212-FEATURE-partnerzy-transport-geis`, PRT-2.2): tabele `geis_kraje` i `geis_stawki` — transport GEIS dla partnerów (V1: stawka całego kraju). ⚠ **NOWE tabele, nie odtworzenie produkcji**; powstają puste, dane wgrywa `npm run importuj-geis`. |
+| `027_partner_logi.sql` | **Ticket 219** (`219-FEATURE-partnerzy-logi`, PRT-4.2): tabele `partner_logi` (jedna linia na operację) i `partner_error_log` (błędy i ostrzeżenia ze szczegółami) + dwa indeksy; retencja 30 dni robi kod. ⚠ **NOWE tabele, nie odtworzenie produkcji**; powstają puste. |
 
 ### Dyrektywy runnera (od ticketu 107)
 
