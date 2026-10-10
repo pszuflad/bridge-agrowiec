@@ -2,7 +2,7 @@
 import request from "supertest";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { auditLog } from "../src/db/schema.js";
+import { auditLog, products } from "../src/db/schema.js";
 import { stworzSrodowiskoTestowe, type SrodowiskoTestowe } from "./gate/index.js";
 
 describe("trasy /api/partnerzy", () => {
@@ -104,5 +104,19 @@ describe("trasy /api/partnerzy", () => {
     await put(`/api/partnerzy/${a.id}/aktywny`, { aktywny: true });
     const akcje = s.db.select({ akcja: auditLog.akcja }).from(auditLog).all().map((w) => w.akcja);
     expect(akcje).toEqual(expect.arrayContaining(["partner_dodany", "partner_aktywowany"]));
+  });
+
+  it("GET /api/partnerzy/magazyny oddaje magazyny aktywnych pozycji z liczbami (i nie jest brany za id)", async () => {
+    const baza = { marka: "M", kategoria: "Rolnicze", dostawca: "MO1", stan: 5, cenaZakupu: 1, cenaSprzedazy: 2, marzaPct: 1, dataAktualizacji: "x" };
+    s.db.insert(products).values([
+      { ...baza, kod: "A", nazwa: "A", magazyn: "MO2" },
+      { ...baza, kod: "B", nazwa: "B", magazyn: "MO1" },
+      { ...baza, kod: "C", nazwa: "C", magazyn: "MO1" },
+      { ...baza, kod: "D", nazwa: "D", magazyn: "MO9", status: "wstrzymany" },
+    ]).run();
+    expect((await request(s.app).get("/api/partnerzy/magazyny")).status).toBe(401);
+    const odp = await get("/api/partnerzy/magazyny");
+    expect(odp.status).toBe(200);
+    expect(odp.body).toEqual({ magazyny: [{ magazyn: "MO1", liczbaPozycji: 2 }, { magazyn: "MO2", liczbaPozycji: 1 }] });
   });
 });

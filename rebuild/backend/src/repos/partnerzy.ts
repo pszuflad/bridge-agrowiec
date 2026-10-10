@@ -10,6 +10,7 @@ import {
   partnerPolaObliczeniowe,
   partnerWykluczenia,
   partnerzy,
+  products,
 } from "../db/schema.js";
 
 export const ZAOKRAGLANIA = ["grosz", "euro", "gora5", "gora10"] as const;
@@ -140,6 +141,18 @@ export function walidujListeTekstow(v: unknown, pole: string): string[] | BladWa
 export const czyBlad = (v: unknown): v is BladWalidacji => jestObiektem(v) && "blad" in v && typeof v.blad === "string";
 
 const teraz = (): string => new Date().toISOString();
+
+/** Magazyny widoczne w katalogu (`products.magazyn`) z liczbą aktywnych pozycji — do wyboru w panelu partnera. */
+export function dostepneMagazyny(db: Baza): { magazyn: string; liczbaPozycji: number }[] {
+  return db
+    .select({ magazyn: products.magazyn, liczbaPozycji: sql<number>`count(*)` })
+    .from(products)
+    .where(eq(products.status, "aktywny"))
+    .groupBy(products.magazyn)
+    .orderBy(asc(products.magazyn))
+    .all()
+    .map((w) => ({ magazyn: w.magazyn, liczbaPozycji: Number(w.liczbaPozycji) }));
+}
 
 export function listaPartnerow(db: Baza) {
   const wiersze = db.select().from(partnerzy).orderBy(asc(partnerzy.nazwa)).all();
