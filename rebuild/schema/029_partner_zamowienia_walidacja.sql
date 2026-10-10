@@ -1,0 +1,8 @@
+-- Ticket 232 (232-FEATURE-partnerzy-walidacja-zamowien, PRT-7.4a): wynik walidacji zamówienia partnera.
+--
+-- ⚠ NOWE KOLUMNY w tabelach z migracji 028 (puste na produkcji), NIE ODTWORZENIE PRODUKCJI.
+--   partner_zamowienia.blad_importu        — opis zbiorczy, gdy status = 'blad_importu' (NULL przy braku błędów)
+--   partner_zamowienia_pozycje.blad        — powód dla danej pozycji (nieznany kod, produkt nieaktywny, brak stanu); NULL = pozycja w porządku
+-- Statusy zamówienia (kolumna `status`, bez CHECK): 'nowe' → 'przyjete' | 'blad_importu'; kolejne tickety dokładają dalsze.
+-- @dodaj-kolumne-jesli-brak partner_zamowienia blad_importu TEXT
+-- @dodaj-kolumne-jesli-brak partner_zamowienia_pozycje blad TEXT

@@ -8,11 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/toast";
 import {
-  KLUCZ_PARTNERZY, LIMIT_ZAMOWIEN, komunikatBledu, kluczZamowien, kluczZamowienia, odbierzZamowienia,
+  KLUCZ_PARTNERZY, LIMIT_ZAMOWIEN, komunikatBledu, kluczZamowien, kluczZamowienia, odbierzZamowienia, zwalidujZamowienie,
   type ListaZamowien, type SzczegolyPartnera, type SzczegolyZamowienia, type WynikOdbioru,
 } from "./api";
 
 const czas = (iso: string): string => new Date(iso).toLocaleString("pl-PL");
+const ETYKIETY_STATUSOW: Record<string, string> = { nowe: "nowe", przyjete: "przyjęte", blad_importu: "błąd importu" };
+const etykietaStatusu = (status: string): string => ETYKIETY_STATUSOW[status] ?? status;
 /** Polskie etykiety znanych pól adresu dostawy; nieznane pola partnera pokazujemy pod ich nazwą z pliku. */
 const ETYKIETY_DOSTAWY: Record<string, string> = { CUSTOMERNAME: "Odbiorca", COUNTRY: "Kraj", PHONE: "Telefon", MODEOFTRANSPORT: "Sposób transportu", CODCOST: "Pobranie", DELIVERY_COST: "Koszt dostawy" };
 
@@ -81,7 +83,7 @@ export function ZamowieniaPartnera({ partner }: { partner: SzczegolyPartnera }) 
                   >
                     {rozwiniete ? <ChevronDown className="h-3.5 w-3.5" aria-hidden /> : <ChevronRight className="h-3.5 w-3.5" aria-hidden />}
                     <span className="font-medium">{z.numerPartnera}</span>
-                    <Badge variant="secondary">{z.status}</Badge>
+                    <Badge variant={z.status === "blad_importu" ? "destructive" : "secondary"} data-testid={`status-zamowienia-${z.id}`}>{etykietaStatusu(z.status)}</Badge>
                     <span className="text-xs text-muted-foreground">
                       {z.krajDostawy ?? "—"} · {z.liczbaPozycji} poz. · odebrano {czas(z.pobrano)}
                     </span>
@@ -98,24 +100,53 @@ export function ZamowieniaPartnera({ partner }: { partner: SzczegolyPartnera }) 
 }
 
 function SzczegolyZamowieniaWidok({ partnerId, zamowienieId }: { partnerId: number; zamowienieId: number }) {
+  const klient = useQueryClient();
+  const { toast } = useToast();
   const { data, isError, error, isPending } = useQuery<SzczegolyZamowienia | null>({ queryKey: kluczZamowienia(partnerId, zamowienieId), refetchOnMount: "always" });
+  const ponowna = useMutation<SzczegolyZamowienia, Error, void>({
+    mutationFn: () => zwalidujZamowienie(partnerId, zamowienieId),
+    onSuccess: (z) => {
+      toast({
+        title: z.status === "blad_importu" ? "Zamówienie nadal ma błędy" : "Zamówienie w porządku",
+        description: z.status === "blad_importu" ? (z.bladImportu ?? "") : "Wszystkie pozycje są w katalogu i na stanie.",
+        variant: z.status === "blad_importu" ? "destructive" : "default",
+      });
+      void klient.invalidateQueries({ queryKey: [KLUCZ_PARTNERZY, String(partnerId)], predicate: ({ queryKey }) => /^zamowienia/.test(String(queryKey[2])) });
+    },
+    onError: (e) => toast({ title: "Nie udało się sprawdzić zamówienia", description: komunikatBledu(e), variant: "destructive" }),
+  });
   if (isError) return <p className="mt-2 text-sm text-destructive" role="alert" data-testid="text-zamowienie-blad">{komunikatBledu(error)}</p>;
   if (isPending || !data) return <p className="mt-2 text-sm text-muted-foreground">Ładowanie…</p>;
   const dostawa = Object.entries(data.dostawa).filter(([, v]) => v !== "");
+  const blad = data.status === "blad_importu";
   return (
     <div className="mt-2 space-y-3 rounded-md bg-muted/40 p-3" data-testid={`szczegoly-zamowienia-${zamowienieId}`}>
-      <p className="text-xs text-muted-foreground">
-        Data zamówienia: {data.dataZamowienia ?? "—"} · dostawa: {data.dataDostawy ?? "—"} · waluta: {data.waluta ?? "—"} · koszt dostawy: {data.kosztDostawy ?? "—"}
-      </p>
+      {blad ? (
+        <div className="space-y-1.5 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive" role="alert" data-testid={`blad-importu-${zamowienieId}`}>
+          <p className="font-medium">Błąd importu — zamówienie jest zapisane, ale wymaga sprawdzenia. Bridge nie wysyła partnerowi automatycznego powiadomienia.</p>
+          <p className="text-xs">{data.bladImportu}</p>
+        </div>
+      ) : null}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="text-xs text-muted-foreground">
+          Data zamówienia: {data.dataZamowienia ?? "—"} · dostawa: {data.dataDostawy ?? "—"} · waluta: {data.waluta ?? "—"} · koszt dostawy: {data.kosztDostawy ?? "—"}
+        </p>
+        {["nowe", "przyjete", "blad_importu"].includes(data.status) ? (
+          <Button size="sm" variant="outline" disabled={ponowna.isPending} onClick={() => ponowna.mutate()} data-testid={`button-zwaliduj-${zamowienieId}`}>
+            {ponowna.isPending ? "Sprawdzanie…" : "Sprawdź ponownie"}
+          </Button>
+        ) : null}
+      </div>
       <table className="w-full text-xs">
         <thead>
-          <tr className="text-left text-muted-foreground"><th className="py-1 pr-2">Lp</th><th className="pr-2">Kod</th><th className="pr-2">Nazwa</th><th className="pr-2 text-right">Ilość</th><th className="text-right">Cena</th></tr>
+          <tr className="text-left text-muted-foreground"><th className="py-1 pr-2">Lp</th><th className="pr-2">Kod</th><th className="pr-2">Nazwa</th><th className="pr-2 text-right">Ilość</th><th className="pr-2 text-right">Cena</th><th>Uwaga</th></tr>
         </thead>
         <tbody>
           {data.pozycje.map((p) => (
             <tr key={p.id} data-testid={`pozycja-${zamowienieId}-${p.lp}`}>
               <td className="py-0.5 pr-2">{p.lp}</td><td className="pr-2 font-mono">{p.kod}</td><td className="pr-2">{p.nazwa ?? "—"}</td>
-              <td className="pr-2 text-right">{p.ilosc}</td><td className="text-right">{p.cenaSprzedazy ?? "—"}</td>
+              <td className="pr-2 text-right">{p.ilosc}</td><td className="pr-2 text-right">{p.cenaSprzedazy ?? "—"}</td>
+              <td className={p.blad ? "text-destructive" : ""} data-testid={`pozycja-blad-${zamowienieId}-${p.lp}`}>{p.blad ?? ""}</td>
             </tr>
           ))}
         </tbody>

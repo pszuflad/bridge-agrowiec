@@ -29,6 +29,7 @@ danych dla odbudowy backendu.
 | `026_geis.sql` | **Ticket 212** (`212-FEATURE-partnerzy-transport-geis`, PRT-2.2): tabele `geis_kraje` i `geis_stawki` — transport GEIS dla partnerów (V1: stawka całego kraju). ⚠ **NOWE tabele, nie odtworzenie produkcji**; powstają puste, dane wgrywa `npm run importuj-geis`. |
 | `027_partner_logi.sql` | **Ticket 219** (`219-FEATURE-partnerzy-logi`, PRT-4.2): tabele `partner_logi` (jedna linia na operację) i `partner_error_log` (błędy i ostrzeżenia ze szczegółami) + dwa indeksy; retencja 30 dni robi kod. ⚠ **NOWE tabele, nie odtworzenie produkcji**; powstają puste. |
 | `028_partner_zamowienia.sql` | **Ticket 228** (`228-FEATURE-partnerzy-model-zamowien`, PRT-7.1): tabele `partner_zamowienia` (numer partnera + nasz numer osobno, `UNIQUE(partner_id, numer_partnera)` = idempotencja) i `partner_zamowienia_pozycje` + jeden indeks. ⚠ **NOWE tabele, nie odtworzenie produkcji**; powstają puste. |
+| `029_partner_zamowienia_walidacja.sql` | **Ticket 232** (`232-FEATURE-partnerzy-walidacja-zamowien`, PRT-7.4a): kolumny `partner_zamowienia.blad_importu` i `partner_zamowienia_pozycje.blad` (wynik walidacji zamówienia względem katalogu) przez `@dodaj-kolumne-jesli-brak`. ⚠ **NOWE kolumny w nowych tabelach, nie odtworzenie produkcji**. |
 
 ### Dyrektywy runnera (od ticketu 107)
 

@@ -74,6 +74,9 @@ Na stronie partnera sekcja **Zamówienia od partnera**. **Odbierz teraz** jest a
 Działa też dla partnera nieaktywnego i **nie wymaga** włączania harmonogramu. Wynik: toast „Odebrano pocztę" (wiadomości / nowe zamówienia / powtórzone / błędne) albo „Nie odebrano zamówień" z powodem.
 - Bez ustawionych na serwerze `PARTNERZY_IMAP_HOST` i hasła skrzynki dostajesz komunikat z **nazwą brakującej zmiennej** — to oczekiwane, dopóki nie zapadną decyzje o skrzynkach i hasłach.
 - Gdy skrzynka testowa jest podłączona: wyślij na nią wiadomość z załącznikiem XML zamówienia (wzór w karcie PARTNERZY), kliknij **Odbierz teraz** — zamówienie pojawia się na liście; kliknięcie wiersza pokazuje pozycje i adres dostawy. Ten sam plik drugi raz nie tworzy duplikatu.
+- **Walidacja względem katalogu:** każde odebrane zamówienie dostaje status **przyjęte** (kody są w katalogu, produkty aktywne, stan wystarczy) albo **błąd importu** (czerwony): nieznany kod, produkt nieaktywny lub za mały stan. Zamówienie jest wtedy i tak zapisane,
+  a po rozwinięciu widzisz ramkę z opisem i powód przy każdej pozycji. **Partner nie dostaje żadnego powiadomienia.** Po poprawie katalogu kliknij **Sprawdź ponownie** — zamówienie powinno przejść na „przyjęte”.
+  Cena i tolerancja cenowa **nie są** jeszcze sprawdzane (czekamy na decyzję o wartości tolerancji).
 - Błędny plik albo wiadomość bez XML: zamówienie się nie pojawia, a szczegóły są w **Błędy i ostrzeżenia**.
 - **Połączenie z prawdziwym serwerem poczty nie było jeszcze sprawdzone** — to pierwszy test na środowisku testowym; zgłoś każdy komunikat błędu.
 
@@ -100,7 +103,7 @@ Przykład z karty: półpaleta 80×60×85 cm, 56 kg do FR → waga gabarytowa 10
 |---|---|
 | **Dane GEIS** (tabele transportowe 13 krajów) | Plik `GEIS_tabele_13_krajow.xlsx` nie jest w repozytorium. Dopóki nie zostanie wgrany, ceny pokażą błąd „Brak tabeli transportowej GEIS dla kraju …" — to oczekiwane. |
 | **Serwer plików (FTP)** dla partnerów | Czeka na decyzję o protokole i kontach. Pliki powstają tylko w katalogu serwera. |
-| **Statusy zamówień, wysyłka do Selly, tracking** | Kolejne etapy; wymagają decyzji (rozdział w karcie). Zamówienia z e-maila można już odebrać i obejrzeć (1.7). |
+| **Kontrola ceny zamówienia, wysyłka do Selly, tracking** | Kolejne etapy; wymagają decyzji (rozdział w karcie). Zamówienia z e-maila można już odebrać, obejrzeć i sprawdzić względem katalogu (1.7). |
 | **Numeracja katalogowa `KK PP NNNNN`** | Czeka na decyzję. Kolumna „kod" to dziś numer pozycji z katalogu. |
 | **Nazwy plików** | Robocze (`tyreworld.csv`, `adtyres_AT.csv`) — czekamy na Twój schemat. |
 | **XML Ceneo** | Struktura wg publicznego formatu; nie mamy wzorca od partnera. |
