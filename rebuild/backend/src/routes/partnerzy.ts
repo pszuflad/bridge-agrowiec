@@ -9,6 +9,7 @@ import type { Baza } from "../db/index.js";
 import { requireAuth } from "../middleware/auth.js";
 import { zapiszAudyt } from "../repos/audit.js";
 import { pobierzBledy, pobierzLogi } from "../partnerzy/logi.js";
+import { OdbiorTrwaError, odbierzZamowieniaEmail, type OdbiorEmail } from "../partnerzy/odbior-email.js";
 import { listaZamowien, szczegolyZamowieniaDlaPartnera } from "../repos/partnerzy-zamowienia.js";
 import { walidujKolumny, walidujPola, zapiszKolumny, zapiszPola } from "../repos/partnerzy-kolumny.js";
 import { GenerowanieTrwaError, type SerwisPartnerow } from "../partnerzy/scheduler.js";
@@ -30,9 +31,9 @@ import {
   walidujUstawieniaPartnera,
 } from "../repos/partnerzy.js";
 
-export type ZaleznosciPartnerzy = { db: Baza; serwis?: SerwisPartnerow };
+export type ZaleznosciPartnerzy = { db: Baza; serwis?: SerwisPartnerow; odbiorEmail?: OdbiorEmail };
 
-export function trasyPartnerzy({ db, serwis }: ZaleznosciPartnerzy): Router {
+export function trasyPartnerzy({ db, serwis, odbiorEmail }: ZaleznosciPartnerzy): Router {
   const router = Router();
 
   const audytuj = (req: Request, akcja: string, id: number, szczegoly?: unknown): void => {
@@ -105,6 +106,29 @@ export function trasyPartnerzy({ db, serwis }: ZaleznosciPartnerzy): Router {
     const z = Number.isInteger(zamowienieId) && zamowienieId > 0 ? szczegolyZamowieniaDlaPartnera(db, id, zamowienieId) : null;
     if (z === null) return void res.status(404).json({ error: "Nie ma takiego zamówienia tego partnera." });
     res.json(z);
+  });
+
+  /**
+   * Ręczny odbiór zamówień z e-maila partnera (ticket 231) — działa też przy wyłączonym harmonogramie i dla partnera nieaktywnego, do testów kanału.
+   * 200 + wynik (także gdy nic nie odebrano: `polaczono:false` i `powod`, np. brak zmiennej w `.env`); 409 bez kanału e-mail lub gdy odbiór trwa; 503 bez wstrzykniętego odbioru.
+   */
+  router.post("/api/partnerzy/:id/zamowienia/odbierz", requireAuth, async (req, res) => {
+    const id = idZParametru(req, res);
+    if (id === null) return;
+    if (!odbiorEmail) return void res.status(503).json({ error: "Odbiór zamówień z e-maila nie jest dostępny w tej instancji." });
+    const partner = szczegolyPartnera(db, id);
+    if (!partner?.kanalEmail || !partner.emailSkrzynka) {
+      return void res.status(409).json({ error: "Partner nie ma włączonego kanału e-mail albo adresu skrzynki — ustaw je w konfiguracji." });
+    }
+    try {
+      const wynik = await odbierzZamowieniaEmail(db, odbiorEmail.otworz, id, odbiorEmail.ustawienia);
+      audytuj(req, "partner_odbior_reczny", id, { polaczono: wynik.polaczono, wiadomosci: wynik.wiadomosci, nowe: wynik.nowe, bledy: wynik.bledy });
+      res.json(wynik);
+    } catch (e) {
+      if (e instanceof OdbiorTrwaError) return void res.status(409).json({ error: "Odbiór zamówień dla tego partnera już trwa — spróbuj za chwilę." });
+      console.error("[partnerzy] odbiór ręczny nieudany:", e instanceof Error ? e.message : e);
+      res.status(500).json({ error: "Odbiór zamówień nie powiódł się — szczegóły w logach błędów partnera." });
+    }
   });
 
   /** Ręczne „generuj teraz” (też dla partnera nieaktywnego). Zwraca wynik generowania: pliki, błędy, ostrzeżenia. */
