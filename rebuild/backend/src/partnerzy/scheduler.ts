@@ -13,7 +13,7 @@ import { join } from "node:path";
 
 import type { Baza } from "../db/index.js";
 import { partnerLogi, partnerzy } from "../db/schema.js";
-import { generujPlikiPartnera, type WynikGenerowania } from "./generator.js";
+import { generujPlikiPartnera, podgladPartnera, type WynikGenerowania, type WynikPodgladu } from "./generator.js";
 import type { KlientNbp } from "./kurs-nbp.js";
 import { zapiszBlad, zapiszOperacje, zapiszWynikGenerowania } from "./logi.js";
 
@@ -29,6 +29,8 @@ export class GenerowanieTrwaError extends Error {
 export interface SerwisPartnerow {
   /** Generuje pliki partnera teraz (też dla nieaktywnego). Rzuca `GenerowanieTrwaError`, gdy poprzednie jeszcze trwa. */
   generujTeraz(partnerId: number): Promise<WynikGenerowania>;
+  /** Podgląd bez zapisu (pierwsze pozycje, tekst plików) — nie dotyka dysku, logów ani `partner_kursy`. */
+  podglad(partnerId: number): Promise<WynikPodgladu>;
   /** Jeden tick harmonogramu (wołany timerem; wystawiony dla testów). Zwraca ids partnerów, dla których uruchomiono generowanie. */
   tick(): Promise<number[]>;
   uruchom(): void;
@@ -105,6 +107,7 @@ export function stworzSerwisPartnerow(opcje: {
 
   return {
     generujTeraz,
+    podglad: (partnerId) => podgladPartnera(db, klientNbp, partnerId, { teraz }),
     tick,
     uruchom() {
       if (timer) return;

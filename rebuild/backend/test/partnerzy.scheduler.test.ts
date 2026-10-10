@@ -112,6 +112,7 @@ describe("POST /api/partnerzy/:id/generuj", () => {
       if (id === 2) throw new GenerowanieTrwaError(id);
       return { pliki: [], bledy: ["jakiś błąd"], ostrzezenia: [], kursy: {}, pozycjeWybrane: 0, usunieteZArchiwum: 0 };
     },
+    podglad: async () => ({ pliki: [], bledy: [], ostrzezenia: [], pozycjeWybrane: 0 }),
     tick: async () => [],
     uruchom: () => undefined,
     zatrzymaj: () => undefined,
