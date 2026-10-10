@@ -53,3 +53,60 @@ export function opisHarmonogramu(minuty: number | null): string {
   if (minuty % 60 === 0) return `co ${minuty / 60} h`;
   return `co ${minuty} min`;
 }
+
+export type KrajPartnera = {
+  id: number;
+  partnerId: number;
+  kraj: string;
+  /** PROCENT (12 = 12 %). */
+  narzutProc: number;
+  kursZrodlo: "nbp" | "reczny";
+  kursReczny: number | null;
+  /** PLN. */
+  kosztyDodatkowe: number;
+};
+
+export type SzczegolyPartnera = {
+  id: number;
+  nazwa: string;
+  aktywny: boolean;
+  stanMin: number;
+  zaokraglanie: string;
+  harmonogramMinuty: number | null;
+  tolerancjaCenyProc: number | null;
+  formatPliku: string;
+  csvSeparator: string;
+  kanalFtp: boolean;
+  kanalEmail: boolean;
+  emailSkrzynka: string | null;
+  zmieniono: string;
+  magazyny: string[];
+  wykluczenia: string[];
+  kraje: KrajPartnera[];
+};
+
+export type UstawieniaDoZapisu = Pick<
+  SzczegolyPartnera,
+  "nazwa" | "stanMin" | "zaokraglanie" | "harmonogramMinuty" | "tolerancjaCenyProc" | "formatPliku" | "csvSeparator" | "kanalFtp" | "kanalEmail" | "emailSkrzynka"
+>;
+export type UstawieniaKraju = Pick<KrajPartnera, "narzutProc" | "kursZrodlo" | "kursReczny" | "kosztyDodatkowe">;
+export type MagazynKatalogu = { magazyn: string; liczbaPozycji: number };
+
+export const ZAOKRAGLANIA: { wartosc: string; etykieta: string }[] = [
+  { wartosc: "grosz", etykieta: "do 2 miejsc po przecinku" },
+  { wartosc: "euro", etykieta: "do pełnego EUR" },
+  { wartosc: "gora5", etykieta: "w górę do 5 EUR" },
+  { wartosc: "gora10", etykieta: "w górę do 10 EUR" },
+];
+
+export const zapiszUstawienia = async (id: number, c: UstawieniaDoZapisu): Promise<void> => void (await zadanie("PUT", `${KLUCZ_PARTNERZY}/${id}`, c));
+export const zapiszMagazyny = async (id: number, magazyny: string[]): Promise<void> => void (await zadanie("PUT", `${KLUCZ_PARTNERZY}/${id}/magazyny`, { magazyny }));
+export const zapiszWykluczenia = async (id: number, kody: string[]): Promise<void> => void (await zadanie("PUT", `${KLUCZ_PARTNERZY}/${id}/wykluczenia`, { kody }));
+export const zapiszKraj = async (id: number, kraj: string, u: UstawieniaKraju): Promise<void> => void (await zadanie("PUT", `${KLUCZ_PARTNERZY}/${id}/kraje/${kraj}`, u));
+export const usunKraj = async (id: number, kraj: string): Promise<void> => void (await zadanie("DELETE", `${KLUCZ_PARTNERZY}/${id}/kraje/${kraj}`));
+
+/** Zamienia tekst z pola liczbowego na liczbę (przecinek lub kropka); pusty → `null`; nieliczbowy → `NaN`. */
+export function liczbaZPola(tekst: string): number | null {
+  const t = tekst.trim().replace(",", ".");
+  return t === "" ? null : Number(t);
+}

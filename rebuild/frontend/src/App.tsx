@@ -40,6 +40,7 @@ import { WagaGabarytowa } from "@/pages/WagaGabarytowa";
 import { Login } from "@/pages/Login";
 import { MojeKonto } from "@/pages/MojeKonto";
 import { NotFound } from "@/pages/NotFound";
+import { PartnerSzczegoly } from "@/pages/PartnerSzczegoly";
 import { Partnerzy } from "@/pages/Partnerzy";
 import { Pulpit } from "@/pages/Pulpit";
 import { Selly } from "@/pages/Selly";
@@ -87,6 +88,7 @@ const TRASY_Z_RAMA: [string, ComponentType][] = [
   ["/analityka", Analityka],
   ["/selly", Selly],
   ["/partnerzy", Partnerzy],
+  ["/partnerzy/:id", PartnerSzczegoly],
   ["/moje-konto", MojeKonto],
 ];
 

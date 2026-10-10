@@ -13,6 +13,7 @@ import { GenerowanieTrwaError, type SerwisPartnerow } from "../partnerzy/schedul
 import {
   czyBlad,
   dodajPartnera,
+  dostepneMagazyny,
   edytujPartnera,
   listaPartnerow,
   normalizujKraj,
@@ -51,6 +52,11 @@ export function trasyPartnerzy({ db, serwis }: ZaleznosciPartnerzy): Router {
 
   router.get("/api/partnerzy", requireAuth, (_req, res) => {
     res.json({ partnerzy: listaPartnerow(db) });
+  });
+
+  /** Magazyny katalogu do wyboru w panelu. MUSI stać przed `/api/partnerzy/:id`, inaczej „magazyny” zostałoby wzięte za id. */
+  router.get("/api/partnerzy/magazyny", requireAuth, (_req, res) => {
+    res.json({ magazyny: dostepneMagazyny(db) });
   });
 
   router.get("/api/partnerzy/:id", requireAuth, (req, res) => {

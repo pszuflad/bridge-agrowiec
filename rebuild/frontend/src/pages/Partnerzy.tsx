@@ -8,6 +8,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import { useState, type FormEvent } from "react";
+import { Link } from "wouter";
 
 import { PageHeader } from "@/components/PageHeader";
 import { Badge } from "@/components/ui/badge";
@@ -148,7 +149,10 @@ export function Partnerzy() {
                       <td className="px-4 py-3">
                         <OstatnieGenerowanie id={p.id} />
                       </td>
-                      <td className="px-4 py-3 text-right">
+                      <td className="space-x-2 whitespace-nowrap px-4 py-3 text-right">
+                        <Button asChild variant="outline" size="sm">
+                          <Link href={`/partnerzy/${p.id}`} data-testid={`link-partner-konfiguruj-${p.id}`}>Konfiguruj</Link>
+                        </Button>
                         <Button
                           variant="outline"
                           size="sm"
