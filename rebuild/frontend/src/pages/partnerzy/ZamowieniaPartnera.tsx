@@ -14,6 +14,8 @@ import {
 
 const czas = (iso: string): string => new Date(iso).toLocaleString("pl-PL");
 const ETYKIETY_STATUSOW: Record<string, string> = { nowe: "nowe", przyjete: "przyjęte", blad_importu: "błąd importu" };
+/** Opis błędu zbiorczy dużego zamówienia bywa bardzo długi — w toaście tylko początek (całość jest w ramce przy zamówieniu). */
+const przytnij = (tekst: string, maks = 240): string => (tekst.length > maks ? `${tekst.slice(0, maks)}…` : tekst);
 const etykietaStatusu = (status: string): string => ETYKIETY_STATUSOW[status] ?? status;
 /** Polskie etykiety znanych pól adresu dostawy; nieznane pola partnera pokazujemy pod ich nazwą z pliku. */
 const ETYKIETY_DOSTAWY: Record<string, string> = { CUSTOMERNAME: "Odbiorca", COUNTRY: "Kraj", PHONE: "Telefon", MODEOFTRANSPORT: "Sposób transportu", CODCOST: "Pobranie", DELIVERY_COST: "Koszt dostawy" };
@@ -53,7 +55,7 @@ export function ZamowieniaPartnera({ partner }: { partner: SzczegolyPartnera }) 
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-sm font-semibold">Zamówienia od partnera</h2>
           <div className="flex items-center gap-2">
-            <Button size="sm" disabled={!kanalGotowy || odbior.isPending} onClick={() => odbior.mutate()} data-testid="button-zamowienia-odbierz">
+            <Button size="sm" disabled={!kanalGotowy || odbior.isPending} title={kanalGotowy ? undefined : "Wymaga włączonego kanału e-mail i adresu skrzynki w ustawieniach partnera."} onClick={() => odbior.mutate()} data-testid="button-zamowienia-odbierz">
               {odbior.isPending ? "Odbieranie…" : "Odbierz teraz"}
             </Button>
             <Button size="sm" variant="outline" className="gap-1.5" onClick={odswiez} data-testid="button-zamowienia-odswiez">
@@ -64,7 +66,7 @@ export function ZamowieniaPartnera({ partner }: { partner: SzczegolyPartnera }) 
         <p className="text-xs text-muted-foreground">Zamówienia odebrane kanałem e-mail (tylko podgląd). Statusy i wysyłka do sklepu dojdą w kolejnych etapach.</p>
         {!kanalGotowy ? <p className="text-xs text-muted-foreground" data-testid="text-zamowienia-kanal">„Odbierz teraz” wymaga włączonego kanału e-mail i adresu skrzynki w ustawieniach partnera.</p> : null}
         {lista.isError ? <p className="text-sm text-destructive" role="alert" data-testid="text-zamowienia-blad">{komunikatBledu(lista.error)}</p> : null}
-        {lista.data && lista.data.zamowienia.length === 0 ? <p className="text-sm text-muted-foreground" data-testid="text-zamowienia-pusto">Brak zamówień — nic jeszcze nie odebrano.</p> : null}
+        {lista.data && lista.data.zamowienia.length === 0 ? <p className="text-sm text-muted-foreground" data-testid="text-zamowienia-pusto">Brak zamówień — nic jeszcze nie odebrano.{!kanalGotowy ? " Kanał e-mail tego partnera jest wyłączony." : ""}</p> : null}
         {lista.data && lista.data.zamowienia.length >= LIMIT_ZAMOWIEN ? (
           <p className="text-xs text-muted-foreground" data-testid="text-zamowienia-obcieta">Pokazano {LIMIT_ZAMOWIEN} najnowszych zamówień — starsze nie są tu widoczne.</p>
         ) : null}
@@ -78,6 +80,7 @@ export function ZamowieniaPartnera({ partner }: { partner: SzczegolyPartnera }) 
                     type="button"
                     className="flex w-full flex-wrap items-center gap-2 text-left"
                     aria-expanded={rozwiniete}
+                    aria-controls={`szczegoly-zamowienia-${z.id}`}
                     onClick={() => ustawOtwarte(rozwiniete ? null : z.id)}
                     data-testid={`button-zamowienie-${z.id}`}
                   >
@@ -108,7 +111,7 @@ function SzczegolyZamowieniaWidok({ partnerId, zamowienieId }: { partnerId: numb
     onSuccess: (z) => {
       toast({
         title: z.status === "blad_importu" ? "Zamówienie nadal ma błędy" : "Zamówienie w porządku",
-        description: z.status === "blad_importu" ? (z.bladImportu ?? "") : "Wszystkie pozycje są w katalogu i na stanie.",
+        description: z.status === "blad_importu" ? przytnij(z.bladImportu ?? "") : "Wszystkie pozycje są w katalogu i na stanie.",
         variant: z.status === "blad_importu" ? "destructive" : "default",
       });
       void klient.invalidateQueries({ queryKey: [KLUCZ_PARTNERZY, String(partnerId)], predicate: ({ queryKey }) => /^zamowienia/.test(String(queryKey[2])) });
@@ -120,7 +123,7 @@ function SzczegolyZamowieniaWidok({ partnerId, zamowienieId }: { partnerId: numb
   const dostawa = Object.entries(data.dostawa).filter(([, v]) => v !== "");
   const blad = data.status === "blad_importu";
   return (
-    <div className="mt-2 space-y-3 rounded-md bg-muted/40 p-3" data-testid={`szczegoly-zamowienia-${zamowienieId}`}>
+    <div id={`szczegoly-zamowienia-${zamowienieId}`} className="mt-2 space-y-3 rounded-md bg-muted/40 p-3" data-testid={`szczegoly-zamowienia-${zamowienieId}`}>
       {blad ? (
         <div className="space-y-1.5 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive" role="alert" data-testid={`blad-importu-${zamowienieId}`}>
           <p className="font-medium">Błąd importu — zamówienie jest zapisane, ale wymaga sprawdzenia. Bridge nie wysyła partnerowi automatycznego powiadomienia.</p>
@@ -131,15 +134,16 @@ function SzczegolyZamowieniaWidok({ partnerId, zamowienieId }: { partnerId: numb
         <p className="text-xs text-muted-foreground">
           Data zamówienia: {data.dataZamowienia ?? "—"} · dostawa: {data.dataDostawy ?? "—"} · waluta: {data.waluta ?? "—"} · koszt dostawy: {data.kosztDostawy ?? "—"}
         </p>
-        {["nowe", "przyjete", "blad_importu"].includes(data.status) ? (
+        {data.mozeWalidowac ? (
           <Button size="sm" variant="outline" disabled={ponowna.isPending} onClick={() => ponowna.mutate()} data-testid={`button-zwaliduj-${zamowienieId}`}>
             {ponowna.isPending ? "Sprawdzanie…" : "Sprawdź ponownie"}
           </Button>
         ) : null}
       </div>
+      <div className="overflow-x-auto">
       <table className="w-full text-xs">
         <thead>
-          <tr className="text-left text-muted-foreground"><th className="py-1 pr-2">Lp</th><th className="pr-2">Kod</th><th className="pr-2">Nazwa</th><th className="pr-2 text-right">Ilość</th><th className="pr-2 text-right">Cena</th><th>Uwaga</th></tr>
+          <tr className="text-left text-muted-foreground"><th scope="col" className="py-1 pr-2">Lp</th><th scope="col" className="pr-2">Kod</th><th scope="col" className="pr-2">Nazwa</th><th scope="col" className="pr-2 text-right">Ilość</th><th scope="col" className="pr-2 text-right">Cena</th><th scope="col">Uwaga</th></tr>
         </thead>
         <tbody>
           {data.pozycje.map((p) => (
@@ -151,6 +155,7 @@ function SzczegolyZamowieniaWidok({ partnerId, zamowienieId }: { partnerId: numb
           ))}
         </tbody>
       </table>
+      </div>
       {dostawa.length > 0 ? (
         <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 text-xs" data-testid={`dostawa-${zamowienieId}`}>
           {dostawa.map(([k, v]) => (

@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { partnerErrorLog, partnerLogi, partnerzy, products } from "../src/db/schema.js";
 import { LIMIT_ZAMKA_MS, OdbiorTrwaError, _zresetujZamkiOdbioru, odbierzDlaWszystkich, odbierzZamowieniaEmail, stworzHarmonogramOdbioru, type UstawieniaOdbioru } from "../src/partnerzy/odbior-email.js";
 import type { KonfiguracjaSkrzynki, OtworzSkrzynke, WiadomoscPoczty, ZalacznikPoczty } from "../src/partnerzy/poczta.js";
-import { listaZamowien } from "../src/repos/partnerzy-zamowienia.js";
+import { listaZamowien, szczegolyZamowienia } from "../src/repos/partnerzy-zamowienia.js";
 import { stworzSrodowiskoTestowe, type SrodowiskoTestowe } from "./gate/index.js";
 import { XML_PRZYKLAD } from "./partnerzy.zamowienie-przyklad.js";
 
@@ -122,6 +122,19 @@ describe("odbiór zamówień przez e-mail", () => {
     expect(w).toMatchObject({ wiadomosci: 2, nowe: 0, bledy: 0 });
     expect(bledy().map((b) => b.poziom)).toEqual(["ostrzezenie", "ostrzezenie"]);
     expect(skrzynka.przetworzone).toEqual(["1", "2"]);
+  });
+
+  it("załącznik Office (xlsx) jest pominięty jako nie-XML; XML w ISO-8859-2 z polskimi literami jest zapisany poprawnie", async () => {
+    const xlsx: ZalacznikPoczty = { nazwa: "cennik.xlsx", typ: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", tresc: Buffer.from("PK") };
+    // XML w ISO-8859-2: bajty ASCII jak w UTF-8, a „ł” to jeden bajt 0xB3 (w UTF-8 byłyby dwa)
+    const poczatek = Buffer.from(`<?xml version="1.0" encoding="ISO-8859-2"?>${XML_PRZYKLAD.replace("Jan Kowalski", "Jan Kowa")}`, "latin1");
+    const zL = Buffer.concat([poczatek.subarray(0, poczatek.indexOf("Jan Kowa") + "Jan Kowa".length), Buffer.from([0xb3]), poczatek.subarray(poczatek.indexOf("Jan Kowa") + "Jan Kowa".length)]);
+    const skrzynka = new AtrapaSkrzynki([wiad("1", [xlsx]), wiad("2", [{ nazwa: "z.xml", typ: "application/xml", tresc: zL }])]);
+    const w = await odbierzZamowieniaEmail(s.db, skrzynka.otworz, partnerId, USTAWIENIA);
+    expect(w).toMatchObject({ nowe: 1, bledy: 0 });
+    expect(bledy().map((b) => [b.poziom, b.komunikat])).toEqual([["ostrzezenie", expect.stringContaining("brak załącznika XML")]]);
+    const id = listaZamowien(s.db, partnerId)[0]!.id;
+    expect(szczegolyZamowienia(s.db, id)!.dostawa.CUSTOMERNAME).toBe("Jan Kował");
   });
 
   it("rozpoznaje XML po typie MIME, gdy nazwa nie ma rozszerzenia", async () => {

@@ -1,8 +1,8 @@
 # PARTNERZY — moduł partnerów B2B (cenniki EUR, zamówienia, tracking)
 
-> **Stan:** 🟡 w trakcie (2026-10-10) — zrobione poziomy 1–5 (bez numeracji katalogowej) + krok wdrożenia (tickety 208–226); zostają numeracja, serwer plików, zamówienia, tracking — czekają na decyzje użytkownika (sekcja „Do koordynatora”)
+> **Stan:** 🟡 w trakcie (2026-10-10) — na `main`: poziomy 1–5 (bez numeracji katalogowej), krok wdrożenia (226), a z poziomu 7 odbiór zamówień z e-maila, podgląd, walidacja względem katalogu i utwardzenie (tickety 208–233). Zostają: numeracja katalogowa, serwer plików/FTP, kontrola ceny zamówienia, wysyłka do Selly, tracking — wszystkie czekają na decyzje (sekcja „Do koordynatora”, `decyzje-do-konsultacji-marty.md`)
 > **Iteracja:** poza planem odbudowy — NOWA funkcjonalność · **Wpisy backlogu:** — · **Zależy od:** —
-> **Tickety:** 208–228 (plan podziału: `podzial-na-tickety.md`; instrukcja testów: `docs/instrukcja-testow-PARTNERZY.md`)
+> **Tickety:** 208–233 (plan podziału: `podzial-na-tickety.md`; instrukcja testów: `docs/instrukcja-testow-PARTNERZY.md`)
 
 **To NIE jest odtworzenie produkcji.** Moduł jest świadomym odstępstwem od reguły „wierna
 odbudowa 1:1" (`CLAUDE.md`) — decyzja użytkownika, 2026-10-06. Nie zmienia niczego z
@@ -196,6 +196,7 @@ Stan na 2026-10-10 (wszystko na `develop`, PR-y #323–#342; **nic nie jest jesz
 | 7 | panel zamówień partnera: lista i szczegóły, tylko odczyt (`GET /api/partnerzy/:id/zamowienia[/:zid]`, sekcja na stronie partnera) | 230 |
 | 7 | ręczne „Odbierz teraz” zamówienia z e-maila (`POST /api/partnerzy/:id/zamowienia/odbierz`, przycisk w panelu; zamek wspólny z harmonogramem) | 231 |
 | 7 | walidacja zamówienia względem katalogu: nieznany kod / produkt nieaktywny / brak stanu → status `blad_importu` (bez powiadomienia partnera); cena i tolerancja NIE w tym tickecie | 232 |
+| 7 | utwardzenie po review 229–232: załączniki w innym kodowaniu (ISO-8859-2, windows-1250, BOM) i pliki Office nie psują odbioru, wymuszony STARTTLS poza portem 993, `mozeWalidowac` z backendu, a11y panelu (bez nowych funkcji) | 233 |
 | 9 | krok wdrożenia: partnerzy TyreWorld i Adtyres jako nieaktywni | 226 |
 
 Założenia wykonawcze do potwierdzenia: przesyłka GEIS w EUR (nie dzielona przez kurs), narzut w %, koszty dodatkowe w PLN; do pliku tylko produkty `status='aktywny'`; nazwy plików robocze; struktura XML wg publicznego formatu Ceneo.

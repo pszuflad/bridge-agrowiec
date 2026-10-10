@@ -6,6 +6,7 @@ import { and, asc, desc, eq, sql } from "drizzle-orm";
 
 import type { Baza } from "../db/index.js";
 import { partnerZamowienia, partnerZamowieniaPozycje } from "../db/schema.js";
+import { czyPodlegaWalidacji } from "../partnerzy/walidacja-zamowienia.js";
 import { parsujZamowienie } from "../partnerzy/zamowienie-xml.js";
 
 export type WynikZapisu = {
@@ -94,5 +95,5 @@ export function szczegolyZamowieniaDlaPartnera(db: Baza, partnerId: number, zamo
   const z = szczegolyZamowienia(db, zamowienieId);
   if (!z || z.partnerId !== partnerId) return null;
   const { surowyXml: _xml, skrotXml: _skrot, fakturaJson: _f, dostawaJson: _d, ...reszta } = z;
-  return reszta;
+  return { ...reszta, mozeWalidowac: czyPodlegaWalidacji(reszta.status) };
 }

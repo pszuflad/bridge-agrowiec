@@ -20,7 +20,7 @@ const naLiscie = (id: number, numer: string): ZamowienieNaLiscie => ({
   id, numerPartnera: numer, numerWlasny: null, status: "przyjete", bladImportu: null, dataZamowienia: "2024-02-02 11:27:11", waluta: "EUR", krajDostawy: "AT", pobrano: "2026-10-10T12:00:00.000Z", liczbaPozycji: 2,
 });
 const szczegoly = (id: number, numer: string): SzczegolyZamowienia => ({
-  id, partnerId: 1, numerPartnera: numer, numerWlasny: null, status: "przyjete", bladImportu: null, dataZamowienia: "2024-02-02 11:27:11", dataDostawy: "2024-02-02", waluta: "EUR", kosztDostawy: 0,
+  id, partnerId: 1, numerPartnera: numer, numerWlasny: null, status: "przyjete", bladImportu: null, mozeWalidowac: true, dataZamowienia: "2024-02-02 11:27:11", dataDostawy: "2024-02-02", waluta: "EUR", kosztDostawy: 0,
   krajDostawy: "AT", pobrano: "2026-10-10T12:00:00.000Z", faktura: {}, dostawa: { CUSTOMERNAME: "Jan Kowalski", COUNTRY: "AT", PHONE: "" },
   pozycje: [
     { id: 1, lp: 1, kod: "011200284", nazwa: "Ceat Farmax R70", ilosc: 2, cenaSprzedazy: 202, blad: null },
@@ -171,6 +171,37 @@ describe("zamówienia partnera", () => {
     await uzytkownik.click(await screen.findByTestId("button-zamowienia-odbierz"));
     expect(await screen.findByText("Nie odebrano zamówień")).toBeInTheDocument();
     expect(await screen.findByText(/brak PARTNERZY_IMAP_HOST/)).toBeInTheDocument();
+  });
+
+  it("pusty stan mówi, że kanał e-mail jest wyłączony; wyłączony przycisk ma podpowiedź (title)", async () => {
+    kanalEmail = false;
+    await otworz();
+    expect(await screen.findByTestId("text-zamowienia-pusto")).toHaveTextContent("Kanał e-mail tego partnera jest wyłączony");
+    expect(screen.getByTestId("button-zamowienia-odbierz")).toHaveAttribute("title", expect.stringContaining("kanału e-mail"));
+  });
+
+  it("przycisk „Sprawdź ponownie” zależy od pola mozeWalidowac z serwera (nie od listy statusów w panelu)", async () => {
+    const uzytkownik = userEvent.setup();
+    zamowienia = [naLiscie(1, "A01")];
+    szczegolyNadpisanie = { status: "wyslane", mozeWalidowac: false };
+    await otworz();
+    await uzytkownik.click(await screen.findByTestId("button-zamowienie-1"));
+    await screen.findByTestId("szczegoly-zamowienia-1");
+    expect(screen.queryByTestId("button-zwaliduj-1")).not.toBeInTheDocument();
+    expect(screen.getByTestId("button-zamowienie-1")).toHaveAttribute("aria-controls", "szczegoly-zamowienia-1");
+  });
+
+  it("długi opis błędu w toaście jest przycięty, całość zostaje w ramce przy zamówieniu", async () => {
+    const uzytkownik = userEvent.setup();
+    const dlugi = `poz. 1: ${"bardzo długi powód ".repeat(40)}KONIEC`;
+    zamowienia = [naLiscie(1, "A01")];
+    walidacja = { status: 200, cialo: { ...szczegoly(1, "A01"), status: "blad_importu", bladImportu: dlugi, mozeWalidowac: true }, wywolania: 0 };
+    await otworz();
+    await uzytkownik.click(await screen.findByTestId("button-zamowienie-1"));
+    await uzytkownik.click(await screen.findByTestId("button-zwaliduj-1"));
+    expect(await screen.findByText("Zamówienie nadal ma błędy")).toBeInTheDocument();
+    expect(screen.queryByText(/KONIEC/)).not.toBeInTheDocument();
+    expect(screen.getByText(/bardzo długi powód.*…$/)).toBeInTheDocument();
   });
 
   it("błąd serwera przy odbiorze (np. 409 — odbiór trwa) jest widoczny", async () => {
