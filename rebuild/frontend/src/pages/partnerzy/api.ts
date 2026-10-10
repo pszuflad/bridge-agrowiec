@@ -163,3 +163,25 @@ export function liczbaZPola(tekst: string): number | null {
   const t = tekst.trim().replace(",", ".");
   return t === "" ? null : Number(t);
 }
+
+export type WpisBledu = { id: number; partnerId: number; kiedy: string; operacja: string; poziom: "blad" | "ostrzezenie"; komunikat: string };
+export type ListaBledow = { bledy: WpisBledu[] };
+export type WynikGenerowania = {
+  pliki: { nazwa: string; kraj: string | null; liczbaWierszy: number; pominiete: number; zapisany: boolean }[];
+  bledy: string[];
+  ostrzezenia: string[];
+  pozycjeWybrane: number;
+};
+export type FiltrPoziomu = "wszystkie" | "blad" | "ostrzezenie";
+
+export async function generujTeraz(id: number): Promise<WynikGenerowania> {
+  return (await (await zadanie("POST", `${KLUCZ_PARTNERZY}/${id}/generuj`, {})).json()) as WynikGenerowania;
+}
+
+export const LIMIT_LOGOW = 50;
+export const LIMIT_BLEDOW = 100;
+/** Klucze zapytań logów — ścieżka sklejana z `queryKey` (konwencja aplikacji). */
+export const kluczLogow = (id: number): string[] => [KLUCZ_PARTNERZY, String(id), `logi?limit=${LIMIT_LOGOW}`];
+export const kluczBledow = (id: number, poziom: FiltrPoziomu): string[] => [
+  KLUCZ_PARTNERZY, String(id), `error-log?limit=${LIMIT_BLEDOW}${poziom === "wszystkie" ? "" : `&poziom=${poziom}`}`,
+];
