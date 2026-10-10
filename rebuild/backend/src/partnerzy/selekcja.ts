@@ -41,7 +41,7 @@ export type PozycjaEksportu = {
 export type WynikSelekcji = {
   pozycje: PozycjaEksportu[];
   /** Ile pozycji z wybranych magazynów odpadło i dlaczego (do logu operacji). */
-  pominiete: { stanPonizejMinimum: number; wykluczone: number; bezCenyZakupu: number };
+  pominiete: { stanPonizejMinimum: number; wykluczone: number; bezCenyZakupu: number; bezKodu: number };
   ostrzezenia: string[];
 };
 
@@ -56,7 +56,7 @@ export function wybierzPozycje(db: Baza, partnerId: number): WynikSelekcji {
   if (!partner) throw new Error(`Nie ma partnera o id ${partnerId}.`);
   const magazyny = db.select({ m: partnerMagazyny.magazyn }).from(partnerMagazyny).where(eq(partnerMagazyny.partnerId, partnerId)).all().map((w) => w.m);
   const wykluczone = db.select({ k: partnerWykluczenia.produktKod }).from(partnerWykluczenia).where(eq(partnerWykluczenia.partnerId, partnerId)).all().map((w) => w.k);
-  const wynik: WynikSelekcji = { pozycje: [], pominiete: { stanPonizejMinimum: 0, wykluczone: 0, bezCenyZakupu: 0 }, ostrzezenia: [] };
+  const wynik: WynikSelekcji = { pozycje: [], pominiete: { stanPonizejMinimum: 0, wykluczone: 0, bezCenyZakupu: 0, bezKodu: 0 }, ostrzezenia: [] };
   if (magazyny.length === 0) {
     wynik.ostrzezenia.push("Partner nie ma wybranych magazynów — plik będzie pusty.");
     return wynik;
@@ -92,7 +92,8 @@ export function wybierzPozycje(db: Baza, partnerId: number): WynikSelekcji {
 
   const wykl = new Set(wykluczone);
   for (const w of wiersze) {
-    if (wykl.has(w.kod)) wynik.pominiete.wykluczone++;
+    if (w.kod.trim() === "") wynik.pominiete.bezKodu++; // numer katalogowy jest kluczem pozycji — pusty to defekt (w plikach wzorcowych 30 takich)
+    else if (wykl.has(w.kod)) wynik.pominiete.wykluczone++;
     else if (w.stan < partner.stanMin) wynik.pominiete.stanPonizejMinimum++;
     else if (!(w.cenaZakupu > 0)) wynik.pominiete.bezCenyZakupu++;
     else

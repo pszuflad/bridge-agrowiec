@@ -79,7 +79,7 @@ describe("selekcja i wycena partnera", () => {
     );
     const w = wybierzPozycje(db, partnerId);
     expect(w.pozycje.map((p) => p.kod)).toEqual(["OK1", "OK2"]);
-    expect(w.pominiete).toEqual({ stanPonizejMinimum: 2, wykluczone: 1, bezCenyZakupu: 1 });
+    expect(w.pominiete).toEqual({ stanPonizejMinimum: 2, wykluczone: 1, bezCenyZakupu: 1, bezKodu: 0 });
   });
 
   it("stan minimalny jest ustawieniem partnera", () => {
