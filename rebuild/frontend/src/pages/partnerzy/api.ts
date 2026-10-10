@@ -192,6 +192,8 @@ export type ZamowienieNaLiscie = {
   numerPartnera: string;
   numerWlasny: string | null;
   status: string;
+  /** Opis zbiorczy, gdy `status` = `blad_importu` (ticket 232). */
+  bladImportu: string | null;
   dataZamowienia: string | null;
   waluta: string | null;
   krajDostawy: string | null;
@@ -199,7 +201,8 @@ export type ZamowienieNaLiscie = {
   liczbaPozycji: number;
 };
 export type ListaZamowien = { zamowienia: ZamowienieNaLiscie[] };
-export type PozycjaZamowienia = { id: number; lp: number; kod: string; nazwa: string | null; ilosc: number; cenaSprzedazy: number | null };
+/** `blad` — powód z walidacji względem katalogu (nieznany kod, produkt nieaktywny, brak stanu) albo `null` (ticket 232). */
+export type PozycjaZamowienia = { id: number; lp: number; kod: string; nazwa: string | null; ilosc: number; cenaSprzedazy: number | null; blad: string | null };
 export type SzczegolyZamowienia = Omit<ZamowienieNaLiscie, "liczbaPozycji"> & {
   partnerId: number;
   dataDostawy: string | null;
@@ -217,4 +220,9 @@ export type WynikOdbioru = { polaczono: boolean; powod: string | null; wiadomosc
 
 export async function odbierzZamowienia(id: number): Promise<WynikOdbioru> {
   return (await (await zadanie("POST", `${KLUCZ_PARTNERZY}/${id}/zamowienia/odbierz`, {})).json()) as WynikOdbioru;
+}
+
+/** Ponowna walidacja zamówienia względem katalogu (ticket 232): zwraca świeże szczegóły. */
+export async function zwalidujZamowienie(partnerId: number, zamowienieId: number): Promise<SzczegolyZamowienia> {
+  return (await (await zadanie("POST", `${KLUCZ_PARTNERZY}/${partnerId}/zamowienia/${zamowienieId}/waliduj`, {})).json()) as SzczegolyZamowienia;
 }

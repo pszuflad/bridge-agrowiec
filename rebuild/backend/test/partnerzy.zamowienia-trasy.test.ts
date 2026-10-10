@@ -2,6 +2,8 @@
 import request from "supertest";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
+import { products } from "../src/db/schema.js";
+import { zwaliduj } from "../src/partnerzy/walidacja-zamowienia.js";
 import { zapiszZamowienie } from "../src/repos/partnerzy-zamowienia.js";
 import { stworzSrodowiskoTestowe, type SrodowiskoTestowe } from "./gate/index.js";
 import { XML_PRZYKLAD } from "./partnerzy.zamowienie-przyklad.js";
@@ -85,5 +87,45 @@ describe("trasy /api/partnerzy/:id/zamowienia", () => {
     expect((await get(`/api/partnerzy/${b}/zamowienia/${id}`)).status).toBe(404);
     expect((await get(`/api/partnerzy/${a}/zamowienia/99999`)).status).toBe(404);
     expect((await get(`/api/partnerzy/${a}/zamowienia/abc`)).status).toBe(404);
+  });
+
+  describe("POST …/zamowienia/:zamowienieId/waliduj", () => {
+    const post = (u: string) => request(s.app).post(u).set("Authorization", `Bearer ${token}`).send({});
+    const wstaw = (kod: string, stan = 10) =>
+      s.db.insert(products).values({
+        kod, nazwa: "OPONA", marka: "CEAT", kategoria: "Rolnicze", dostawca: "MO1", magazyn: "MO1", stan, cenaZakupu: 100, cenaSprzedazy: 150, marzaPct: 50,
+        dataAktualizacji: "2026-10-10T00:00:00.000Z", kodImportu: `IMP_${kod}`,
+      }).run();
+
+    it("wymaga logowania; 404 dla cudzego i nieistniejącego zamówienia", async () => {
+      const { id } = zapiszZamowienie(s.db, a, XML_PRZYKLAD);
+      expect((await request(s.app).post(`/api/partnerzy/${a}/zamowienia/${id}/waliduj`)).status).toBe(401);
+      expect((await post(`/api/partnerzy/${b}/zamowienia/${id}/waliduj`)).status).toBe(404);
+      expect((await post(`/api/partnerzy/${a}/zamowienia/99999/waliduj`)).status).toBe(404);
+      expect((await post(`/api/partnerzy/${a}/zamowienia/abc/waliduj`)).status).toBe(404);
+    });
+
+    it("po poprawie katalogu ponowna walidacja przywraca zamówienie; odpowiedź to świeże szczegóły z powodami per pozycja", async () => {
+      const { id } = zapiszZamowienie(s.db, a, XML_PRZYKLAD);
+      zwaliduj(s.db, id);
+      const przed = (await get(`/api/partnerzy/${a}/zamowienia/${id}`)).body as { status: string; bladImportu: string; pozycje: { blad: string | null }[] };
+      expect(przed).toMatchObject({ status: "blad_importu", bladImportu: expect.stringContaining("nieznany kod") });
+      expect(przed.pozycje.map((p) => p.blad)).toEqual(["nieznany kod", "nieznany kod"]);
+
+      wstaw("011200284");
+      wstaw("0102 00001");
+      const odp = await post(`/api/partnerzy/${a}/zamowienia/${id}/waliduj`);
+      expect(odp.status).toBe(200);
+      expect(odp.body).toMatchObject({ id, status: "przyjete", bladImportu: null });
+      expect((odp.body as { pozycje: { blad: string | null }[] }).pozycje.every((p) => p.blad === null)).toBe(true);
+      expect(JSON.stringify(odp.body)).not.toContain("surowyXml");
+    });
+
+    it("lista pokazuje status i opis błędu importu", async () => {
+      const { id } = zapiszZamowienie(s.db, a, XML_PRZYKLAD);
+      zwaliduj(s.db, id);
+      const lista = ((await get(`/api/partnerzy/${a}/zamowienia`)).body as { zamowienia: { status: string; bladImportu: string | null }[] }).zamowienia;
+      expect(lista[0]).toMatchObject({ status: "blad_importu", bladImportu: expect.stringContaining("nieznany kod") });
+    });
   });
 });

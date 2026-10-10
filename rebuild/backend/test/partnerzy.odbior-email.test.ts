@@ -2,7 +2,7 @@
 import { eq } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { partnerErrorLog, partnerLogi, partnerzy } from "../src/db/schema.js";
+import { partnerErrorLog, partnerLogi, partnerzy, products } from "../src/db/schema.js";
 import { LIMIT_ZAMKA_MS, OdbiorTrwaError, _zresetujZamkiOdbioru, odbierzDlaWszystkich, odbierzZamowieniaEmail, stworzHarmonogramOdbioru, type UstawieniaOdbioru } from "../src/partnerzy/odbior-email.js";
 import type { KonfiguracjaSkrzynki, OtworzSkrzynke, WiadomoscPoczty, ZalacznikPoczty } from "../src/partnerzy/poczta.js";
 import { listaZamowien } from "../src/repos/partnerzy-zamowienia.js";
@@ -67,6 +67,14 @@ describe("odbiór zamówień przez e-mail", () => {
     _zresetujZamkiOdbioru();
     s = await stworzSrodowiskoTestowe();
     partnerId = dodaj("TyreWorld");
+    // Katalog z pozycjami z przykładowego zamówienia — inaczej walidacja (ticket 232) dopisywałaby ostrzeżenia „błąd importu” do każdego testu.
+    // Jej własne przypadki: partnerzy.walidacja-zamowien.test.ts.
+    for (const kod of ["011200284", "0102 00001"]) {
+      s.db.insert(products).values({
+        kod, nazwa: "OPONA", marka: "CEAT", kategoria: "Rolnicze", dostawca: "MO1", magazyn: "MO1", stan: 100, cenaZakupu: 100, cenaSprzedazy: 150, marzaPct: 50,
+        dataAktualizacji: "2026-10-10T00:00:00.000Z", kodImportu: `IMP_${kod}`,
+      }).run();
+    }
   });
   afterEach(() => s.posprzataj());
 

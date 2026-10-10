@@ -744,6 +744,7 @@ export const partnerZamowienia = sqliteTable("partner_zamowienia", {
 	numerPartnera: text("numer_partnera").notNull(),
 	numerWlasny: text("numer_wlasny"),
 	status: text().default("nowe").notNull(),
+	bladImportu: text("blad_importu"),
 	dataZamowienia: text("data_zamowienia"),
 	dataDostawy: text("data_dostawy"),
 	waluta: text(),
@@ -764,4 +765,5 @@ export const partnerZamowieniaPozycje = sqliteTable("partner_zamowienia_pozycje"
 	nazwa: text(),
 	ilosc: integer().notNull(),
 	cenaSprzedazy: real("cena_sprzedazy"),
+	blad: text(),
 }, (table) => [unique().on(table.zamowienieId, table.lp), index("idx_partner_zamowienia_pozycje_zam").on(table.zamowienieId)]);
