@@ -133,6 +133,14 @@ const schemaEnvBazowe = z.object({
   /** Katalog bazowy plików partnerów (`<katalog>/<id partnera>/{pricelist,archive}`). Domyślnie `partnerzy/` obok pliku bazy. */
   PARTNERZY_KATALOG: z.string().min(1).optional(),
   /**
+   * Odbiór zamówień partnerów przez e-mail (karta PARTNERZY, ticket 229) — DOMYŚLNIE WYŁĄCZONY. Host/port IMAP wspólne; hasło skrzynki każdego
+   * partnera w `PARTNERZY_IMAP_HASLO_<id partnera>` (czytane wprost ze środowiska, nie tutaj). Brak hosta lub hasła = kanał pomijany z wpisem w logu.
+   */
+  PARTNERZY_ODBIOR_EMAIL: flagaBoolDomyslnieWylaczona,
+  PARTNERZY_ODBIOR_EMAIL_MINUTY: z.coerce.number().int().min(1).max(1440).default(5),
+  PARTNERZY_IMAP_HOST: z.string().min(1).optional(),
+  PARTNERZY_IMAP_PORT: z.coerce.number().int().min(1).max(65535).default(993),
+  /**
    * Tor 3 (ticket 186): usuwanie z Selly produktów, których nie ma już w Bridge. Działa w ramach harmonogramu
    * Selly (czyli tylko przy `SELLY_SCHEDULER=true` i `SELLY_TRYB=pelny`); ten przełącznik pozwala je
    * wyłączyć bez ruszania reszty synchronizacji (`SELLY_USUWANIE=false`). Domyślnie WŁĄCZONE (decyzja użytkownika).
