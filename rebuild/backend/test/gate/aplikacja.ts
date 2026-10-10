@@ -1,4 +1,5 @@
 import type { SerwisPartnerow } from "../../src/partnerzy/scheduler.js";
+import type { OdbiorEmail } from "../../src/partnerzy/odbior-email.js";
 import { dirname, join } from "node:path";
 import type { Express } from "express";
 import { wczytajEnv, type Env } from "../../src/config/env.js";
@@ -46,6 +47,8 @@ export type OpcjeSrodowiska = {
   discoverySelly?: Discovery;
   /** Serwis generowania cenników partnerów (karta PARTNERZY). Bez niego `POST /api/partnerzy/:id/generuj` odpowiada 503. */
   serwisPartnerow?: SerwisPartnerow;
+  /** Odbiór zamówień z e-maila partnerów (ticket 231) — atrapa skrzynki. Bez niego trasa „odbierz” odpowiada 503. */
+  odbiorEmail?: OdbiorEmail;
 };
 
 /**
@@ -82,6 +85,7 @@ export async function stworzSrodowiskoTestowe(
     klientSelly: opcje.klientSelly,
     discoverySelly: opcje.discoverySelly,
     serwisPartnerow: opcje.serwisPartnerow,
+    odbiorEmail: opcje.odbiorEmail,
   });
   return { ...baza, app, env, uzytkownik, dane, katalogArchiwum, katalogCsvSelly };
 }

@@ -1,14 +1,15 @@
 /** Zamówienia odebrane od partnera — lista i szczegóły, tylko odczyt (ticket 230, PRT-7.6a). Statusy i akcje: PRT-7.4/7.5. */
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronDown, ChevronRight, RefreshCw } from "lucide-react";
 import { Fragment, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { useToast } from "@/components/ui/toast";
 import {
-  KLUCZ_PARTNERZY, LIMIT_ZAMOWIEN, komunikatBledu, kluczZamowien, kluczZamowienia,
-  type ListaZamowien, type SzczegolyPartnera, type SzczegolyZamowienia,
+  KLUCZ_PARTNERZY, LIMIT_ZAMOWIEN, komunikatBledu, kluczZamowien, kluczZamowienia, odbierzZamowienia,
+  type ListaZamowien, type SzczegolyPartnera, type SzczegolyZamowienia, type WynikOdbioru,
 } from "./api";
 
 const czas = (iso: string): string => new Date(iso).toLocaleString("pl-PL");
@@ -18,6 +19,7 @@ const ETYKIETY_DOSTAWY: Record<string, string> = { CUSTOMERNAME: "Odbiorca", COU
 export function ZamowieniaPartnera({ partner }: { partner: SzczegolyPartnera }) {
   const [otwarte, ustawOtwarte] = useState<number | null>(null);
   const klient = useQueryClient();
+  const { toast } = useToast();
   const lista = useQuery<ListaZamowien | null>({ queryKey: kluczZamowien(partner.id), refetchOnMount: "always" });
   const odswiez = () => {
     void lista.refetch();
@@ -25,16 +27,34 @@ export function ZamowieniaPartnera({ partner }: { partner: SzczegolyPartnera }) 
     void klient.invalidateQueries({ queryKey: [KLUCZ_PARTNERZY, String(partner.id), "zamowienia"] });
   };
 
+  const kanalGotowy = partner.kanalEmail && !!partner.emailSkrzynka;
+  const odbior = useMutation<WynikOdbioru, Error, void>({
+    mutationFn: () => odbierzZamowienia(partner.id),
+    onSuccess: (w) => {
+      if (!w.polaczono) toast({ title: "Nie odebrano zamówień", description: w.powod ?? "Brak połączenia ze skrzynką.", variant: "destructive" });
+      else toast({ title: "Odebrano pocztę", description: `Wiadomości: ${w.wiadomosci}, nowych zamówień: ${w.nowe}, powtórzonych: ${w.duplikaty}, błędnych: ${w.bledy}.`, variant: w.bledy > 0 ? "destructive" : "default" });
+      odswiez();
+      void klient.invalidateQueries({ queryKey: [KLUCZ_PARTNERZY, String(partner.id)] }); // logi i błędy partnera też się zmieniły
+    },
+    onError: (e) => toast({ title: "Odbiór zamówień nie powiódł się", description: komunikatBledu(e), variant: "destructive" }),
+  });
+
   return (
     <Card>
       <CardContent className="space-y-3 p-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-sm font-semibold">Zamówienia od partnera</h2>
-          <Button size="sm" variant="outline" className="gap-1.5" onClick={odswiez} data-testid="button-zamowienia-odswiez">
-            <RefreshCw className="h-3.5 w-3.5" aria-hidden />Odśwież
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button size="sm" disabled={!kanalGotowy || odbior.isPending} onClick={() => odbior.mutate()} data-testid="button-zamowienia-odbierz">
+              {odbior.isPending ? "Odbieranie…" : "Odbierz teraz"}
+            </Button>
+            <Button size="sm" variant="outline" className="gap-1.5" onClick={odswiez} data-testid="button-zamowienia-odswiez">
+              <RefreshCw className="h-3.5 w-3.5" aria-hidden />Odśwież
+            </Button>
+          </div>
         </div>
         <p className="text-xs text-muted-foreground">Zamówienia odebrane kanałem e-mail (tylko podgląd). Statusy i wysyłka do sklepu dojdą w kolejnych etapach.</p>
+        {!kanalGotowy ? <p className="text-xs text-muted-foreground" data-testid="text-zamowienia-kanal">„Odbierz teraz” wymaga włączonego kanału e-mail i adresu skrzynki w ustawieniach partnera.</p> : null}
         {lista.isError ? <p className="text-sm text-destructive" role="alert" data-testid="text-zamowienia-blad">{komunikatBledu(lista.error)}</p> : null}
         {lista.data && lista.data.zamowienia.length === 0 ? <p className="text-sm text-muted-foreground" data-testid="text-zamowienia-pusto">Brak zamówień — nic jeszcze nie odebrano.</p> : null}
         {lista.data && lista.data.zamowienia.length >= LIMIT_ZAMOWIEN ? (

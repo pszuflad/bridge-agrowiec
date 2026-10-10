@@ -3,7 +3,7 @@ import { wczytajEnv } from "./config/env.js";
 import { otworzBaze } from "./db/index.js";
 import { stworzApp } from "./app.js";
 import { klientNbpHttp } from "./partnerzy/kurs-nbp.js";
-import { stworzHarmonogramOdbioru } from "./partnerzy/odbior-email.js";
+import { stworzHarmonogramOdbioru, type OdbiorEmail } from "./partnerzy/odbior-email.js";
 import { otworzSkrzynkeImap } from "./partnerzy/poczta-imap.js";
 import { stworzSerwisPartnerow } from "./partnerzy/scheduler.js";
 import { dirname, join } from "node:path";
@@ -121,13 +121,12 @@ const serwisPartnerow = stworzSerwisPartnerow({
   katalogBazowy: env.PARTNERZY_KATALOG ?? join(dirname(env.DB_PATH), "partnerzy"),
 });
 
-// Odbiór zamówień partnerów przez e-mail (ticket 229): timer tylko przy PARTNERZY_ODBIOR_EMAIL; hasła skrzynek wprost ze środowiska serwera.
-const odbiorEmail = stworzHarmonogramOdbioru({
-  db,
+// Odbiór zamówień partnerów przez e-mail (tickety 229, 231): timer tylko przy PARTNERZY_ODBIOR_EMAIL, ręczne „Odbierz teraz” zawsze; hasła skrzynek wprost ze środowiska serwera.
+const odbiorEmail: OdbiorEmail = {
   otworz: otworzSkrzynkeImap,
   ustawienia: { host: env.PARTNERZY_IMAP_HOST, port: env.PARTNERZY_IMAP_PORT, haslo: (id) => process.env[`PARTNERZY_IMAP_HASLO_${id}`] || undefined },
-  interwalMs: env.PARTNERZY_ODBIOR_EMAIL_MINUTY * 60_000,
-});
+};
+const harmonogramOdbioru = stworzHarmonogramOdbioru({ db, ...odbiorEmail, interwalMs: env.PARTNERZY_ODBIOR_EMAIL_MINUTY * 60_000 });
 
 const app = stworzApp({
   env,
@@ -138,6 +137,7 @@ const app = stworzApp({
   klientSelly,
   discoverySelly,
   serwisPartnerow,
+  odbiorEmail,
 });
 
 const server = app.listen(env.PORT, env.HOST, () => {
@@ -187,7 +187,7 @@ const server = app.listen(env.PORT, env.HOST, () => {
 
   // Odbiór zamówień partnerów przez e-mail (karta PARTNERZY, ticket 229) — domyślnie wyłączony.
   if (env.PARTNERZY_ODBIOR_EMAIL) {
-    odbiorEmail.uruchom();
+    harmonogramOdbioru.uruchom();
   } else {
     console.log("[partnerzy-odbior-email] wyłączony (PARTNERZY_ODBIOR_EMAIL nie jest ustawione)");
   }
@@ -205,7 +205,7 @@ function zamknij(sygnal: string): void {
   scheduler.zatrzymaj();
   harmonogramSelly.zatrzymaj();
   serwisPartnerow.zatrzymaj();
-  odbiorEmail.zatrzymaj();
+  harmonogramOdbioru.zatrzymaj();
   wygaszacz.zatrzymaj();
   // Wyrejestrowanie jest bezwarunkowe — zdjęcie instancji, której nie ma, jest no-opem.
   // Od tej chwili `zadajOdswiezenie()` nie ROZPOCZNIE już nowego biegu.

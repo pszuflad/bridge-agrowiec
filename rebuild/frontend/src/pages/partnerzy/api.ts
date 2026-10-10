@@ -211,3 +211,10 @@ export type SzczegolyZamowienia = Omit<ZamowienieNaLiscie, "liczbaPozycji"> & {
 export const LIMIT_ZAMOWIEN = 50;
 export const kluczZamowien = (id: number): string[] => [KLUCZ_PARTNERZY, String(id), `zamowienia?limit=${LIMIT_ZAMOWIEN}`];
 export const kluczZamowienia = (id: number, zamowienieId: number): string[] => [KLUCZ_PARTNERZY, String(id), "zamowienia", String(zamowienieId)];
+
+/** Wynik ręcznego odbioru zamówień z e-maila (ticket 231). `powod` ≠ null, gdy nic nie odebrano (brak zmiennej w `.env`, awaria połączenia). */
+export type WynikOdbioru = { polaczono: boolean; powod: string | null; wiadomosci: number; nowe: number; duplikaty: number; bledy: number };
+
+export async function odbierzZamowienia(id: number): Promise<WynikOdbioru> {
+  return (await (await zadanie("POST", `${KLUCZ_PARTNERZY}/${id}/zamowienia/odbierz`, {})).json()) as WynikOdbioru;
+}

@@ -33,6 +33,7 @@ import { trasyEksportuShoper } from "./routes/export-shoper.js";
 import { trasySpedycji } from "./routes/spedycja.js";
 import { trasyWagiGabarytowej } from "./routes/waga-gabarytowa.js";
 import { trasyEanPary } from "./routes/ean-pary.js";
+import type { OdbiorEmail } from "./partnerzy/odbior-email.js";
 import { trasyPartnerzy } from "./routes/partnerzy.js";
 import type { SerwisPartnerow } from "./partnerzy/scheduler.js";
 import { trasyNieobecne } from "./routes/nieobecne.js";
@@ -87,6 +88,8 @@ export type ZaleznosciApp = {
   discoverySelly?: Discovery;
   /** Serwis generowania cenników partnerów (karta PARTNERZY). Pominięty (testy) ⇒ `POST /api/partnerzy/:id/generuj` odpowiada 503. */
   serwisPartnerow?: SerwisPartnerow;
+  /** Odbiór zamówień partnerów z e-maila (ticket 231). Pominięty (testy) ⇒ `POST /api/partnerzy/:id/zamowienia/odbierz` odpowiada 503. */
+  odbiorEmail?: OdbiorEmail;
 };
 
 /**
@@ -102,6 +105,7 @@ export function stworzApp({
   klientSelly,
   discoverySelly,
   serwisPartnerow,
+  odbiorEmail,
 }: ZaleznosciApp): Express {
   const app = express();
 
@@ -256,7 +260,7 @@ export function stworzApp({
   app.use(trasyEksportuShoper({ db }));
   app.use(trasyWagiGabarytowej({ db }));
   app.use(trasyEanPary({ db }));
-  app.use(trasyPartnerzy({ db, serwis: serwisPartnerow }));
+  app.use(trasyPartnerzy({ db, serwis: serwisPartnerow, odbiorEmail }));
   app.use(trasyNieobecne({ db }));
   app.use(trasyAtrybutow({ db }));
 

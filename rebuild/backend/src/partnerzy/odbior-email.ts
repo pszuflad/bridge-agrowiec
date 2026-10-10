@@ -28,9 +28,22 @@ export type UstawieniaOdbioru = {
   haslo: (partnerId: number) => string | undefined;
 };
 
+/** Zależności odbioru wstrzykiwane do aplikacji (trasa „Odbierz teraz”): fabryka skrzynki + ustawienia z `.env`. */
+export type OdbiorEmail = { otworz: OtworzSkrzynke; ustawienia: UstawieniaOdbioru };
+
+/** Odbiór dla tego partnera już trwa (zamek jest wspólny dla harmonogramu i ręcznego „Odbierz teraz”). */
+export class OdbiorTrwaError extends Error {
+  constructor(partnerId: number) {
+    super(`Odbiór zamówień dla partnera ${partnerId} już trwa.`);
+    this.name = "OdbiorTrwaError";
+  }
+}
+
 export type WynikOdbioru = {
-  /** false — kanał pominięty (brak konfiguracji) albo awaria połączenia; powód w logach partnera. */
+  /** false — kanał pominięty (brak konfiguracji) albo awaria połączenia; szczegóły w `powod` i w logach partnera. */
   polaczono: boolean;
+  /** Czytelny powód, gdy nic nie odebrano (brak zmiennej w `.env`, awaria połączenia); `null`, gdy odbiór się odbył. Bez wartości sekretów. */
+  powod: string | null;
   wiadomosci: number;
   nowe: number;
   duplikaty: number;
@@ -40,6 +53,16 @@ export type WynikOdbioru = {
 const czyXml = (z: ZalacznikPoczty): boolean => /\.xml$/i.test(z.nazwa) || /xml/i.test(z.typ);
 const komunikat = (e: unknown): string => (e instanceof Error ? e.message : String(e));
 
+/** Po tym czasie zamek uznajemy za porzucony (zawieszone połączenie IMAP nie może zablokować odbioru partnera do restartu). */
+export const LIMIT_ZAMKA_MS = 15 * 60_000;
+const trwajace = new Map<number, number>(); // partnerId → kiedy zajęty (ms)
+
+/** Tylko dla testów: zamki są stanem modułu, więc zawieszony odbiór z jednego testu nie może blokować następnych. */
+export function _zresetujZamkiOdbioru(): void {
+  trwajace.clear();
+}
+
+/** Rzuca `OdbiorTrwaError`, gdy odbiór dla partnera już trwa (zamek w pamięci procesu — wystarczy: jeden proces backendu). */
 export async function odbierzZamowieniaEmail(
   db: Baza,
   otworz: OtworzSkrzynke,
@@ -47,13 +70,37 @@ export async function odbierzZamowieniaEmail(
   ustawienia: UstawieniaOdbioru,
   teraz: Date = new Date(),
 ): Promise<WynikOdbioru> {
-  const wynik: WynikOdbioru = { polaczono: false, wiadomosci: 0, nowe: 0, duplikaty: 0, bledy: 0 };
+  const zajety = trwajace.get(partnerId);
+  if (zajety !== undefined && Date.now() - zajety < LIMIT_ZAMKA_MS) throw new OdbiorTrwaError(partnerId);
+  const moj = Date.now();
+  trwajace.set(partnerId, moj);
+  try {
+    return await odbierz(db, otworz, partnerId, ustawienia, teraz);
+  } finally {
+    // Nie zdejmujemy cudzego zamka: po przeterminowaniu mógł go przejąć nowszy odbiór.
+    if (trwajace.get(partnerId) === moj) trwajace.delete(partnerId);
+  }
+}
+
+async function odbierz(
+  db: Baza,
+  otworz: OtworzSkrzynke,
+  partnerId: number,
+  ustawienia: UstawieniaOdbioru,
+  teraz: Date = new Date(),
+): Promise<WynikOdbioru> {
+  const wynik: WynikOdbioru = { polaczono: false, powod: null, wiadomosci: 0, nowe: 0, duplikaty: 0, bledy: 0 };
   const partner = db.select().from(partnerzy).where(eq(partnerzy.id, partnerId)).get();
-  if (!partner || !partner.kanalEmail || !partner.emailSkrzynka) return wynik;
+  if (!partner || !partner.kanalEmail || !partner.emailSkrzynka) {
+    wynik.powod = "Kanał e-mail partnera nie jest włączony albo brakuje adresu skrzynki.";
+    return wynik;
+  }
 
   const haslo = ustawienia.haslo(partnerId);
   if (!ustawienia.host || !haslo) {
-    zapiszOstrzezenieRaz(db, partnerId, `Odbiór e-mail pominięty: brak ${!ustawienia.host ? "PARTNERZY_IMAP_HOST" : `PARTNERZY_IMAP_HASLO_${partnerId}`} w konfiguracji serwera.`, teraz);
+    const tekst = `Odbiór e-mail pominięty: brak ${!ustawienia.host ? "PARTNERZY_IMAP_HOST" : `PARTNERZY_IMAP_HASLO_${partnerId}`} w konfiguracji serwera.`;
+    zapiszOstrzezenieRaz(db, partnerId, tekst, teraz);
+    wynik.powod = tekst;
     return wynik;
   }
 
@@ -61,7 +108,9 @@ export async function odbierzZamowieniaEmail(
   try {
     skrzynka = await otworz({ host: ustawienia.host, port: ustawienia.port, uzytkownik: partner.emailSkrzynka, haslo });
   } catch (e) {
-    zapiszBlad(db, partnerId, OPERACJA_ODBIOR_EMAIL, `Nie udało się połączyć ze skrzynką ${partner.emailSkrzynka}: ${bezHasla(komunikat(e), haslo)}`, "blad", teraz);
+    const tekst = `Nie udało się połączyć ze skrzynką ${partner.emailSkrzynka}: ${bezHasla(komunikat(e), haslo)}`;
+    zapiszBlad(db, partnerId, OPERACJA_ODBIOR_EMAIL, tekst, "blad", teraz);
+    wynik.powod = tekst;
     return wynik;
   }
   wynik.polaczono = true;
@@ -154,6 +203,7 @@ export async function odbierzDlaWszystkich(db: Baza, otworz: OtworzSkrzynke, ust
     try {
       wyniki.set(id, await odbierzZamowieniaEmail(db, otworz, id, ustawienia, teraz));
     } catch (e) {
+      if (e instanceof OdbiorTrwaError) continue; // ręczne „Odbierz teraz” właśnie trwa — ten partner w tym przebiegu pomijamy
       console.error(`[partnerzy-odbior-email] partner ${id}:`, komunikat(e));
     }
   }
