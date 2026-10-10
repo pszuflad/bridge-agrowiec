@@ -694,3 +694,10 @@ export const partnerKursy = sqliteTable("partner_kursy", {
 	plik: text(),
 	zapisano: text().notNull(),
 }, (table) => [index("idx_partner_kursy_partner").on(table.partnerId, table.zapisano)]);
+
+// Ticket 210 (PRT-2.1; migracja 025) — ostatnie znane kursy EUR z NBP (tabela A), rezerwa na awarię NBP.
+export const kursyNbp = sqliteTable("kursy_nbp", {
+	data: text().primaryKey().notNull(),
+	kurs: real().notNull(),
+	pobrano: text().notNull(),
+});
