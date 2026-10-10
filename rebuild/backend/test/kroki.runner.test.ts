@@ -303,3 +303,46 @@ describe("krok wdrożenia: reset hasła Arkadiusza", () => {
     expect(await porownajHaslo("zapomniane-haslo-1", pobierzUzytkownikaPoEmailu(db, EMAIL)!.hasloHash)).toBe(true);
   });
 });
+
+describe("krok 2026-10-10-partnerzy-startowi", () => {
+  const ID = "2026-10-10-partnerzy-startowi";
+  const krok = () => KROKI_WDROZENIA.find((k) => k.id === ID)!;
+
+  it("zakłada TyreWorld i Adtyres jako nieaktywnych, bez krajów, magazynów i kolumn", async () => {
+    const { sqlite, db } = baza();
+    const wynik = await uruchomKroki(sqlite, db, [krok()], {});
+    expect(wynik.wykonane).toEqual([ID]);
+    expect(sqlite.prepare("SELECT nazwa, aktywny, stan_min, harmonogram_minuty FROM partnerzy ORDER BY nazwa").all()).toEqual([
+      { nazwa: "Adtyres", aktywny: 0, stan_min: 2, harmonogram_minuty: null },
+      { nazwa: "TyreWorld", aktywny: 0, stan_min: 2, harmonogram_minuty: null },
+    ]);
+    for (const t of ["partner_kraje", "partner_magazyny", "partner_kolumny", "partner_wykluczenia", "partner_logi"]) {
+      expect(sqlite.prepare(`SELECT COUNT(*) c FROM ${t}`).get(), t).toEqual({ c: 0 });
+    }
+  });
+
+  it("jest idempotentny: istniejącego partnera (też zmienionego w panelu) nie rusza i nie dubluje", async () => {
+    const { sqlite, db } = baza();
+    sqlite.prepare("INSERT INTO partnerzy (nazwa, aktywny, stan_min, utworzono, zmieniono) VALUES ('TyreWorld', 1, 5, 'x', 'x')").run();
+    await krok().uruchom({ db, sqlite, env: {} });
+    await krok().uruchom({ db, sqlite, env: {} });
+    expect(sqlite.prepare("SELECT nazwa, aktywny, stan_min FROM partnerzy ORDER BY nazwa").all()).toEqual([
+      { nazwa: "Adtyres", aktywny: 0, stan_min: 2 },
+      { nazwa: "TyreWorld", aktywny: 1, stan_min: 5 },
+    ]);
+  });
+
+  it("zapisuje się raz — drugie wdrożenie go pomija, także po ręcznym usunięciu partnera", async () => {
+    const { sqlite, db } = baza();
+    await uruchomKroki(sqlite, db, [krok()], {});
+    sqlite.prepare("DELETE FROM partnerzy WHERE nazwa = 'Adtyres'").run();
+    const drugi = await uruchomKroki(sqlite, db, [krok()], {});
+    expect(drugi.juzWykonane).toEqual([ID]);
+    expect(sqlite.prepare("SELECT COUNT(*) c FROM partnerzy").get()).toEqual({ c: 1 });
+  });
+
+  it("działa też na środowisku testowym (nie jest tylkoProdukcja) i nie wymaga sekretów", () => {
+    expect(krok().tylkoProdukcja).toBeUndefined();
+    expect(krok().wymagaEnv).toBeUndefined();
+  });
+});

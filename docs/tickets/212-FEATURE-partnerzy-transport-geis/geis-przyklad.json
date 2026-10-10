@@ -1,0 +1,8 @@
+{
+  "FR": {
+    "wspGabarytowy": 250,
+    "kosztPakowania": 0,
+    "maks": null,
+    "stawki": [[100, 103], [200, 163], [500, 369], [2500, 1135]]
+  }
+}

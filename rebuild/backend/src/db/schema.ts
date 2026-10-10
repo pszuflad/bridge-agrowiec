@@ -621,3 +621,147 @@ export const eanPary = sqliteTable("ean_pary", {
 	zastapiono: text(),
 	zastapionyPrzez: text("zastapiony_przez"),
 });
+
+// ── Moduł partnerów B2B (karta PARTNERZY, ticket 208 / PRT-1.1; migracja 024) ──
+// NOWA funkcjonalność, nie odtworzenie produkcji. Sam model — logika w kolejnych ticketach.
+// Ceny i koszty w PLN; kurs EUR zapisywany osobno przy pliku (`partnerKursy`).
+export const partnerzy = sqliteTable("partnerzy", {
+	id: integer().primaryKey({ autoIncrement: true }),
+	nazwa: text().notNull().unique(),
+	aktywny: integer({ mode: "boolean" }).default(false).notNull(),
+	stanMin: integer("stan_min").default(2).notNull(),
+	zaokraglanie: text().default("grosz").notNull(),
+	harmonogramMinuty: integer("harmonogram_minuty"),
+	tolerancjaCenyProc: real("tolerancja_ceny_proc"),
+	formatPliku: text("format_pliku").default("csv").notNull(),
+	csvSeparator: text("csv_separator").default(";").notNull(),
+	kanalFtp: integer("kanal_ftp", { mode: "boolean" }).default(false).notNull(),
+	kanalEmail: integer("kanal_email", { mode: "boolean" }).default(false).notNull(),
+	emailSkrzynka: text("email_skrzynka"),
+	utworzono: text().notNull(),
+	zmieniono: text().notNull(),
+});
+
+export const partnerMagazyny = sqliteTable("partner_magazyny", {
+	partnerId: integer("partner_id").notNull().references(() => partnerzy.id, { onDelete: "cascade" }),
+	magazyn: text().notNull(),
+}, (table) => [primaryKey({ columns: [table.partnerId, table.magazyn] })]);
+
+export const partnerWykluczenia = sqliteTable("partner_wykluczenia", {
+	partnerId: integer("partner_id").notNull().references(() => partnerzy.id, { onDelete: "cascade" }),
+	produktKod: text("produkt_kod").notNull(),
+}, (table) => [primaryKey({ columns: [table.partnerId, table.produktKod] })]);
+
+export const partnerKraje = sqliteTable("partner_kraje", {
+	id: integer().primaryKey({ autoIncrement: true }),
+	partnerId: integer("partner_id").notNull().references(() => partnerzy.id, { onDelete: "cascade" }),
+	kraj: text().notNull(),
+	narzutProc: real("narzut_proc").default(0).notNull(),
+	kursZrodlo: text("kurs_zrodlo").default("nbp").notNull(),
+	kursReczny: real("kurs_reczny"),
+	kosztyDodatkowe: real("koszty_dodatkowe").default(0).notNull(),
+}, (table) => [unique().on(table.partnerId, table.kraj)]);
+
+export const partnerPolaObliczeniowe = sqliteTable("partner_pola_obliczeniowe", {
+	id: integer().primaryKey({ autoIncrement: true }),
+	partnerId: integer("partner_id").notNull().references(() => partnerzy.id, { onDelete: "cascade" }),
+	nazwa: text().notNull(),
+	formula: text().notNull(),
+}, (table) => [unique().on(table.partnerId, table.nazwa)]);
+
+export const partnerKolumny = sqliteTable("partner_kolumny", {
+	id: integer().primaryKey({ autoIncrement: true }),
+	partnerId: integer("partner_id").notNull().references(() => partnerzy.id, { onDelete: "cascade" }),
+	pozycja: integer().notNull(),
+	nazwaWPliku: text("nazwa_w_pliku").notNull(),
+	zrodloTyp: text("zrodlo_typ").notNull(),
+	zrodlo: text().notNull(),
+}, (table) => [unique().on(table.partnerId, table.pozycja)]);
+
+export const paliwoHistoria = sqliteTable("paliwo_historia", {
+	id: integer().primaryKey({ autoIncrement: true }),
+	kraj: text().notNull(),
+	procent: real().notNull(),
+	obowiazujeOd: text("obowiazuje_od").notNull(),
+}, (table) => [unique().on(table.kraj, table.obowiazujeOd)]);
+
+export const partnerKursy = sqliteTable("partner_kursy", {
+	id: integer().primaryKey({ autoIncrement: true }),
+	partnerId: integer("partner_id").notNull().references(() => partnerzy.id, { onDelete: "cascade" }),
+	kraj: text().notNull(),
+	kurs: real().notNull(),
+	zrodlo: text().notNull(),
+	plik: text(),
+	zapisano: text().notNull(),
+}, (table) => [index("idx_partner_kursy_partner").on(table.partnerId, table.zapisano)]);
+
+// Ticket 210 (PRT-2.1; migracja 025) — ostatnie znane kursy EUR z NBP (tabela A), rezerwa na awarię NBP.
+export const kursyNbp = sqliteTable("kursy_nbp", {
+	data: text().primaryKey().notNull(),
+	kurs: real().notNull(),
+	pobrano: text().notNull(),
+});
+
+// Ticket 212 (PRT-2.2; migracja 026) — tabele transportowe GEIS (V1: stawka całego kraju). Dane wgrywa `importuj-geis`.
+export const geisKraje = sqliteTable("geis_kraje", {
+	kraj: text().primaryKey().notNull(),
+	wspGabarytowy: real("wsp_gabarytowy").notNull(),
+	kosztPakowania: real("koszt_pakowania").default(0).notNull(),
+	maksDlugosc: real("maks_dlugosc"),
+	maksSzerokosc: real("maks_szerokosc"),
+	maksWysokosc: real("maks_wysokosc"),
+});
+
+export const geisStawki = sqliteTable("geis_stawki", {
+	kraj: text().notNull().references(() => geisKraje.kraj, { onDelete: "cascade" }),
+	progKg: real("prog_kg").notNull(),
+	stawka: real().notNull(),
+}, (table) => [primaryKey({ columns: [table.kraj, table.progKg] })]);
+
+// Ticket 219 (PRT-4.2; migracja 027) — logi operacji modułu partnerów: jedna linia na operację + osobny log błędów i ostrzeżeń.
+export const partnerLogi = sqliteTable("partner_logi", {
+	id: integer().primaryKey({ autoIncrement: true }),
+	partnerId: integer("partner_id").notNull().references(() => partnerzy.id, { onDelete: "cascade" }),
+	kiedy: text().notNull(),
+	operacja: text().notNull(),
+	opis: text().notNull(),
+	liczbaPozycji: integer("liczba_pozycji"),
+}, (table) => [index("idx_partner_logi_partner").on(table.partnerId, table.kiedy)]);
+
+export const partnerErrorLog = sqliteTable("partner_error_log", {
+	id: integer().primaryKey({ autoIncrement: true }),
+	partnerId: integer("partner_id").notNull().references(() => partnerzy.id, { onDelete: "cascade" }),
+	kiedy: text().notNull(),
+	operacja: text().notNull(),
+	poziom: text().default("blad").notNull(),
+	komunikat: text().notNull(),
+}, (table) => [index("idx_partner_error_log_partner").on(table.partnerId, table.kiedy)]);
+
+// Ticket 228 (PRT-7.1; migracja 028) — zamówienia odbierane od partnerów. Numer partnera i nasz numer osobno; UNIQUE(partner, numer partnera) = idempotencja.
+export const partnerZamowienia = sqliteTable("partner_zamowienia", {
+	id: integer().primaryKey({ autoIncrement: true }),
+	partnerId: integer("partner_id").notNull().references(() => partnerzy.id, { onDelete: "cascade" }),
+	numerPartnera: text("numer_partnera").notNull(),
+	numerWlasny: text("numer_wlasny"),
+	status: text().default("nowe").notNull(),
+	dataZamowienia: text("data_zamowienia"),
+	dataDostawy: text("data_dostawy"),
+	waluta: text(),
+	kosztDostawy: real("koszt_dostawy"),
+	krajDostawy: text("kraj_dostawy"),
+	fakturaJson: text("faktura_json").default("{}").notNull(),
+	dostawaJson: text("dostawa_json").default("{}").notNull(),
+	surowyXml: text("surowy_xml").notNull(),
+	skrotXml: text("skrot_xml").notNull(),
+	pobrano: text().notNull(),
+}, (table) => [unique().on(table.partnerId, table.numerPartnera)]);
+
+export const partnerZamowieniaPozycje = sqliteTable("partner_zamowienia_pozycje", {
+	id: integer().primaryKey({ autoIncrement: true }),
+	zamowienieId: integer("zamowienie_id").notNull().references(() => partnerZamowienia.id, { onDelete: "cascade" }),
+	lp: integer().notNull(),
+	kod: text().notNull(),
+	nazwa: text(),
+	ilosc: integer().notNull(),
+	cenaSprzedazy: real("cena_sprzedazy"),
+}, (table) => [unique().on(table.zamowienieId, table.lp), index("idx_partner_zamowienia_pozycje_zam").on(table.zamowienieId)]);

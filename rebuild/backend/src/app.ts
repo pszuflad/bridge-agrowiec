@@ -33,6 +33,8 @@ import { trasyEksportuShoper } from "./routes/export-shoper.js";
 import { trasySpedycji } from "./routes/spedycja.js";
 import { trasyWagiGabarytowej } from "./routes/waga-gabarytowa.js";
 import { trasyEanPary } from "./routes/ean-pary.js";
+import { trasyPartnerzy } from "./routes/partnerzy.js";
+import type { SerwisPartnerow } from "./partnerzy/scheduler.js";
 import { trasyNieobecne } from "./routes/nieobecne.js";
 import type { OpcjeSynchronizacji, WynikSynchronizacji } from "./import/synchronizuj.js";
 import { stworzKlientaSelly, type KlientSelly } from "./selly/klient.js";
@@ -83,6 +85,8 @@ export type ZaleznosciApp = {
    * Pominięta (testy, dev) ⇒ `stworzApp` buduje własną na tym samym kliencie, co panel.
    */
   discoverySelly?: Discovery;
+  /** Serwis generowania cenników partnerów (karta PARTNERZY). Pominięty (testy) ⇒ `POST /api/partnerzy/:id/generuj` odpowiada 503. */
+  serwisPartnerow?: SerwisPartnerow;
 };
 
 /**
@@ -97,6 +101,7 @@ export function stworzApp({
   przeplanujScheduler,
   klientSelly,
   discoverySelly,
+  serwisPartnerow,
 }: ZaleznosciApp): Express {
   const app = express();
 
@@ -251,6 +256,7 @@ export function stworzApp({
   app.use(trasyEksportuShoper({ db }));
   app.use(trasyWagiGabarytowej({ db }));
   app.use(trasyEanPary({ db }));
+  app.use(trasyPartnerzy({ db, serwis: serwisPartnerow }));
   app.use(trasyNieobecne({ db }));
   app.use(trasyAtrybutow({ db }));
 
