@@ -205,6 +205,8 @@ export type ListaZamowien = { zamowienia: ZamowienieNaLiscie[] };
 export type PozycjaZamowienia = { id: number; lp: number; kod: string; nazwa: string | null; ilosc: number; cenaSprzedazy: number | null; blad: string | null };
 export type SzczegolyZamowienia = Omit<ZamowienieNaLiscie, "liczbaPozycji"> & {
   partnerId: number;
+  /** Z backendu (jedno źródło prawdy o statusach podlegających walidacji) — ticket 233. */
+  mozeWalidowac: boolean;
   dataDostawy: string | null;
   kosztDostawy: number | null;
   faktura: Record<string, string>;

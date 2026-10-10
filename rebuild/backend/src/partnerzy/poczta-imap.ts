@@ -20,6 +20,8 @@ export const otworzSkrzynkeImap: OtworzSkrzynke = async (konfig: KonfiguracjaSkr
     host: konfig.host,
     port: konfig.port,
     secure: konfig.port === 993,
+    // Port ≠ 993: STARTTLS jest WYMAGANY — bez tego imapflow połączyłby się bez szyfrowania, gdyby serwer go nie oferował, i hasło poszłoby jawnie.
+    ...(konfig.port === 993 ? {} : { doSTARTTLS: true }),
     auth: { user: konfig.uzytkownik, pass: konfig.haslo },
     logger: false,
     connectionTimeout: TIMEOUT_POLACZENIA_MS,

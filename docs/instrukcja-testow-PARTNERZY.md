@@ -78,6 +78,7 @@ Działa też dla partnera nieaktywnego i **nie wymaga** włączania harmonogramu
   a po rozwinięciu widzisz ramkę z opisem i powód przy każdej pozycji. **Partner nie dostaje żadnego powiadomienia.** Po poprawie katalogu kliknij **Sprawdź ponownie** — zamówienie powinno przejść na „przyjęte”.
   Cena i tolerancja cenowa **nie są** jeszcze sprawdzane (czekamy na decyzję o wartości tolerancji).
 - Błędny plik albo wiadomość bez XML: zamówienie się nie pojawia, a szczegóły są w **Błędy i ostrzeżenia**.
+- **Szyfrowanie:** port 993 = TLS od razu; inny port (np. 143) wymaga STARTTLS — jeśli serwer go nie oferuje, odbiór zakończy się błędem zamiast wysłać hasło jawnie. Załączniki w innym kodowaniu (ISO-8859-2, windows-1250) są czytane poprawnie; pliki Excel/Word w załączniku są pomijane.
 - **Połączenie z prawdziwym serwerem poczty nie było jeszcze sprawdzone** — to pierwszy test na środowisku testowym; zgłoś każdy komunikat błędu.
 
 > **Twoja ocena:** ☐ OK ☐ ŹLE — uwagi: _______________

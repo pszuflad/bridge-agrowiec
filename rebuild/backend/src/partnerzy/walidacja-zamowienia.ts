@@ -18,6 +18,9 @@ export const STATUS_BLAD_IMPORTU = "blad_importu";
 /** Statusy, w których wolno (ponownie) walidować; późniejsze (np. wysłane do sklepu, 7.5) są nietykalne. */
 const STATUSY_DO_WALIDACJI: readonly string[] = [STATUS_NOWE, STATUS_PRZYJETE, STATUS_BLAD_IMPORTU];
 
+/** Czy zamówienie w tym statusie podlega (ponownej) walidacji — jedyne źródło prawdy dla backendu i panelu (pole `mozeWalidowac`). */
+export const czyPodlegaWalidacji = (status: string): boolean => STATUSY_DO_WALIDACJI.includes(status);
+
 export type PozycjaKatalogu = { kod: string; stan: number; status: string };
 
 /** Baza albo transakcja Drizzle — oba mają `select`; sama transakcja nie jest typem `Baza`. */
@@ -48,7 +51,7 @@ export function zwaliduj(db: Baza, zamowienieId: number, opcje: { zachowajPrzyje
   return db.transaction((tx) => {
     const z = tx.select({ id: partnerZamowienia.id, status: partnerZamowienia.status }).from(partnerZamowienia).where(eq(partnerZamowienia.id, zamowienieId)).get();
     if (!z) return null;
-    if (!STATUSY_DO_WALIDACJI.includes(z.status) || (opcje.zachowajPrzyjete && z.status === STATUS_PRZYJETE)) return { status: z.status, bledy: 0, zmieniony: false };
+    if (!czyPodlegaWalidacji(z.status) || (opcje.zachowajPrzyjete && z.status === STATUS_PRZYJETE)) return { status: z.status, bledy: 0, zmieniony: false };
 
     const pozycje = tx.select().from(partnerZamowieniaPozycje).where(eq(partnerZamowieniaPozycje.zamowienieId, zamowienieId)).all();
     const lacznie = new Map<string, number>();
