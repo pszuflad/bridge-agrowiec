@@ -43,8 +43,24 @@ describe("trasy /api/partnerzy/:id/zamowienia", () => {
     const lista = (odp.body as { zamowienia: Record<string, unknown>[] }).zamowienia;
     expect(lista.map((z) => z.numerPartnera)).toEqual(["A2", "A1"]);
     expect(lista[0]).toMatchObject({ status: "nowe", numerWlasny: null, waluta: "EUR", krajDostawy: "AT", liczbaPozycji: 2 });
-    expect(Object.keys(lista[0]!)).not.toEqual(expect.arrayContaining(["surowyXml"]));
+    for (const klucz of ["surowyXml", "skrotXml", "fakturaJson", "dostawaJson", "dostawa", "faktura"]) expect(lista[0]).not.toHaveProperty(klucz);
     expect(JSON.stringify(odp.body)).not.toContain("Jan Kowalski");
+  });
+
+  it("lista partnera nie zawiera zamówień innego partnera", async () => {
+    zapiszZamowienie(s.db, a, zamowienie("OD_A"));
+    zapiszZamowienie(s.db, b, zamowienie("OD_B"));
+    const numery = async (id: number) => ((await get(`/api/partnerzy/${id}/zamowienia`)).body as { zamowienia: { numerPartnera: string }[] }).zamowienia.map((z) => z.numerPartnera);
+    expect(await numery(a)).toEqual(["OD_A"]);
+    expect(await numery(b)).toEqual(["OD_B"]);
+  });
+
+  it("lista: niecałkowity lub ujemny limit/offset nie wywraca trasy", async () => {
+    zapiszZamowienie(s.db, a, zamowienie("A1"));
+    for (const q of ["limit=1.5", "offset=0.7", "limit=-3&offset=-1", "limit=abc"]) {
+      const odp = await get(`/api/partnerzy/${a}/zamowienia?${q}`);
+      expect(odp.status, q).toBe(200);
+    }
   });
 
   it("lista: limit i offset", async () => {

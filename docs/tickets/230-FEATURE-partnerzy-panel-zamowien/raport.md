@@ -23,3 +23,10 @@ None.
 
 ## Follow-up
 - Statusy, błędy importu i powiązanie z Selly (PRT-7.4/7.5); „Odbierz teraz” (wymaga wstrzyknięcia IMAP do aplikacji); filtry i wyszukiwanie.
+
+## Review fixes applied (review.md, 0 BLOCKER / 5 SHOULD-FIX)
+- `stronicowanie` (wspólny helper tras partnerów, dotyczy też `logi` i `error-log`): `Math.floor`, więc niecałkowite `limit`/`offset` nie wywracają SQLite (500); test brzegowy.
+- Lista obcięta do 50 pozycji pokazuje komunikat; „Odśwież” odświeża także szczegóły rozwiniętych zamówień (`refetchOnMount: "always"` + unieważnienie).
+- Polskie etykiety znanych pól dostawy (nieznane pola partnera pod nazwą z pliku). `faktura` zostaje poza panelem (jest w API) — do potwierdzenia z użytkownikiem, czy ma być widoczna.
+- Mocniejsze testy: brak pól wrażliwych w liście, lista partnera A nie zawiera zamówień B.
+- NICE-TO-HAVE z review.md: nie wdrożone. Drugi przebieg reviewera nie był uruchamiany — poprawki pokryte testami.

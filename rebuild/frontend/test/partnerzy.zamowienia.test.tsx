@@ -1,5 +1,5 @@
 /** Zamówienia odebrane od partnera na stronie partnera: lista i szczegóły, tylko odczyt (ticket 230, PRT-7.6a). MSW od zera. */
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { beforeEach, describe, expect, it } from "vitest";
@@ -89,7 +89,8 @@ describe("zamówienia partnera", () => {
     expect(within(szczegolyWidok).getByTestId("pozycja-1-1")).toHaveTextContent("Ceat Farmax R70");
     expect(within(szczegolyWidok).getByTestId("pozycja-1-2")).toHaveTextContent("0102 00001");
     expect(within(screen.getByTestId("dostawa-1")).getByText("Jan Kowalski")).toBeInTheDocument();
-    expect(screen.getByTestId("dostawa-1")).not.toHaveTextContent("PHONE"); // puste pola pomijane
+    expect(screen.getByTestId("dostawa-1")).toHaveTextContent("Odbiorca");
+    expect(screen.getByTestId("dostawa-1")).not.toHaveTextContent("Telefon"); // puste pola pomijane
     await uzytkownik.click(screen.getByTestId("button-zamowienie-1"));
     expect(screen.queryByTestId("szczegoly-zamowienia-1")).not.toBeInTheDocument();
   });
@@ -117,5 +118,22 @@ describe("zamówienia partnera", () => {
     zamowienia = [naLiscie(5, "NOWE5")];
     await uzytkownik.click(screen.getByTestId("button-zamowienia-odswiez"));
     expect(await screen.findByTestId("zamowienie-5")).toHaveTextContent("NOWE5");
+  });
+
+  it("pełna strona wyników (limit) pokazuje informację o obciętej liście", async () => {
+    zamowienia = Array.from({ length: 50 }, (_, i) => naLiscie(i + 1, `A${i + 1}`));
+    await otworz();
+    expect(await screen.findByTestId("text-zamowienia-obcieta")).toHaveTextContent("50 najnowszych");
+  });
+
+  it("Odśwież pobiera od nowa także szczegóły rozwiniętego zamówienia", async () => {
+    const uzytkownik = userEvent.setup();
+    zamowienia = [naLiscie(1, "A01")];
+    await otworz();
+    await uzytkownik.click(await screen.findByTestId("button-zamowienie-1"));
+    await screen.findByTestId("szczegoly-zamowienia-1");
+    const przed = zapytaniaSzczegolow.length;
+    await uzytkownik.click(screen.getByTestId("button-zamowienia-odswiez"));
+    await waitFor(() => expect(zapytaniaSzczegolow.length).toBeGreaterThan(przed));
   });
 });

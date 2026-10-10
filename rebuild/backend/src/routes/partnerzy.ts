@@ -67,8 +67,9 @@ export function trasyPartnerzy({ db, serwis }: ZaleznosciPartnerzy): Router {
   });
 
   const stronicowanie = (req: Request): { limit: number; offset: number } => ({
-    limit: Math.min(Math.max(Number(req.query.limit) || 100, 1), 1000),
-    offset: Math.max(Number(req.query.offset) || 0, 0),
+    // `Math.floor`: niecałkowite `limit=1.5` wywracałoby SQLite (500) — dotyczy też tras logów.
+    limit: Math.min(Math.max(Math.floor(Number(req.query.limit)) || 100, 1), 1000),
+    offset: Math.max(Math.floor(Number(req.query.offset)) || 0, 0),
   });
 
   /** Log operacji (jedna linia na operację), najnowsze pierwsze; `limit` (domyślnie 100, max 1000) i `offset`. */

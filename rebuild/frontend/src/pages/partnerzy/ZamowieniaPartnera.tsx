@@ -1,5 +1,5 @@
 /** Zamówienia odebrane od partnera — lista i szczegóły, tylko odczyt (ticket 230, PRT-7.6a). Statusy i akcje: PRT-7.4/7.5. */
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChevronDown, ChevronRight, RefreshCw } from "lucide-react";
 import { Fragment, useState } from "react";
 
@@ -7,28 +7,39 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
-  komunikatBledu, kluczZamowien, kluczZamowienia,
+  KLUCZ_PARTNERZY, LIMIT_ZAMOWIEN, komunikatBledu, kluczZamowien, kluczZamowienia,
   type ListaZamowien, type SzczegolyPartnera, type SzczegolyZamowienia,
 } from "./api";
 
 const czas = (iso: string): string => new Date(iso).toLocaleString("pl-PL");
+/** Polskie etykiety znanych pól adresu dostawy; nieznane pola partnera pokazujemy pod ich nazwą z pliku. */
+const ETYKIETY_DOSTAWY: Record<string, string> = { CUSTOMERNAME: "Odbiorca", COUNTRY: "Kraj", PHONE: "Telefon", MODEOFTRANSPORT: "Sposób transportu", CODCOST: "Pobranie", DELIVERY_COST: "Koszt dostawy" };
 
 export function ZamowieniaPartnera({ partner }: { partner: SzczegolyPartnera }) {
   const [otwarte, ustawOtwarte] = useState<number | null>(null);
+  const klient = useQueryClient();
   const lista = useQuery<ListaZamowien | null>({ queryKey: kluczZamowien(partner.id), refetchOnMount: "always" });
+  const odswiez = () => {
+    void lista.refetch();
+    // Szczegóły rozwiniętych zamówień też od nowa (inaczej zostałyby w cache ze starym stanem).
+    void klient.invalidateQueries({ queryKey: [KLUCZ_PARTNERZY, String(partner.id), "zamowienia"] });
+  };
 
   return (
     <Card>
       <CardContent className="space-y-3 p-4">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold">Zamówienia od partnera</h2>
-          <Button size="sm" variant="outline" className="gap-1.5" onClick={() => void lista.refetch()} data-testid="button-zamowienia-odswiez">
+          <Button size="sm" variant="outline" className="gap-1.5" onClick={odswiez} data-testid="button-zamowienia-odswiez">
             <RefreshCw className="h-3.5 w-3.5" aria-hidden />Odśwież
           </Button>
         </div>
         <p className="text-xs text-muted-foreground">Zamówienia odebrane kanałem e-mail (tylko podgląd). Statusy i wysyłka do sklepu dojdą w kolejnych etapach.</p>
         {lista.isError ? <p className="text-sm text-destructive" role="alert" data-testid="text-zamowienia-blad">{komunikatBledu(lista.error)}</p> : null}
         {lista.data && lista.data.zamowienia.length === 0 ? <p className="text-sm text-muted-foreground" data-testid="text-zamowienia-pusto">Brak zamówień — nic jeszcze nie odebrano.</p> : null}
+        {lista.data && lista.data.zamowienia.length >= LIMIT_ZAMOWIEN ? (
+          <p className="text-xs text-muted-foreground" data-testid="text-zamowienia-obcieta">Pokazano {LIMIT_ZAMOWIEN} najnowszych zamówień — starsze nie są tu widoczne.</p>
+        ) : null}
         {lista.data && lista.data.zamowienia.length > 0 ? (
           <ul className="divide-y text-sm" data-testid="lista-zamowien">
             {lista.data.zamowienia.map((z) => {
@@ -61,7 +72,7 @@ export function ZamowieniaPartnera({ partner }: { partner: SzczegolyPartnera }) 
 }
 
 function SzczegolyZamowieniaWidok({ partnerId, zamowienieId }: { partnerId: number; zamowienieId: number }) {
-  const { data, isError, error, isPending } = useQuery<SzczegolyZamowienia | null>({ queryKey: kluczZamowienia(partnerId, zamowienieId) });
+  const { data, isError, error, isPending } = useQuery<SzczegolyZamowienia | null>({ queryKey: kluczZamowienia(partnerId, zamowienieId), refetchOnMount: "always" });
   if (isError) return <p className="mt-2 text-sm text-destructive" role="alert" data-testid="text-zamowienie-blad">{komunikatBledu(error)}</p>;
   if (isPending || !data) return <p className="mt-2 text-sm text-muted-foreground">Ładowanie…</p>;
   const dostawa = Object.entries(data.dostawa).filter(([, v]) => v !== "");
@@ -86,7 +97,7 @@ function SzczegolyZamowieniaWidok({ partnerId, zamowienieId }: { partnerId: numb
       {dostawa.length > 0 ? (
         <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 text-xs" data-testid={`dostawa-${zamowienieId}`}>
           {dostawa.map(([k, v]) => (
-            <Fragment key={k}><dt className="text-muted-foreground">{k}</dt><dd>{v}</dd></Fragment>
+            <Fragment key={k}><dt className="text-muted-foreground">{ETYKIETY_DOSTAWY[k] ?? k}</dt><dd>{v}</dd></Fragment>
           ))}
         </dl>
       ) : null}
