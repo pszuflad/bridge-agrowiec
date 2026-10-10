@@ -185,3 +185,29 @@ export const kluczLogow = (id: number): string[] => [KLUCZ_PARTNERZY, String(id)
 export const kluczBledow = (id: number, poziom: FiltrPoziomu): string[] => [
   KLUCZ_PARTNERZY, String(id), `error-log?limit=${LIMIT_BLEDOW}${poziom === "wszystkie" ? "" : `&poziom=${poziom}`}`,
 ];
+
+/** Zamówienia odebrane od partnera (ticket 230, PRT-7.6a; tylko odczyt). Kształty z `repos/partnerzy-zamowienia.ts`. */
+export type ZamowienieNaLiscie = {
+  id: number;
+  numerPartnera: string;
+  numerWlasny: string | null;
+  status: string;
+  dataZamowienia: string | null;
+  waluta: string | null;
+  krajDostawy: string | null;
+  pobrano: string;
+  liczbaPozycji: number;
+};
+export type ListaZamowien = { zamowienia: ZamowienieNaLiscie[] };
+export type PozycjaZamowienia = { id: number; lp: number; kod: string; nazwa: string | null; ilosc: number; cenaSprzedazy: number | null };
+export type SzczegolyZamowienia = Omit<ZamowienieNaLiscie, "liczbaPozycji"> & {
+  partnerId: number;
+  dataDostawy: string | null;
+  kosztDostawy: number | null;
+  faktura: Record<string, string>;
+  dostawa: Record<string, string>;
+  pozycje: PozycjaZamowienia[];
+};
+export const LIMIT_ZAMOWIEN = 50;
+export const kluczZamowien = (id: number): string[] => [KLUCZ_PARTNERZY, String(id), `zamowienia?limit=${LIMIT_ZAMOWIEN}`];
+export const kluczZamowienia = (id: number, zamowienieId: number): string[] => [KLUCZ_PARTNERZY, String(id), "zamowienia", String(zamowienieId)];

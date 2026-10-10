@@ -1,6 +1,6 @@
 /**
  * Widok `/partnerzy/:id` — konfiguracja partnera (karta PARTNERZY, ticket 222 / PRT-5.2): ustawienia, magazyny, wykluczenia, kraje.
- * Kolumny pliku i pola obliczeniowe: PRT-5.3; logi i pliki: PRT-5.4.
+ * Kolumny pliku i pola obliczeniowe: PRT-5.3; logi i pliki: PRT-5.4; zamówienia (podgląd): ticket 230.
  */
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
@@ -14,6 +14,7 @@ import { MagazynyPartnera, WykluczeniaPartnera } from "./partnerzy/MagazynyIWykl
 import { KolumnyPliku, PolaObliczeniowe } from "./partnerzy/PolaIKolumny";
 import { PodgladPliku } from "./partnerzy/PodgladPliku";
 import { UstawieniaPartnera } from "./partnerzy/UstawieniaPartnera";
+import { ZamowieniaPartnera } from "./partnerzy/ZamowieniaPartnera";
 
 export function PartnerSzczegoly() {
   const { id } = useParams<{ id: string }>();
@@ -47,6 +48,7 @@ export function PartnerSzczegoly() {
           <PolaObliczeniowe key={`p-${JSON.stringify(data.polaObliczeniowe)}-${data.kraje.length}`} partner={data} />
           <KolumnyPliku key={`k-${JSON.stringify(data.kolumny)}-${data.polaObliczeniowe.length}-${data.kraje.length}`} partner={data} />
           <PodgladPliku partner={data} />
+          <ZamowieniaPartnera partner={data} />
           <LogiPartnera partner={data} />
         </>
       ) : (

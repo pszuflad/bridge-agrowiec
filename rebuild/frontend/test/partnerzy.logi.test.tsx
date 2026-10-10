@@ -29,6 +29,7 @@ let generowanie: { status: number; cialo: object };
 function zamockujApi() {
   server.use(
     http.get("*/api/partnerzy/magazyny", () => HttpResponse.json({ magazyny: [] })),
+    http.get("*/api/partnerzy/:id/zamowienia", () => HttpResponse.json({ zamowienia: [] })),
     http.get("*/api/partnerzy/:id/logi", () => HttpResponse.json({ logi })),
     http.get("*/api/partnerzy/:id/error-log", ({ request }) => {
       const poziom = new URL(request.url).searchParams.get("poziom");
