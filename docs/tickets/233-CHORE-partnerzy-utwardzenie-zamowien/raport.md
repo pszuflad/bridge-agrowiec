@@ -22,3 +22,11 @@ Zamierzona zmiana zachowania: IMAP na porcie ≠ 993 wymaga STARTTLS (bez TLS od
 
 ## Follow-up
 - Pierwszy odbiór na prawdziwej skrzynce; kontrola ceny zamówienia; numer katalogowy.
+
+## Review fixes applied (review.md, 0 BLOCKER / 5 SHOULD-FIX)
+- `podzial-na-tickety.md`: mapowanie PRT → numery ticketów uzupełnione o 228–233 (wcześniej wpis kończył się na 227); `karta.md`: usunięta sprzeczna wzmianka „wszystko na develop / nic na produkcji”.
+- UTF-16 bez BOM (rozpoznawany po „<” zapisanym na dwóch bajtach) jest czytany poprawnie; test.
+- Błąd „Sprawdź ponownie” (np. 409) odświeża szczegóły zamówienia, żeby przycisk nie był nieaktualny; test.
+- Podpowiedź wyłączonego przycisku „Odbierz teraz” na opakowaniu `span` (disabled Button ma `pointer-events-none`).
+- Testy tabelaryczne `czyXml` już były w `partnerzy.dekoduj-xml.test.ts` (uwaga review nietrafiona).
+- NICE-TO-HAVE z review.md (charset z nagłówka MIME, komunikat dla Node bez pełnego ICU, wcięcie JSX): nie wdrożone. Drugi przebieg reviewera nie był uruchamiany — poprawki pokryte testami.

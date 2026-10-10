@@ -182,7 +182,7 @@ Katalog ma pola do wagi gabarytowej: `waga`, `dlugosc`, `szerokoscPaczki`, `wyso
 
 ## Dowiezione
 
-Stan na 2026-10-10 (wszystko na `develop`, PR-y #323–#342; **nic nie jest jeszcze na produkcji** — wymaga merge'u `develop` → `main`):
+Stan na 2026-10-10 (PR-y #323–#342; tabela poniżej opisuje wydanie poziomów 1–5 i 9; kolejne tickety 228–233 są wypisane niżej. Całość jest na `main` i na produkcji):
 
 | Poziom | Co jest | Ticket |
 |---|---|---|

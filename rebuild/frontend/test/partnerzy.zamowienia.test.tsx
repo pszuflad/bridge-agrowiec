@@ -177,7 +177,7 @@ describe("zamówienia partnera", () => {
     kanalEmail = false;
     await otworz();
     expect(await screen.findByTestId("text-zamowienia-pusto")).toHaveTextContent("Kanał e-mail tego partnera jest wyłączony");
-    expect(screen.getByTestId("button-zamowienia-odbierz")).toHaveAttribute("title", expect.stringContaining("kanału e-mail"));
+    expect(screen.getByTestId("opakowanie-odbierz")).toHaveAttribute("title", expect.stringContaining("kanału e-mail"));
   });
 
   it("przycisk „Sprawdź ponownie” zależy od pola mozeWalidowac z serwera (nie od listy statusów w panelu)", async () => {
@@ -274,5 +274,18 @@ describe("zamówienia partnera", () => {
     walidacja = { status: 404, cialo: { error: "Nie ma takiego zamówienia tego partnera." }, wywolania: 0 };
     await uzytkownik.click(screen.getByTestId("button-zwaliduj-1"));
     expect(await screen.findByText("Nie udało się sprawdzić zamówienia")).toBeInTheDocument();
+  });
+
+  it("po błędzie „Sprawdź ponownie” (np. 409) szczegóły zamówienia są pobierane od nowa, żeby przycisk nie był nieaktualny", async () => {
+    const uzytkownik = userEvent.setup();
+    zamowienia = [naLiscie(1, "A01")];
+    walidacja = { status: 409, cialo: { error: "Zamówienie ma status „wyslane” i nie podlega ponownej walidacji." }, wywolania: 0 };
+    await otworz();
+    await uzytkownik.click(await screen.findByTestId("button-zamowienie-1"));
+    const przycisk = await screen.findByTestId("button-zwaliduj-1");
+    const przed = zapytaniaSzczegolow.length;
+    await uzytkownik.click(przycisk);
+    expect(await screen.findByText("Nie udało się sprawdzić zamówienia")).toBeInTheDocument();
+    await waitFor(() => expect(zapytaniaSzczegolow.length).toBeGreaterThan(przed));
   });
 });

@@ -15,6 +15,9 @@ function etykietaKodowania(bufor: Buffer): string {
   if (zaczynaSie(bufor, BOM_UTF8)) return "utf-8";
   if (zaczynaSie(bufor, BOM_UTF16LE)) return "utf-16le";
   if (zaczynaSie(bufor, BOM_UTF16BE)) return "utf-16be";
+  // UTF-16 bez BOM: plik zaczyna się od „<” zapisanego jako dwa bajty (3C 00 albo 00 3C); deklaracja encoding nie jest wtedy czytelna jako latin1.
+  if (bufor[0] === 0x3c && bufor[1] === 0x00) return "utf-16le";
+  if (bufor[0] === 0x00 && bufor[1] === 0x3c) return "utf-16be";
   // Deklaracja jest ASCII-zgodna we wszystkich obsługiwanych kodowaniach jednobajtowych i w UTF-8; patrzymy tylko na początek pliku.
   const poczatek = bufor.subarray(0, 200).toString("latin1");
   const m = /^\s*<\?xml[^>]*?\bencoding\s*=\s*["']([A-Za-z0-9._:-]+)["']/.exec(poczatek);

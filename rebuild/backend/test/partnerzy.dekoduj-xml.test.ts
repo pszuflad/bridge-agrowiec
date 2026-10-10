@@ -22,6 +22,13 @@ describe("dekodujXml", () => {
     expect(dekodujXml(Buffer.concat([Buffer.from([0xfe, 0xff]), be]))).toContain(POLSKIE);
   });
 
+  it("UTF-16 bez BOM (rozpoznany po „<” zapisanym na dwóch bajtach) jest czytany poprawnie", () => {
+    const xml = `<?xml version="1.0" encoding="UTF-16"?>${tresc(POLSKIE)}`;
+    expect(dekodujXml(Buffer.from(xml, "utf16le"))).toContain(POLSKIE);
+    expect(dekodujXml(Buffer.from(xml, "utf16le").swap16())).toContain(POLSKIE);
+    expect(parsujZamowienie(dekodujXml(Buffer.from(xml, "utf16le"))).pozycje[0]!.nazwa).toBe(POLSKIE);
+  });
+
   it("deklarowane ISO-8859-2 i windows-1250 — polskie litery nie są niszczone (to ginęło przy toString utf-8)", () => {
     // bufor w ISO-8859-2: ręcznie, bo Node nie ma kodera; litery spoza ASCII jako bajty
     const iso2: Record<string, number> = { ż: 0xbf, ó: 0xf3, ł: 0xb3, ć: 0xe6, ę: 0xea, ś: 0xb6, ą: 0xb1, ź: 0xbc, ń: 0xf1 };

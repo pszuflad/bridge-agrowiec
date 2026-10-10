@@ -55,9 +55,12 @@ export function ZamowieniaPartnera({ partner }: { partner: SzczegolyPartnera }) 
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-sm font-semibold">Zamówienia od partnera</h2>
           <div className="flex items-center gap-2">
-            <Button size="sm" disabled={!kanalGotowy || odbior.isPending} title={kanalGotowy ? undefined : "Wymaga włączonego kanału e-mail i adresu skrzynki w ustawieniach partnera."} onClick={() => odbior.mutate()} data-testid="button-zamowienia-odbierz">
-              {odbior.isPending ? "Odbieranie…" : "Odbierz teraz"}
-            </Button>
+            {/* `title` na samym wyłączonym przycisku nie działa na hoverze (Button ma pointer-events-none przy disabled) — stąd opakowanie */}
+            <span title={kanalGotowy ? undefined : "Wymaga włączonego kanału e-mail i adresu skrzynki w ustawieniach partnera."} data-testid="opakowanie-odbierz">
+              <Button size="sm" disabled={!kanalGotowy || odbior.isPending} onClick={() => odbior.mutate()} data-testid="button-zamowienia-odbierz">
+                {odbior.isPending ? "Odbieranie…" : "Odbierz teraz"}
+              </Button>
+            </span>
             <Button size="sm" variant="outline" className="gap-1.5" onClick={odswiez} data-testid="button-zamowienia-odswiez">
               <RefreshCw className="h-3.5 w-3.5" aria-hidden />Odśwież
             </Button>
@@ -116,7 +119,11 @@ function SzczegolyZamowieniaWidok({ partnerId, zamowienieId }: { partnerId: numb
       });
       void klient.invalidateQueries({ queryKey: [KLUCZ_PARTNERZY, String(partnerId)], predicate: ({ queryKey }) => /^zamowienia/.test(String(queryKey[2])) });
     },
-    onError: (e) => toast({ title: "Nie udało się sprawdzić zamówienia", description: komunikatBledu(e), variant: "destructive" }),
+    onError: (e) => {
+      toast({ title: "Nie udało się sprawdzić zamówienia", description: komunikatBledu(e), variant: "destructive" });
+      // Np. 409 (status zmienił się w międzyczasie): odświeżamy zamówienie, żeby przycisk i `mozeWalidowac` nie były nieaktualne.
+      void klient.invalidateQueries({ queryKey: [KLUCZ_PARTNERZY, String(partnerId)], predicate: ({ queryKey }) => /^zamowienia/.test(String(queryKey[2])) });
+    },
   });
   if (isError) return <p className="mt-2 text-sm text-destructive" role="alert" data-testid="text-zamowienie-blad">{komunikatBledu(error)}</p>;
   if (isPending || !data) return <p className="mt-2 text-sm text-muted-foreground">Ładowanie…</p>;
