@@ -1,3 +1,4 @@
+import type { SerwisPartnerow } from "../../src/partnerzy/scheduler.js";
 import { dirname, join } from "node:path";
 import type { Express } from "express";
 import { wczytajEnv, type Env } from "../../src/config/env.js";
@@ -43,6 +44,8 @@ export type OpcjeSrodowiska = {
    * wtedy, gdy test chce POLICZYĆ wywołania Selly (`stworzDiscoveryTestowe`).
    */
   discoverySelly?: Discovery;
+  /** Serwis generowania cenników partnerów (karta PARTNERZY). Bez niego `POST /api/partnerzy/:id/generuj` odpowiada 503. */
+  serwisPartnerow?: SerwisPartnerow;
 };
 
 /**
@@ -78,6 +81,7 @@ export async function stworzSrodowiskoTestowe(
     sqlite: baza.sqlite,
     klientSelly: opcje.klientSelly,
     discoverySelly: opcje.discoverySelly,
+    serwisPartnerow: opcje.serwisPartnerow,
   });
   return { ...baza, app, env, uzytkownik, dane, katalogArchiwum, katalogCsvSelly };
 }

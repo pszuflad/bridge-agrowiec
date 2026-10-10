@@ -126,6 +126,13 @@ const schemaEnvBazowe = z.object({
    */
   SELLY_SCHEDULER: flagaBoolDomyslnieWylaczona,
   /**
+   * Harmonogram generowania cenników partnerów B2B (karta PARTNERZY, ticket 220) — DOMYŚLNIE WYŁĄCZONY, wzorem schedulerów importu i Selly:
+   * środowisko testowe nie ma generować plików dla partnerów. Ręczne `POST /api/partnerzy/:id/generuj` działa niezależnie od tej flagi.
+   */
+  PARTNERZY_SCHEDULER: flagaBoolDomyslnieWylaczona,
+  /** Katalog bazowy plików partnerów (`<katalog>/<id partnera>/{pricelist,archive}`). Domyślnie `partnerzy/` obok pliku bazy. */
+  PARTNERZY_KATALOG: z.string().min(1).optional(),
+  /**
    * Tor 3 (ticket 186): usuwanie z Selly produktów, których nie ma już w Bridge. Działa w ramach harmonogramu
    * Selly (czyli tylko przy `SELLY_SCHEDULER=true` i `SELLY_TRYB=pelny`); ten przełącznik pozwala je
    * wyłączyć bez ruszania reszty synchronizacji (`SELLY_USUWANIE=false`). Domyślnie WŁĄCZONE (decyzja użytkownika).
