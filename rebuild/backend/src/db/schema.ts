@@ -717,3 +717,22 @@ export const geisStawki = sqliteTable("geis_stawki", {
 	progKg: real("prog_kg").notNull(),
 	stawka: real().notNull(),
 }, (table) => [primaryKey({ columns: [table.kraj, table.progKg] })]);
+
+// Ticket 219 (PRT-4.2; migracja 027) — logi operacji modułu partnerów: jedna linia na operację + osobny log błędów i ostrzeżeń.
+export const partnerLogi = sqliteTable("partner_logi", {
+	id: integer().primaryKey({ autoIncrement: true }),
+	partnerId: integer("partner_id").notNull().references(() => partnerzy.id, { onDelete: "cascade" }),
+	kiedy: text().notNull(),
+	operacja: text().notNull(),
+	opis: text().notNull(),
+	liczbaPozycji: integer("liczba_pozycji"),
+}, (table) => [index("idx_partner_logi_partner").on(table.partnerId, table.kiedy)]);
+
+export const partnerErrorLog = sqliteTable("partner_error_log", {
+	id: integer().primaryKey({ autoIncrement: true }),
+	partnerId: integer("partner_id").notNull().references(() => partnerzy.id, { onDelete: "cascade" }),
+	kiedy: text().notNull(),
+	operacja: text().notNull(),
+	poziom: text().default("blad").notNull(),
+	komunikat: text().notNull(),
+}, (table) => [index("idx_partner_error_log_partner").on(table.partnerId, table.kiedy)]);
