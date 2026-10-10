@@ -701,3 +701,19 @@ export const kursyNbp = sqliteTable("kursy_nbp", {
 	kurs: real().notNull(),
 	pobrano: text().notNull(),
 });
+
+// Ticket 212 (PRT-2.2; migracja 026) — tabele transportowe GEIS (V1: stawka całego kraju). Dane wgrywa `importuj-geis`.
+export const geisKraje = sqliteTable("geis_kraje", {
+	kraj: text().primaryKey().notNull(),
+	wspGabarytowy: real("wsp_gabarytowy").notNull(),
+	kosztPakowania: real("koszt_pakowania").default(0).notNull(),
+	maksDlugosc: real("maks_dlugosc"),
+	maksSzerokosc: real("maks_szerokosc"),
+	maksWysokosc: real("maks_wysokosc"),
+});
+
+export const geisStawki = sqliteTable("geis_stawki", {
+	kraj: text().notNull().references(() => geisKraje.kraj, { onDelete: "cascade" }),
+	progKg: real("prog_kg").notNull(),
+	stawka: real().notNull(),
+}, (table) => [primaryKey({ columns: [table.kraj, table.progKg] })]);

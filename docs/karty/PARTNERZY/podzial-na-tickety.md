@@ -2,7 +2,7 @@
 
 > **Stan:** plan podziału, 2026-10-10 · właściciel: koordynator · źródło zakresu: `karta.md` (ten sam katalog)
 > **Nie mają jeszcze numerów ticketów.** Numer rezerwuje się atomowo przy starcie każdego ticketu
-> (`feature.md`, Krok 4). Do tego czasu tickety nazywa się identyfikatorem `PRT-…` z tego pliku. Przydzielone: PRT-1.1 = ticket 208, PRT-1.3 = ticket 209 (trasy poza `openapi.yaml`, jak `/api/ean-pary`), PRT-2.1 = ticket 210, PRT-2.3 = ticket 211.
+> (`feature.md`, Krok 4). Do tego czasu tickety nazywa się identyfikatorem `PRT-…` z tego pliku. Przydzielone: PRT-1.1 = ticket 208, PRT-1.3 = ticket 209 (trasy poza `openapi.yaml`, jak `/api/ean-pary`), PRT-2.1 = ticket 210, PRT-2.3 = ticket 211, PRT-2.2 = ticket 212.
 
 ## Zasady układu
 
