@@ -69,7 +69,7 @@ Spróbuj przy partnerze bez magazynów albo bez krajów: dostajesz czytelny bł�
 
 > **Twoja ocena:** ☐ OK ☐ ŹLE — uwagi: _______________
 
-### 1.7 Zamówienia z e-maila (tylko podgląd)
+### 1.7 Zamówienia z e-maila (odbiór i podgląd)
 Na stronie partnera sekcja **Zamówienia od partnera**. **Odbierz teraz** jest aktywne tylko, gdy w ustawieniach partnera jest włączony **kanał e-mail** i podany **adres skrzynki**.
 Działa też dla partnera nieaktywnego i **nie wymaga** włączania harmonogramu. Wynik: toast „Odebrano pocztę" (wiadomości / nowe zamówienia / powtórzone / błędne) albo „Nie odebrano zamówień" z powodem.
 - Bez ustawionych na serwerze `PARTNERZY_IMAP_HOST` i hasła skrzynki dostajesz komunikat z **nazwą brakującej zmiennej** — to oczekiwane, dopóki nie zapadną decyzje o skrzynkach i hasłach.

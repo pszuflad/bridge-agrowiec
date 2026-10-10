@@ -201,7 +201,8 @@ describe("odbiór zamówień przez e-mail", () => {
   it("awaria pobrania listy kończy się wpisem w error_log i zamknięciem skrzynki", async () => {
     const skrzynka = new AtrapaSkrzynki([]);
     skrzynka.awariaListy = new Error("SEARCH failed");
-    await odbierzZamowieniaEmail(s.db, skrzynka.otworz, partnerId, USTAWIENIA);
+    const w = await odbierzZamowieniaEmail(s.db, skrzynka.otworz, partnerId, USTAWIENIA);
+    expect(w).toMatchObject({ polaczono: true, bledy: 1, powod: expect.stringMatching(/Odbiór przerwany: SEARCH failed/) });
     expect(bledy()[0]!.komunikat).toMatch(/Odbiór przerwany: SEARCH failed/);
     expect(skrzynka.zamknieta).toBe(1);
   });

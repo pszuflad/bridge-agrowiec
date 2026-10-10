@@ -32,9 +32,15 @@ export function ZamowieniaPartnera({ partner }: { partner: SzczegolyPartnera }) 
     mutationFn: () => odbierzZamowienia(partner.id),
     onSuccess: (w) => {
       if (!w.polaczono) toast({ title: "Nie odebrano zamówień", description: w.powod ?? "Brak połączenia ze skrzynką.", variant: "destructive" });
+      else if (w.powod) toast({ title: "Odbiór przerwany", description: w.powod, variant: "destructive" });
       else toast({ title: "Odebrano pocztę", description: `Wiadomości: ${w.wiadomosci}, nowych zamówień: ${w.nowe}, powtórzonych: ${w.duplikaty}, błędnych: ${w.bledy}.`, variant: w.bledy > 0 ? "destructive" : "default" });
-      odswiez();
-      void klient.invalidateQueries({ queryKey: [KLUCZ_PARTNERZY, String(partner.id)] }); // logi i błędy partnera też się zmieniły
+      // Tylko to, co odbiór zmienia: lista i szczegóły zamówień oraz logi/błędy partnera (nie cała strona partnera ani podgląd pliku).
+      void klient.invalidateQueries({
+        predicate: ({ queryKey }) => {
+          const [baza, id, sciezka] = queryKey as string[];
+          return baza === KLUCZ_PARTNERZY && id === String(partner.id) && typeof sciezka === "string" && /^(zamowienia|logi|error-log)/.test(sciezka);
+        },
+      });
     },
     onError: (e) => toast({ title: "Odbiór zamówień nie powiódł się", description: komunikatBledu(e), variant: "destructive" }),
   });

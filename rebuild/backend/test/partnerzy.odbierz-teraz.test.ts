@@ -120,4 +120,25 @@ describe("POST /api/partnerzy/:id/zamowienia/odbierz", () => {
     expect((await pierwszy).status).toBe(200);
     expect((await odbierz(id)).status).toBe(200);
   });
+
+  it("nieoczekiwany wyjątek to 500 z ogólnym komunikatem (bez szczegółów i sekretów)", async () => {
+    const o = odbior();
+    o.ustawienia = { ...o.ustawienia, haslo: () => { throw new Error("boom pass=tajne"); } };
+    await start(o);
+    const id = await dodajPartnera();
+    const odp = await odbierz(id);
+    expect(odp.status).toBe(500);
+    expect(JSON.stringify(odp.body)).not.toContain("tajne");
+    expect(JSON.stringify(odp.body)).not.toContain("boom");
+  });
+
+  it("przerwany po połączeniu odbiór nie wygląda na sukces: powód i licznik błędów", async () => {
+    const o = odbior();
+    o.otworz = async () => ({ pobierzNieprzeczytane: async () => { throw new Error("SEARCH failed"); }, zamknij: async () => undefined });
+    await start(o);
+    const id = await dodajPartnera();
+    const odp = await odbierz(id);
+    expect(odp.status).toBe(200);
+    expect(odp.body).toMatchObject({ polaczono: true, bledy: 1, powod: expect.stringContaining("SEARCH failed") });
+  });
 });

@@ -125,7 +125,10 @@ async function odbierz(
       zapiszOperacje(db, partnerId, OPERACJA_ODBIOR_EMAIL, `Odebrano ${wynik.wiadomosci} wiad.: ${wynik.nowe} nowych zamówień, ${wynik.duplikaty} powtórzonych, ${wynik.bledy} błędnych`, wynik.nowe, teraz);
     }
   } catch (e) {
-    zapiszBlad(db, partnerId, OPERACJA_ODBIOR_EMAIL, `Odbiór przerwany: ${bezHasla(komunikat(e), haslo)}`, "blad", teraz);
+    const tekst = `Odbiór przerwany: ${bezHasla(komunikat(e), haslo)}`;
+    zapiszBlad(db, partnerId, OPERACJA_ODBIOR_EMAIL, tekst, "blad", teraz);
+    wynik.powod = tekst; // połączenie było, ale odbiór się nie dokończył — wynik nie może wyglądać na sukces
+    wynik.bledy++;
   } finally {
     await skrzynka.zamknij().catch(() => undefined);
   }

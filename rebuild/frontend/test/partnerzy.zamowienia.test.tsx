@@ -180,4 +180,13 @@ describe("zamówienia partnera", () => {
     expect(await screen.findByTestId("button-zamowienia-odbierz")).toBeDisabled();
     expect(screen.getByTestId("text-zamowienia-kanal")).toBeInTheDocument();
   });
+
+  it("odbiór przerwany po połączeniu (powód przy polaczono:true) nie jest pokazany jako sukces", async () => {
+    const uzytkownik = userEvent.setup();
+    odbior = { status: 200, cialo: { polaczono: true, powod: "Odbiór przerwany: SEARCH failed", wiadomosci: 0, nowe: 0, duplikaty: 0, bledy: 1 }, wywolania: 0 };
+    await otworz();
+    await uzytkownik.click(await screen.findByTestId("button-zamowienia-odbierz"));
+    expect(await screen.findByText("Odbiór przerwany")).toBeInTheDocument();
+    expect(screen.queryByText("Odebrano pocztę")).not.toBeInTheDocument();
+  });
 });

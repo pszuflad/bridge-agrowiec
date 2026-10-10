@@ -24,3 +24,8 @@ None.
 ## Follow-up
 - Pierwszy odbiór na prawdziwej skrzynce (środowisko testowe) wciąż nie wykonany.
 
+## Review fixes applied (review.md, 0 BLOCKER / 3 SHOULD-FIX)
+- Odbiór przerwany po udanym połączeniu (np. błąd listowania) ma teraz `powod` i `bledy`, a panel pokazuje „Odbiór przerwany” zamiast zielonego „0/0/0/0”; testy backendu i frontendu.
+- „Odbierz teraz” unieważnia tylko listę/szczegóły zamówień oraz logi i błędy partnera (nie całą stronę partnera).
+- Test gałęzi 500 (ogólny komunikat, bez szczegółów i sekretów).
+- NICE-TO-HAVE z review.md: nie wdrożone (np. token zamka zamiast `Date.now()`, rozjazd 10/15 min między harmonogramem a zamkiem). Drugi przebieg reviewera nie był uruchamiany — poprawki pokryte testami.
