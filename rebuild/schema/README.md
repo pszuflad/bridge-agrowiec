@@ -26,6 +26,7 @@ danych dla odbudowy backendu.
 | `023_selly_usuniecia.sql` | **Ticket 195** (`195-FEATURE-selly-historia-usuniec`): tabela `selly_usuniecia` — zbiorcza historia pozycji usuniętych z Selly (Tor 3), jeden wiersz na pozycję (data UTC, `przebieg_id` = `selly_sync_log.id`, kod, nazwa, EAN, dostawca, kod importu, id produktu/wariantu w Selly, akcja) + dwa indeksy. ⚠ **NOWA tabela, nie odtworzenie produkcji** (produkcja nie usuwała nic z Selly); na cutoverze/wdrożeniu powstaje pusta, bez kroków ręcznych. |
 | `024_partnerzy.sql` | **Ticket 208** (`208-FEATURE-partnerzy-model-danych`, PRT-1.1, karta PARTNERZY): osiem nowych tabel modułu partnerów B2B (`partnerzy`, `partner_magazyny`, `partner_wykluczenia`, `partner_kraje`, `partner_kolumny`, `partner_pola_obliczeniowe`, `paliwo_historia`, `partner_kursy`) + indeks. ⚠ **NOWE tabele, nie odtworzenie produkcji**; na wdrożeniu powstają puste, bez kroków ręcznych. Sam model, bez logiki. |
 | `025_kursy_nbp.sql` | **Ticket 210** (`210-FEATURE-partnerzy-kurs-nbp`, PRT-2.1): tabela `kursy_nbp` — ostatnie znane kursy EUR z NBP (rezerwa na awarię NBP). ⚠ **NOWA tabela, nie odtworzenie produkcji**; powstaje pusta. |
+| `026_geis.sql` | **Ticket 212** (`212-FEATURE-partnerzy-transport-geis`, PRT-2.2): tabele `geis_kraje` i `geis_stawki` — transport GEIS dla partnerów (V1: stawka całego kraju). ⚠ **NOWE tabele, nie odtworzenie produkcji**; powstają puste, dane wgrywa `npm run importuj-geis`. |
 
 ### Dyrektywy runnera (od ticketu 107)
 

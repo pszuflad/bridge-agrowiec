@@ -180,6 +180,8 @@ describe("pełny łańcuch migracji na schemacie produkcji @ 7d6cfc9 (bez `_migr
     expect(po.filter((o) => !nazwyPrzed.has(o.name)).map((o) => o.name).sort()).toEqual([
       "alerty_katalogu_statusy",
       "ean_pary",
+      "geis_kraje",
+      "geis_stawki",
       "idx_alerty_katalogu_statusy_klucz",
       "idx_partner_kursy_partner",
       "idx_products_scalone_kod",
