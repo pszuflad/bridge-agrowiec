@@ -195,6 +195,7 @@ Stan na 2026-10-10 (wszystko na `develop`, PR-y #323–#342; **nic nie jest jesz
 | 7 | odbiór zamówień przez e-mail (IMAP, hasła skrzynek w `.env`, harmonogram domyślnie wyłączony; nieprzetestowany na prawdziwym serwerze IMAP) | 229 |
 | 7 | panel zamówień partnera: lista i szczegóły, tylko odczyt (`GET /api/partnerzy/:id/zamowienia[/:zid]`, sekcja na stronie partnera) | 230 |
 | 7 | ręczne „Odbierz teraz” zamówienia z e-maila (`POST /api/partnerzy/:id/zamowienia/odbierz`, przycisk w panelu; zamek wspólny z harmonogramem) | 231 |
+| 7 | walidacja zamówienia względem katalogu: nieznany kod / produkt nieaktywny / brak stanu → status `blad_importu` (bez powiadomienia partnera); cena i tolerancja NIE w tym tickecie | 232 |
 | 9 | krok wdrożenia: partnerzy TyreWorld i Adtyres jako nieaktywni | 226 |
 
 Założenia wykonawcze do potwierdzenia: przesyłka GEIS w EUR (nie dzielona przez kurs), narzut w %, koszty dodatkowe w PLN; do pliku tylko produkty `status='aktywny'`; nazwy plików robocze; struktura XML wg publicznego formatu Ceneo.

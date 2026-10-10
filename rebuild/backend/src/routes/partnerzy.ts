@@ -10,6 +10,7 @@ import { requireAuth } from "../middleware/auth.js";
 import { zapiszAudyt } from "../repos/audit.js";
 import { pobierzBledy, pobierzLogi } from "../partnerzy/logi.js";
 import { OdbiorTrwaError, odbierzZamowieniaEmail, type OdbiorEmail } from "../partnerzy/odbior-email.js";
+import { zwaliduj } from "../partnerzy/walidacja-zamowienia.js";
 import { listaZamowien, szczegolyZamowieniaDlaPartnera } from "../repos/partnerzy-zamowienia.js";
 import { walidujKolumny, walidujPola, zapiszKolumny, zapiszPola } from "../repos/partnerzy-kolumny.js";
 import { GenerowanieTrwaError, type SerwisPartnerow } from "../partnerzy/scheduler.js";
@@ -106,6 +107,22 @@ export function trasyPartnerzy({ db, serwis, odbiorEmail }: ZaleznosciPartnerzy)
     const z = Number.isInteger(zamowienieId) && zamowienieId > 0 ? szczegolyZamowieniaDlaPartnera(db, id, zamowienieId) : null;
     if (z === null) return void res.status(404).json({ error: "Nie ma takiego zamówienia tego partnera." });
     res.json(z);
+  });
+
+  /**
+   * Ponowna walidacja zamówienia względem katalogu (ticket 232) — po poprawieniu katalogu człowiek ponawia sprawdzenie zamówienia z `blad_importu`.
+   * Tyka tylko statusów `nowe`/`przyjete`/`blad_importu`; zwraca świeże szczegóły zamówienia. Nic nie wysyła do partnera.
+   */
+  router.post("/api/partnerzy/:id/zamowienia/:zamowienieId/waliduj", requireAuth, (req, res) => {
+    const id = idZParametru(req, res);
+    if (id === null) return;
+    const zamowienieId = Number(req.params.zamowienieId);
+    if (!Number.isInteger(zamowienieId) || zamowienieId < 1 || szczegolyZamowieniaDlaPartnera(db, id, zamowienieId) === null) {
+      return void res.status(404).json({ error: "Nie ma takiego zamówienia tego partnera." });
+    }
+    const wynik = zwaliduj(db, zamowienieId);
+    audytuj(req, "partner_zamowienie_waliduj", id, { zamowienieId, status: wynik?.status, bledy: wynik?.bledy });
+    res.json(szczegolyZamowieniaDlaPartnera(db, id, zamowienieId));
   });
 
   /**

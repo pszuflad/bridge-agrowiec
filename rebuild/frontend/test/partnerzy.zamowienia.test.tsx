@@ -17,20 +17,22 @@ const partner = (): SzczegolyPartnera => ({
   kanalFtp: false, kanalEmail, emailSkrzynka: kanalEmail ? "zamowienia@example.test" : null, zmieniono: "2026-10-10T10:00:00.000Z", magazyny: [], wykluczenia: [], kraje: [], kolumny: [], polaObliczeniowe: [],
 });
 const naLiscie = (id: number, numer: string): ZamowienieNaLiscie => ({
-  id, numerPartnera: numer, numerWlasny: null, status: "nowe", dataZamowienia: "2024-02-02 11:27:11", waluta: "EUR", krajDostawy: "AT", pobrano: "2026-10-10T12:00:00.000Z", liczbaPozycji: 2,
+  id, numerPartnera: numer, numerWlasny: null, status: "przyjete", bladImportu: null, dataZamowienia: "2024-02-02 11:27:11", waluta: "EUR", krajDostawy: "AT", pobrano: "2026-10-10T12:00:00.000Z", liczbaPozycji: 2,
 });
 const szczegoly = (id: number, numer: string): SzczegolyZamowienia => ({
-  id, partnerId: 1, numerPartnera: numer, numerWlasny: null, status: "nowe", dataZamowienia: "2024-02-02 11:27:11", dataDostawy: "2024-02-02", waluta: "EUR", kosztDostawy: 0,
+  id, partnerId: 1, numerPartnera: numer, numerWlasny: null, status: "przyjete", bladImportu: null, dataZamowienia: "2024-02-02 11:27:11", dataDostawy: "2024-02-02", waluta: "EUR", kosztDostawy: 0,
   krajDostawy: "AT", pobrano: "2026-10-10T12:00:00.000Z", faktura: {}, dostawa: { CUSTOMERNAME: "Jan Kowalski", COUNTRY: "AT", PHONE: "" },
   pozycje: [
-    { id: 1, lp: 1, kod: "011200284", nazwa: "Ceat Farmax R70", ilosc: 2, cenaSprzedazy: 202 },
-    { id: 2, lp: 2, kod: "0102 00001", nazwa: null, ilosc: 1, cenaSprzedazy: null },
+    { id: 1, lp: 1, kod: "011200284", nazwa: "Ceat Farmax R70", ilosc: 2, cenaSprzedazy: 202, blad: null },
+    { id: 2, lp: 2, kod: "0102 00001", nazwa: null, ilosc: 1, cenaSprzedazy: null, blad: null },
   ],
 });
 
 let zamowienia: ZamowienieNaLiscie[];
 let odbior: { status: number; cialo: object; wywolania: number };
 let kanalEmail: boolean;
+let szczegolyNadpisanie: Partial<SzczegolyZamowienia> | null;
+let walidacja: { status: number; cialo: object; wywolania: number };
 let zapytaniaSzczegolow: number[];
 
 function zamockujApi() {
@@ -41,7 +43,11 @@ function zamockujApi() {
     http.get("*/api/partnerzy/:id/zamowienia/:zid", ({ params }) => {
       zapytaniaSzczegolow.push(Number(params.zid));
       const z = zamowienia.find((x) => x.id === Number(params.zid));
-      return z ? HttpResponse.json(szczegoly(z.id, z.numerPartnera)) : HttpResponse.json({ error: "Nie ma takiego zamówienia tego partnera." }, { status: 404 });
+      return z ? HttpResponse.json({ ...szczegoly(z.id, z.numerPartnera), ...szczegolyNadpisanie }) : HttpResponse.json({ error: "Nie ma takiego zamówienia tego partnera." }, { status: 404 });
+    }),
+    http.post("*/api/partnerzy/:id/zamowienia/:zid/waliduj", () => {
+      walidacja.wywolania++;
+      return HttpResponse.json(walidacja.cialo, { status: walidacja.status });
     }),
     http.get("*/api/partnerzy/:id/zamowienia", () => HttpResponse.json({ zamowienia })),
     http.post("*/api/partnerzy/:id/zamowienia/odbierz", () => {
@@ -62,6 +68,8 @@ async function otworz() {
 beforeEach(() => {
   zamowienia = [];
   kanalEmail = true;
+  szczegolyNadpisanie = null;
+  walidacja = { status: 200, cialo: szczegoly(1, "A01"), wywolania: 0 };
   odbior = { status: 200, cialo: { polaczono: true, powod: null, wiadomosci: 1, nowe: 1, duplikaty: 0, bledy: 0 }, wywolania: 0 };
   zapytaniaSzczegolow = [];
   queryClient.clear();
@@ -84,7 +92,7 @@ describe("zamówienia partnera", () => {
     await otworz();
     const lista = await screen.findByTestId("lista-zamowien");
     const wiersze = within(lista).getAllByRole("listitem");
-    expect(wiersze.map((w) => w.textContent)).toEqual([expect.stringMatching(/A02.*nowe.*AT · 2 poz\./), expect.stringMatching(/A01.*nowe.*AT · 2 poz\./)]);
+    expect(wiersze.map((w) => w.textContent)).toEqual([expect.stringMatching(/A02.*przyjęte.*AT · 2 poz\./), expect.stringMatching(/A01.*przyjęte.*AT · 2 poz\./)]);
     expect(zapytaniaSzczegolow).toEqual([]); // szczegóły dopiero po rozwinięciu
   });
 
@@ -188,5 +196,52 @@ describe("zamówienia partnera", () => {
     await uzytkownik.click(await screen.findByTestId("button-zamowienia-odbierz"));
     expect(await screen.findByText("Odbiór przerwany")).toBeInTheDocument();
     expect(screen.queryByText("Odebrano pocztę")).not.toBeInTheDocument();
+  });
+
+  const zBledem = (): Partial<SzczegolyZamowienia> => ({
+    status: "blad_importu",
+    bladImportu: "poz. 2 (0102 00001): nieznany kod",
+    pozycje: [
+      { id: 1, lp: 1, kod: "011200284", nazwa: "Ceat Farmax R70", ilosc: 2, cenaSprzedazy: 202, blad: null },
+      { id: 2, lp: 2, kod: "0102 00001", nazwa: null, ilosc: 1, cenaSprzedazy: null, blad: "nieznany kod" },
+    ],
+  });
+
+  it("zamówienie z błędem importu: czerwony status, opis zbiorczy, powód przy pozycji i informacja o braku powiadomienia partnera", async () => {
+    const uzytkownik = userEvent.setup();
+    zamowienia = [{ ...naLiscie(1, "A01"), status: "blad_importu", bladImportu: "poz. 2 (0102 00001): nieznany kod" }];
+    szczegolyNadpisanie = zBledem();
+    await otworz();
+    expect(await screen.findByTestId("status-zamowienia-1")).toHaveTextContent("błąd importu");
+    await uzytkownik.click(screen.getByTestId("button-zamowienie-1"));
+    const blad = await screen.findByTestId("blad-importu-1");
+    expect(blad).toHaveTextContent("nieznany kod");
+    expect(blad).toHaveTextContent("nie wysyła partnerowi automatycznego powiadomienia");
+    expect(screen.getByTestId("pozycja-blad-1-2")).toHaveTextContent("nieznany kod");
+    expect(screen.getByTestId("pozycja-blad-1-1")).toBeEmptyDOMElement();
+  });
+
+  it("„Sprawdź ponownie” woła walidację i pokazuje wynik; zamówienie w porządku nie ma ramki błędu", async () => {
+    const uzytkownik = userEvent.setup();
+    zamowienia = [naLiscie(1, "A01")];
+    await otworz();
+    await uzytkownik.click(await screen.findByTestId("button-zamowienie-1"));
+    expect(screen.queryByTestId("blad-importu-1")).not.toBeInTheDocument();
+    await uzytkownik.click(await screen.findByTestId("button-zwaliduj-1"));
+    expect(await screen.findByText("Zamówienie w porządku")).toBeInTheDocument();
+    expect(walidacja.wywolania).toBe(1);
+  });
+
+  it("ponowna walidacja nadal z błędami pokazuje opis błędów; błąd serwera jest widoczny", async () => {
+    const uzytkownik = userEvent.setup();
+    zamowienia = [naLiscie(1, "A01")];
+    walidacja = { status: 200, cialo: { ...szczegoly(1, "A01"), ...zBledem() }, wywolania: 0 };
+    await otworz();
+    await uzytkownik.click(await screen.findByTestId("button-zamowienie-1"));
+    await uzytkownik.click(await screen.findByTestId("button-zwaliduj-1"));
+    expect(await screen.findByText("Zamówienie nadal ma błędy")).toBeInTheDocument();
+    walidacja = { status: 404, cialo: { error: "Nie ma takiego zamówienia tego partnera." }, wywolania: 0 };
+    await uzytkownik.click(screen.getByTestId("button-zwaliduj-1"));
+    expect(await screen.findByText("Nie udało się sprawdzić zamówienia")).toBeInTheDocument();
   });
 });

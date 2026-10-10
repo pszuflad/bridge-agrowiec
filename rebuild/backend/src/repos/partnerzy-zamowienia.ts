@@ -66,6 +66,7 @@ export function listaZamowien(db: Baza, partnerId: number, limit = 100, offset =
       numerPartnera: partnerZamowienia.numerPartnera,
       numerWlasny: partnerZamowienia.numerWlasny,
       status: partnerZamowienia.status,
+      bladImportu: partnerZamowienia.bladImportu,
       dataZamowienia: partnerZamowienia.dataZamowienia,
       waluta: partnerZamowienia.waluta,
       krajDostawy: partnerZamowienia.krajDostawy,
