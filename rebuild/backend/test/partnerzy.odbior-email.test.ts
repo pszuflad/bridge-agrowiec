@@ -1,9 +1,9 @@
 /** Odbiór zamówień partnerów przez e-mail (ticket 229, PRT-7.3) — na atrapie skrzynki; testy NIGDY nie łączą się z prawdziwą pocztą. */
 import { eq } from "drizzle-orm";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { partnerErrorLog, partnerLogi, partnerzy } from "../src/db/schema.js";
-import { odbierzDlaWszystkich, odbierzZamowieniaEmail, stworzHarmonogramOdbioru, type UstawieniaOdbioru } from "../src/partnerzy/odbior-email.js";
+import { LIMIT_ZAMKA_MS, OdbiorTrwaError, _zresetujZamkiOdbioru, odbierzDlaWszystkich, odbierzZamowieniaEmail, stworzHarmonogramOdbioru, type UstawieniaOdbioru } from "../src/partnerzy/odbior-email.js";
 import type { KonfiguracjaSkrzynki, OtworzSkrzynke, WiadomoscPoczty, ZalacznikPoczty } from "../src/partnerzy/poczta.js";
 import { listaZamowien } from "../src/repos/partnerzy-zamowienia.js";
 import { stworzSrodowiskoTestowe, type SrodowiskoTestowe } from "./gate/index.js";
@@ -64,6 +64,7 @@ describe("odbiór zamówień przez e-mail", () => {
   const logi = (id = partnerId) => s.db.select().from(partnerLogi).where(eq(partnerLogi.partnerId, id)).all();
 
   beforeEach(async () => {
+    _zresetujZamkiOdbioru();
     s = await stworzSrodowiskoTestowe();
     partnerId = dodaj("TyreWorld");
   });
@@ -72,7 +73,7 @@ describe("odbiór zamówień przez e-mail", () => {
   it("zapisuje zamówienie z załącznika XML, loguje jedną linię i oznacza wiadomość jako przetworzoną", async () => {
     const skrzynka = new AtrapaSkrzynki([wiad("1", [xmlZ("zamowienie.xml", XML_PRZYKLAD)])]);
     const w = await odbierzZamowieniaEmail(s.db, skrzynka.otworz, partnerId, USTAWIENIA);
-    expect(w).toEqual({ polaczono: true, wiadomosci: 1, nowe: 1, duplikaty: 0, bledy: 0 });
+    expect(w).toEqual({ polaczono: true, powod: null, wiadomosci: 1, nowe: 1, duplikaty: 0, bledy: 0 });
     expect(listaZamowien(s.db, partnerId).map((z) => z.numerPartnera)).toEqual(["A01UF90224"]);
     expect(skrzynka.przetworzone).toEqual(["1"]);
     expect(skrzynka.zamknieta).toBe(1);
@@ -200,7 +201,8 @@ describe("odbiór zamówień przez e-mail", () => {
   it("awaria pobrania listy kończy się wpisem w error_log i zamknięciem skrzynki", async () => {
     const skrzynka = new AtrapaSkrzynki([]);
     skrzynka.awariaListy = new Error("SEARCH failed");
-    await odbierzZamowieniaEmail(s.db, skrzynka.otworz, partnerId, USTAWIENIA);
+    const w = await odbierzZamowieniaEmail(s.db, skrzynka.otworz, partnerId, USTAWIENIA);
+    expect(w).toMatchObject({ polaczono: true, bledy: 1, powod: expect.stringMatching(/Odbiór przerwany: SEARCH failed/) });
     expect(bledy()[0]!.komunikat).toMatch(/Odbiór przerwany: SEARCH failed/);
     expect(skrzynka.zamknieta).toBe(1);
   });
@@ -254,5 +256,36 @@ describe("odbiór zamówień przez e-mail", () => {
     const h = stworzHarmonogramOdbioru({ db: s.db, otworz: zawieszona, ustawienia: USTAWIENIA, interwalMs: 60_000, limitPrzebieguMs: 50 });
     expect(await h.tick()).toBe(true); // wraca po limicie, mimo że skrzynka nigdy nie odpowiada
     expect(await h.tick()).toBe(true); // zamek zwolniony — kolejny przebieg rusza
+  });
+
+  it("zamek: równoległy odbiór tego samego partnera rzuca OdbiorTrwaError, a po zakończeniu znów można odbierać; powód przy braku konfiguracji", async () => {
+    let zwolnij!: () => void;
+    const brama = new Promise<void>((r) => (zwolnij = r));
+    const wolna: OtworzSkrzynke = async () => {
+      await brama;
+      return { pobierzNieprzeczytane: async () => [], zamknij: async () => undefined };
+    };
+    const pierwszy = odbierzZamowieniaEmail(s.db, wolna, partnerId, USTAWIENIA);
+    await expect(odbierzZamowieniaEmail(s.db, wolna, partnerId, USTAWIENIA)).rejects.toBeInstanceOf(OdbiorTrwaError);
+    // harmonogram pomija partnera, któremu odbiór właśnie trwa, bez błędu
+    expect((await odbierzDlaWszystkich(s.db, wolna, USTAWIENIA)).size).toBe(0);
+    zwolnij();
+    expect((await pierwszy).polaczono).toBe(true);
+    const bez = await odbierzZamowieniaEmail(s.db, wolna, partnerId, { ...USTAWIENIA, haslo: () => undefined });
+    expect(bez).toMatchObject({ polaczono: false, powod: expect.stringContaining(`PARTNERZY_IMAP_HASLO_${partnerId}`) });
+  });
+
+  it("zawieszony odbiór nie blokuje partnera na zawsze: zamek wygasa po LIMIT_ZAMKA_MS", async () => {
+    const zawieszona: OtworzSkrzynke = () => new Promise(() => undefined);
+    void odbierzZamowieniaEmail(s.db, zawieszona, partnerId, USTAWIENIA); // nigdy się nie kończy
+    await expect(odbierzZamowieniaEmail(s.db, zawieszona, partnerId, USTAWIENIA)).rejects.toBeInstanceOf(OdbiorTrwaError);
+    const teraz = Date.now();
+    const zegar = vi.spyOn(Date, "now").mockReturnValue(teraz + LIMIT_ZAMKA_MS + 1);
+    try {
+      const skrzynka = new AtrapaSkrzynki([]);
+      expect((await odbierzZamowieniaEmail(s.db, skrzynka.otworz, partnerId, USTAWIENIA)).polaczono).toBe(true);
+    } finally {
+      zegar.mockRestore();
+    }
   });
 });

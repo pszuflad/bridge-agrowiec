@@ -14,7 +14,7 @@ import { TOKEN_TESTOWY, uzytkownikZFixtura } from "./msw/kontrakt";
 
 const partner = (): SzczegolyPartnera => ({
   id: 1, nazwa: "TyreWorld", aktywny: false, stanMin: 2, zaokraglanie: "grosz", harmonogramMinuty: null, tolerancjaCenyProc: null, formatPliku: "csv", csvSeparator: ";",
-  kanalFtp: false, kanalEmail: true, emailSkrzynka: "zamowienia@example.test", zmieniono: "2026-10-10T10:00:00.000Z", magazyny: [], wykluczenia: [], kraje: [], kolumny: [], polaObliczeniowe: [],
+  kanalFtp: false, kanalEmail, emailSkrzynka: kanalEmail ? "zamowienia@example.test" : null, zmieniono: "2026-10-10T10:00:00.000Z", magazyny: [], wykluczenia: [], kraje: [], kolumny: [], polaObliczeniowe: [],
 });
 const naLiscie = (id: number, numer: string): ZamowienieNaLiscie => ({
   id, numerPartnera: numer, numerWlasny: null, status: "nowe", dataZamowienia: "2024-02-02 11:27:11", waluta: "EUR", krajDostawy: "AT", pobrano: "2026-10-10T12:00:00.000Z", liczbaPozycji: 2,
@@ -29,6 +29,8 @@ const szczegoly = (id: number, numer: string): SzczegolyZamowienia => ({
 });
 
 let zamowienia: ZamowienieNaLiscie[];
+let odbior: { status: number; cialo: object; wywolania: number };
+let kanalEmail: boolean;
 let zapytaniaSzczegolow: number[];
 
 function zamockujApi() {
@@ -42,6 +44,11 @@ function zamockujApi() {
       return z ? HttpResponse.json(szczegoly(z.id, z.numerPartnera)) : HttpResponse.json({ error: "Nie ma takiego zamówienia tego partnera." }, { status: 404 });
     }),
     http.get("*/api/partnerzy/:id/zamowienia", () => HttpResponse.json({ zamowienia })),
+    http.post("*/api/partnerzy/:id/zamowienia/odbierz", () => {
+      odbior.wywolania++;
+      if (odbior.status === 200) zamowienia = [naLiscie(9, "NOWE9"), ...zamowienia];
+      return HttpResponse.json(odbior.cialo, { status: odbior.status });
+    }),
     http.get("*/api/partnerzy/:id", () => HttpResponse.json(partner())),
   );
 }
@@ -54,6 +61,8 @@ async function otworz() {
 
 beforeEach(() => {
   zamowienia = [];
+  kanalEmail = true;
+  odbior = { status: 200, cialo: { polaczono: true, powod: null, wiadomosci: 1, nowe: 1, duplikaty: 0, bledy: 0 }, wywolania: 0 };
   zapytaniaSzczegolow = [];
   queryClient.clear();
   sessionStorage.clear();
@@ -135,5 +144,49 @@ describe("zamówienia partnera", () => {
     const przed = zapytaniaSzczegolow.length;
     await uzytkownik.click(screen.getByTestId("button-zamowienia-odswiez"));
     await waitFor(() => expect(zapytaniaSzczegolow.length).toBeGreaterThan(przed));
+  });
+
+  it("„Odbierz teraz” odbiera pocztę, odświeża listę i pokazuje wynik", async () => {
+    const uzytkownik = userEvent.setup();
+    await otworz();
+    await screen.findByTestId("text-zamowienia-pusto");
+    await uzytkownik.click(screen.getByTestId("button-zamowienia-odbierz"));
+    expect(await screen.findByTestId("zamowienie-9")).toHaveTextContent("NOWE9");
+    expect(odbior.wywolania).toBe(1);
+    expect(await screen.findByText("Odebrano pocztę")).toBeInTheDocument();
+  });
+
+  it("brak połączenia: pokazuje powód z serwera (bez sekretów) i nie udaje sukcesu", async () => {
+    const uzytkownik = userEvent.setup();
+    odbior = { status: 200, cialo: { polaczono: false, powod: "Odbiór e-mail pominięty: brak PARTNERZY_IMAP_HOST w konfiguracji serwera.", wiadomosci: 0, nowe: 0, duplikaty: 0, bledy: 0 }, wywolania: 0 };
+    await otworz();
+    await uzytkownik.click(await screen.findByTestId("button-zamowienia-odbierz"));
+    expect(await screen.findByText("Nie odebrano zamówień")).toBeInTheDocument();
+    expect(await screen.findByText(/brak PARTNERZY_IMAP_HOST/)).toBeInTheDocument();
+  });
+
+  it("błąd serwera przy odbiorze (np. 409 — odbiór trwa) jest widoczny", async () => {
+    const uzytkownik = userEvent.setup();
+    odbior = { status: 409, cialo: { error: "Odbiór zamówień dla tego partnera już trwa — spróbuj za chwilę." }, wywolania: 0 };
+    await otworz();
+    await uzytkownik.click(await screen.findByTestId("button-zamowienia-odbierz"));
+    expect(await screen.findByText("Odbiór zamówień nie powiódł się")).toBeInTheDocument();
+    expect(await screen.findByText(/już trwa/)).toBeInTheDocument();
+  });
+
+  it("bez kanału e-mail przycisk jest wyłączony i jest podpowiedź", async () => {
+    kanalEmail = false;
+    await otworz();
+    expect(await screen.findByTestId("button-zamowienia-odbierz")).toBeDisabled();
+    expect(screen.getByTestId("text-zamowienia-kanal")).toBeInTheDocument();
+  });
+
+  it("odbiór przerwany po połączeniu (powód przy polaczono:true) nie jest pokazany jako sukces", async () => {
+    const uzytkownik = userEvent.setup();
+    odbior = { status: 200, cialo: { polaczono: true, powod: "Odbiór przerwany: SEARCH failed", wiadomosci: 0, nowe: 0, duplikaty: 0, bledy: 1 }, wywolania: 0 };
+    await otworz();
+    await uzytkownik.click(await screen.findByTestId("button-zamowienia-odbierz"));
+    expect(await screen.findByText("Odbiór przerwany")).toBeInTheDocument();
+    expect(screen.queryByText("Odebrano pocztę")).not.toBeInTheDocument();
   });
 });
