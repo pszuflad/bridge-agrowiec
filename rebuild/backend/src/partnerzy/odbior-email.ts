@@ -15,6 +15,7 @@ import { and, eq, gt, isNotNull } from "drizzle-orm";
 import type { Baza } from "../db/index.js";
 import { partnerErrorLog, partnerzy } from "../db/schema.js";
 import { zapiszZamowienie } from "../repos/partnerzy-zamowienia.js";
+import { dekodujXml } from "./dekoduj-xml.js";
 import { wyczyscLogi, zapiszBlad, zapiszOperacje } from "./logi.js";
 import { STATUS_BLAD_IMPORTU, zwaliduj } from "./walidacja-zamowienia.js";
 import type { OtworzSkrzynke, WiadomoscPoczty, ZalacznikPoczty } from "./poczta.js";
@@ -51,12 +52,16 @@ export type WynikOdbioru = {
   bledy: number;
 };
 
-const czyXml = (z: ZalacznikPoczty): boolean => /\.xml$/i.test(z.nazwa) || /xml/i.test(z.typ);
+/**
+ * Załącznik uznajemy za XML po rozszerzeniu `.xml` albo typie MIME `text/xml`, `application/xml`, `…+xml`. Typy `vnd.openxmlformats-…` (pliki .xlsx/.docx) i inne
+ * zawierające „xml” tylko w nazwie NIE są XML-em zamówienia — gdyby wpadły do parsera, w error_log byłby błędny „XML” zamiast zwykłego pominięcia.
+ */
+export const czyXml = (z: ZalacznikPoczty): boolean => /\.xml$/i.test(z.nazwa) || /^(text|application)\/([\w.-]+\+)?xml\s*(;|$)/i.test(z.typ.trim());
 const komunikat = (e: unknown): string => (e instanceof Error ? e.message : String(e));
 
 /** Po tym czasie zamek uznajemy za porzucony (zawieszone połączenie IMAP nie może zablokować odbioru partnera do restartu). */
 export const LIMIT_ZAMKA_MS = 15 * 60_000;
-const trwajace = new Map<number, number>(); // partnerId → kiedy zajęty (ms)
+const trwajace = new Map<number, { token: symbol; od: number }>(); // partnerId → właściciel zamka i kiedy zajęty (ms)
 
 /** Tylko dla testów: zamki są stanem modułu, więc zawieszony odbiór z jednego testu nie może blokować następnych. */
 export function _zresetujZamkiOdbioru(): void {
@@ -72,14 +77,14 @@ export async function odbierzZamowieniaEmail(
   teraz: Date = new Date(),
 ): Promise<WynikOdbioru> {
   const zajety = trwajace.get(partnerId);
-  if (zajety !== undefined && Date.now() - zajety < LIMIT_ZAMKA_MS) throw new OdbiorTrwaError(partnerId);
-  const moj = Date.now();
-  trwajace.set(partnerId, moj);
+  if (zajety !== undefined && Date.now() - zajety.od < LIMIT_ZAMKA_MS) throw new OdbiorTrwaError(partnerId);
+  const moj = Symbol("zamek-odbioru"); // unikalny token — znacznik czasu nie odróżniłby dwóch przejęć w tej samej milisekundzie
+  trwajace.set(partnerId, { token: moj, od: Date.now() });
   try {
     return await odbierz(db, otworz, partnerId, ustawienia, teraz);
   } finally {
     // Nie zdejmujemy cudzego zamka: po przeterminowaniu mógł go przejąć nowszy odbiór.
-    if (trwajace.get(partnerId) === moj) trwajace.delete(partnerId);
+    if (trwajace.get(partnerId)?.token === moj) trwajace.delete(partnerId);
   }
 }
 
@@ -155,7 +160,7 @@ async function obsluzWiadomosc(db: Baza, partnerId: number, w: WiadomoscPoczty, 
     if (pliki.length === 0) zapiszBlad(db, partnerId, OPERACJA_ODBIOR_EMAIL, `${opis}: brak załącznika XML.`, "ostrzezenie", teraz);
     for (const plik of pliki) {
       try {
-        const z = zapiszZamowienie(db, partnerId, plik.tresc.toString("utf-8"), teraz);
+        const z = zapiszZamowienie(db, partnerId, dekodujXml(plik.tresc), teraz);
         // Walidacja względem katalogu (ticket 232) po KAŻDYM zapisie, także dla powtórzonego pliku (zamówienie ze statusem `nowe` po awarii walidacji
         // zostanie dokończone, a po poprawie katalogu wróci `blad_importu`). `zachowajPrzyjete`: zamówienie już przyjęte nie jest degradowane samoczynnie.
         // Zamówienie zostaje zapisane niezależnie od wyniku; partner NIE dostaje żadnego powiadomienia.

@@ -2,6 +2,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const stan = vi.hoisted(() => ({
+  opcje: [] as Record<string, unknown>[],
   zdarzenia: [] as string[],
   wywolania: [] as string[],
   blokadaRzuca: false,
@@ -10,6 +11,9 @@ const stan = vi.hoisted(() => ({
 
 vi.mock("imapflow", () => ({
   ImapFlow: class {
+    constructor(opcje: Record<string, unknown>) {
+      stan.opcje.push(opcje);
+    }
     on(zdarzenie: string): void {
       stan.zdarzenia.push(zdarzenie);
     }
@@ -42,6 +46,7 @@ const konfig = { host: "imap.example.test", port: 993, uzytkownik: "u@example.te
 
 describe("adapter IMAP", () => {
   beforeEach(() => {
+    stan.opcje = [];
     stan.zdarzenia = [];
     stan.wywolania = [];
     stan.blokadaRzuca = false;
@@ -76,5 +81,13 @@ describe("adapter IMAP", () => {
     const [w] = await skrzynka.pobierzNieprzeczytane();
     await expect(w!.wczytaj()).rejects.toThrow(/za duża/);
     expect(stan.wywolania).not.toContain("fetch-source");
+  });
+
+  it("port 993: TLS od początku; inny port: STARTTLS jest WYMAGANY (hasło nie pójdzie jawnie, gdy serwer go nie oferuje)", async () => {
+    await otworzSkrzynkeImap(konfig);
+    expect(stan.opcje[0]).toMatchObject({ secure: true });
+    expect(stan.opcje[0]).not.toHaveProperty("doSTARTTLS");
+    await otworzSkrzynkeImap({ ...konfig, port: 143 });
+    expect(stan.opcje[1]).toMatchObject({ secure: false, doSTARTTLS: true });
   });
 });

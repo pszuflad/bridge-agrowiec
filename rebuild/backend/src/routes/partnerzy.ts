@@ -117,8 +117,10 @@ export function trasyPartnerzy({ db, serwis, odbiorEmail }: ZaleznosciPartnerzy)
     const id = idZParametru(req, res);
     if (id === null) return;
     const zamowienieId = Number(req.params.zamowienieId);
-    if (!Number.isInteger(zamowienieId) || zamowienieId < 1 || szczegolyZamowieniaDlaPartnera(db, id, zamowienieId) === null) {
-      return void res.status(404).json({ error: "Nie ma takiego zamówienia tego partnera." });
+    const obecne = Number.isInteger(zamowienieId) && zamowienieId >= 1 ? szczegolyZamowieniaDlaPartnera(db, id, zamowienieId) : null;
+    if (obecne === null) return void res.status(404).json({ error: "Nie ma takiego zamówienia tego partnera." });
+    if (!obecne.mozeWalidowac) {
+      return void res.status(409).json({ error: `Zamówienie ma status „${obecne.status}” i nie podlega ponownej walidacji.` });
     }
     const wynik = zwaliduj(db, zamowienieId);
     audytuj(req, "partner_zamowienie_waliduj", id, { zamowienieId, status: wynik?.status, bledy: wynik?.bledy });

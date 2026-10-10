@@ -121,6 +121,16 @@ describe("trasy /api/partnerzy/:id/zamowienia", () => {
       expect(JSON.stringify(odp.body)).not.toContain("surowyXml");
     });
 
+    it("zamówienie w późniejszym statusie: 409 zamiast mylącego 200 „0 błędów”; szczegóły mówią mozeWalidowac", async () => {
+      const { id } = zapiszZamowienie(s.db, a, XML_PRZYKLAD);
+      expect(((await get(`/api/partnerzy/${a}/zamowienia/${id}`)).body as { mozeWalidowac: boolean }).mozeWalidowac).toBe(true);
+      s.sqlite.prepare("UPDATE partner_zamowienia SET status = 'wyslane' WHERE id = ?").run(id);
+      expect(((await get(`/api/partnerzy/${a}/zamowienia/${id}`)).body as { mozeWalidowac: boolean }).mozeWalidowac).toBe(false);
+      const odp = await post(`/api/partnerzy/${a}/zamowienia/${id}/waliduj`);
+      expect(odp.status).toBe(409);
+      expect((odp.body as { error: string }).error).toMatch(/wyslane.*nie podlega/);
+    });
+
     it("lista pokazuje status i opis błędu importu", async () => {
       const { id } = zapiszZamowienie(s.db, a, XML_PRZYKLAD);
       zwaliduj(s.db, id);
