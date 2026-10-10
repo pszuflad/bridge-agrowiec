@@ -15,7 +15,7 @@ import { TOKEN_TESTOWY, uzytkownikZFixtura } from "./msw/kontrakt";
 const FR: KrajPartnera = { id: 1, partnerId: 1, kraj: "FR", narzutProc: 12, kursZrodlo: "nbp", kursReczny: null, kosztyDodatkowe: 43 };
 const startowy = (): SzczegolyPartnera => ({
   id: 1, nazwa: "TyreWorld", aktywny: false, stanMin: 2, zaokraglanie: "grosz", harmonogramMinuty: 60, tolerancjaCenyProc: null, formatPliku: "csv",
-  csvSeparator: ";", kanalFtp: false, kanalEmail: false, emailSkrzynka: null, zmieniono: "2026-10-10T10:00:00.000Z", magazyny: ["MO1"], wykluczenia: ["MO1_9"], kraje: [FR],
+  csvSeparator: ";", kanalFtp: false, kanalEmail: false, emailSkrzynka: null, zmieniono: "2026-10-10T10:00:00.000Z", magazyny: ["MO1"], wykluczenia: ["MO1_9"], kraje: [FR], kolumny: [], polaObliczeniowe: [],
 });
 
 let partner: SzczegolyPartnera;
