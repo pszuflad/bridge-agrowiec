@@ -11,6 +11,17 @@ Miejsce w modelu zostawione, kolumny w `products` jeszcze NIE ma. Do rozstrzygni
 5. Reguła „stary numer przy pozycji z najniższą ceną, pozostałe magazyny dostają nowe" — potwierdzić na przykładach z danych Adtyres (ok. 630 wierszy współdzieli numer).
 6. Backfill jako krok wdrożenia po jawnej zgodzie użytkownika (numery wychodzą poza Bridge).
 
+## Hasła i skrzynki partnerów (zapis 2026-10-10, do decyzji w poniedziałek z Martą)
+Kontekst: odbiór zamówień przez e-mail (ticket 229, PR #346) jest gotowy w kodzie, ale **wyłączony i nieprzetestowany na prawdziwym serwerze IMAP**. Hasła nie mogą trafić do repozytorium (jest publiczne) —
+wpisuje się je raz do `.env` na serwerze. Do ustalenia:
+1. **Gdzie stoją skrzynki partnerów** — na naszym serwerze pocztowym czy zewnętrznym? Od tego zależy wartość `PARTNERZY_IMAP_HOST` (jeden host dla wszystkich partnerów) i port (domyślnie 993/TLS).
+2. **Kto zakłada skrzynki** (po jednej na partnera, np. zamowienia-tyreworld@…) i kto zna hasła.
+3. **Kto i jak wpisuje hasła do `.env` na serwerze** — zmienne `PARTNERZY_IMAP_HASLO_<id partnera>` (id widać w panelu / w adresie `/partnerzy/<id>`). Wzór procesu jak przy `HASLO_TYMCZASOWE`: wpis ręczny raz, poza repo; sesja nie ma dostępu do serwera.
+4. **Rotacja haseł** — jak często i kto zmienia; po zmianie trzeba poprawić `.env` i zrestartować backend.
+5. **Skrzynka testowa** na środowisku testowym (`training.agroopony.eu`) do pierwszego prawdziwego odbioru — bez niej połączenia IMAP nie da się sprawdzić.
+6. **Konta FTP partnerów** (PRT-6.1) — to samo pytanie: kto zakłada konta, jak przekazujemy hasła partnerom (nie mailem w treści?), gdzie je trzymamy po stronie Bridge. Kroki wdrożenia nie wpisują haseł do repo; krok zależny od sekretu pomija się, gdy sekretu brak.
+7. **Czy włączyć odbiór e-mail już na produkcji**, czy najpierw tylko FTP (wtedy `PARTNERZY_ODBIOR_EMAIL` zostaje wyłączone).
+
 ## Zależy od numeru katalogowego
 PRT-7.4 (walidacja `CODE` zamówienia = numer katalogowy) i PRT-3.1 (selekcja wymaga unikalnych numerów).
 

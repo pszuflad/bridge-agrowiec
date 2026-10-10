@@ -192,6 +192,7 @@ Stan na 2026-10-10 (wszystko na `develop`, PR-y #323–#342; **nic nie jest jesz
 | 4 | logi operacji i błędów z retencją 30 dni (migracja 027), harmonogram per partner (domyślnie wyłączony) i ręczne „generuj teraz” | 219, 220 |
 | 5 | panel: lista, konfiguracja, kolumny i pola obliczeniowe z podglądem, logi i „Generuj teraz” | 221–225 |
 | 7 | model zamówień (migracja 028) i parser XML `DOCUMENTORDER`, idempotentny zapis po numerze partnera (bez tras REST) | 228 |
+| 7 | odbiór zamówień przez e-mail (IMAP, hasła skrzynek w `.env`, harmonogram domyślnie wyłączony; nieprzetestowany na prawdziwym serwerze IMAP) | 229 |
 | 9 | krok wdrożenia: partnerzy TyreWorld i Adtyres jako nieaktywni | 226 |
 
 Założenia wykonawcze do potwierdzenia: przesyłka GEIS w EUR (nie dzielona przez kurs), narzut w %, koszty dodatkowe w PLN; do pliku tylko produkty `status='aktywny'`; nazwy plików robocze; struktura XML wg publicznego formatu Ceneo.
