@@ -2,7 +2,7 @@
 
 import { createHash } from "node:crypto";
 
-import { and, asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, sql } from "drizzle-orm";
 
 import type { Baza } from "../db/index.js";
 import { partnerZamowienia, partnerZamowieniaPozycje } from "../db/schema.js";
@@ -58,8 +58,8 @@ export function zapiszZamowienie(db: Baza, partnerId: number, xml: string, teraz
   }, { behavior: "immediate" });
 }
 
-/** Zamówienia partnera, najnowsze pobrane najpierw (bez surowego XML — jest duży). */
-export function listaZamowien(db: Baza, partnerId: number) {
+/** Zamówienia partnera, najnowsze pobrane najpierw (bez surowego XML — jest duży). `liczbaPozycji` liczona w SQL. */
+export function listaZamowien(db: Baza, partnerId: number, limit = 100, offset = 0) {
   return db
     .select({
       id: partnerZamowienia.id,
@@ -70,10 +70,14 @@ export function listaZamowien(db: Baza, partnerId: number) {
       waluta: partnerZamowienia.waluta,
       krajDostawy: partnerZamowienia.krajDostawy,
       pobrano: partnerZamowienia.pobrano,
+      // Jawne nazwy tabel: Drizzle w podzapytaniu renderuje kolumny bez kwalifikatora, a `id` zasłoniłoby wtedy tabelę zewnętrzną.
+      liczbaPozycji: sql<number>`(SELECT count(*) FROM partner_zamowienia_pozycje p WHERE p.zamowienie_id = partner_zamowienia.id)`,
     })
     .from(partnerZamowienia)
     .where(eq(partnerZamowienia.partnerId, partnerId))
     .orderBy(desc(partnerZamowienia.pobrano), desc(partnerZamowienia.id))
+    .limit(limit)
+    .offset(offset)
     .all();
 }
 
@@ -82,4 +86,12 @@ export function szczegolyZamowienia(db: Baza, id: number) {
   if (!zamowienie) return null;
   const pozycje = db.select().from(partnerZamowieniaPozycje).where(eq(partnerZamowieniaPozycje.zamowienieId, id)).orderBy(asc(partnerZamowieniaPozycje.lp)).all();
   return { ...zamowienie, faktura: JSON.parse(zamowienie.fakturaJson) as Record<string, string>, dostawa: JSON.parse(zamowienie.dostawaJson) as Record<string, string>, pozycje };
+}
+
+/** Szczegóły zamówienia do API/panelu: bez `surowy_xml`, skrótu i surowych JSON-ów (są odpowiednio ciężkie lub zdublowane w `faktura`/`dostawa`). */
+export function szczegolyZamowieniaDlaPartnera(db: Baza, partnerId: number, zamowienieId: number) {
+  const z = szczegolyZamowienia(db, zamowienieId);
+  if (!z || z.partnerId !== partnerId) return null;
+  const { surowyXml: _xml, skrotXml: _skrot, fakturaJson: _f, dostawaJson: _d, ...reszta } = z;
+  return reszta;
 }

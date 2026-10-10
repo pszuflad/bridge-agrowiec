@@ -28,6 +28,7 @@ function zamockujApi() {
   const zmien = () => { partner = { ...partner, zmieniono: new Date().toISOString() }; };
   server.use(
     http.get("*/api/partnerzy/magazyny", () => HttpResponse.json({ magazyny: [{ magazyn: "MO1", liczbaPozycji: 120 }, { magazyn: "MO2", liczbaPozycji: 80 }] })),
+    http.get("*/api/partnerzy/:id/zamowienia", () => HttpResponse.json({ zamowienia: [] })),
     http.get("*/api/partnerzy/:id/logi", () => HttpResponse.json({ logi: [] })),
     http.get("*/api/partnerzy/:id/error-log", () => HttpResponse.json({ bledy: [] })),
     http.get("*/api/partnerzy/:id", ({ params }) => (Number(params.id) === 1 ? HttpResponse.json(partner) : HttpResponse.json({ error: "Nie ma takiego partnera." }, { status: 404 }))),

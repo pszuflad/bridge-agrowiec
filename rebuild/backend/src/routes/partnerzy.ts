@@ -9,6 +9,7 @@ import type { Baza } from "../db/index.js";
 import { requireAuth } from "../middleware/auth.js";
 import { zapiszAudyt } from "../repos/audit.js";
 import { pobierzBledy, pobierzLogi } from "../partnerzy/logi.js";
+import { listaZamowien, szczegolyZamowieniaDlaPartnera } from "../repos/partnerzy-zamowienia.js";
 import { walidujKolumny, walidujPola, zapiszKolumny, zapiszPola } from "../repos/partnerzy-kolumny.js";
 import { GenerowanieTrwaError, type SerwisPartnerow } from "../partnerzy/scheduler.js";
 import {
@@ -66,8 +67,9 @@ export function trasyPartnerzy({ db, serwis }: ZaleznosciPartnerzy): Router {
   });
 
   const stronicowanie = (req: Request): { limit: number; offset: number } => ({
-    limit: Math.min(Math.max(Number(req.query.limit) || 100, 1), 1000),
-    offset: Math.max(Number(req.query.offset) || 0, 0),
+    // `Math.floor`: niecałkowite `limit=1.5` wywracałoby SQLite (500) — dotyczy też tras logów.
+    limit: Math.min(Math.max(Math.floor(Number(req.query.limit)) || 100, 1), 1000),
+    offset: Math.max(Math.floor(Number(req.query.offset)) || 0, 0),
   });
 
   /** Log operacji (jedna linia na operację), najnowsze pierwsze; `limit` (domyślnie 100, max 1000) i `offset`. */
@@ -85,6 +87,24 @@ export function trasyPartnerzy({ db, serwis }: ZaleznosciPartnerzy): Router {
     const poziom = req.query.poziom === "blad" || req.query.poziom === "ostrzezenie" ? req.query.poziom : undefined;
     const { limit, offset } = stronicowanie(req);
     res.json({ bledy: pobierzBledy(db, id, limit, offset, poziom) });
+  });
+
+  /** Zamówienia odebrane od partnera (ticket 230, tylko odczyt), najnowsze pobrane pierwsze; `limit` (domyślnie 100, max 1000) i `offset`. Bez surowego XML. */
+  router.get("/api/partnerzy/:id/zamowienia", requireAuth, (req, res) => {
+    const id = idZParametru(req, res);
+    if (id === null) return;
+    const { limit, offset } = stronicowanie(req);
+    res.json({ zamowienia: listaZamowien(db, id, limit, offset) });
+  });
+
+  /** Szczegóły zamówienia partnera: pozycje, dostawa, faktura. 404, gdy zamówienie nie należy do tego partnera. */
+  router.get("/api/partnerzy/:id/zamowienia/:zamowienieId", requireAuth, (req, res) => {
+    const id = idZParametru(req, res);
+    if (id === null) return;
+    const zamowienieId = Number(req.params.zamowienieId);
+    const z = Number.isInteger(zamowienieId) && zamowienieId > 0 ? szczegolyZamowieniaDlaPartnera(db, id, zamowienieId) : null;
+    if (z === null) return void res.status(404).json({ error: "Nie ma takiego zamówienia tego partnera." });
+    res.json(z);
   });
 
   /** Ręczne „generuj teraz” (też dla partnera nieaktywnego). Zwraca wynik generowania: pliki, błędy, ostrzeżenia. */
