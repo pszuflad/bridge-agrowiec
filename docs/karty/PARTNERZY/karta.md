@@ -182,7 +182,9 @@ Katalog ma pola do wagi gabarytowej: `waga`, `dlugosc`, `szerokoscPaczki`, `wyso
 
 ## Dowiezione
 
-—
+Tickety 208–225 (model, CRUD, kurs NBP, parser formuł, GEIS, kalkulator, selekcja, szablony CSV/XML, generator, test zgodności, logi, scheduler, panel — lista, konfiguracja, kolumny, logi); szczegóły: `docs/spec-backend/wpis-208…225.md`.
+Ticket 227 (PRT-7.1): model zamówień i parser XML (`wpis-227.md`).
+Sekcja „Co jest w Bridge, a czego nie ma” wyżej opisuje stan z 2026-10-06 (przed budową) — historyczna.
 
 ## Do koordynatora
 

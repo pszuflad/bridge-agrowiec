@@ -736,3 +736,32 @@ export const partnerErrorLog = sqliteTable("partner_error_log", {
 	poziom: text().default("blad").notNull(),
 	komunikat: text().notNull(),
 }, (table) => [index("idx_partner_error_log_partner").on(table.partnerId, table.kiedy)]);
+
+// Ticket 227 (PRT-7.1; migracja 028) — zamówienia odbierane od partnerów. Numer partnera i nasz numer osobno; UNIQUE(partner, numer partnera) = idempotencja.
+export const partnerZamowienia = sqliteTable("partner_zamowienia", {
+	id: integer().primaryKey({ autoIncrement: true }),
+	partnerId: integer("partner_id").notNull().references(() => partnerzy.id, { onDelete: "cascade" }),
+	numerPartnera: text("numer_partnera").notNull(),
+	numerWlasny: text("numer_wlasny"),
+	status: text().default("nowe").notNull(),
+	dataZamowienia: text("data_zamowienia"),
+	dataDostawy: text("data_dostawy"),
+	waluta: text(),
+	kosztDostawy: real("koszt_dostawy"),
+	krajDostawy: text("kraj_dostawy"),
+	fakturaJson: text("faktura_json").default("{}").notNull(),
+	dostawaJson: text("dostawa_json").default("{}").notNull(),
+	surowyXml: text("surowy_xml").notNull(),
+	skrotXml: text("skrot_xml").notNull(),
+	pobrano: text().notNull(),
+}, (table) => [unique().on(table.partnerId, table.numerPartnera)]);
+
+export const partnerZamowieniaPozycje = sqliteTable("partner_zamowienia_pozycje", {
+	id: integer().primaryKey({ autoIncrement: true }),
+	zamowienieId: integer("zamowienie_id").notNull().references(() => partnerZamowienia.id, { onDelete: "cascade" }),
+	lp: integer().notNull(),
+	kod: text().notNull(),
+	nazwa: text(),
+	ilosc: integer().notNull(),
+	cenaSprzedazy: real("cena_sprzedazy"),
+}, (table) => [unique().on(table.zamowienieId, table.lp), index("idx_partner_zamowienia_pozycje_zam").on(table.zamowienieId)]);
