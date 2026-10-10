@@ -88,7 +88,7 @@ describe("zastosujMigracje", () => {
     // 020 (ticket 180) dokłada dwie kolumny `selly_products_scalone` — bilans tabel i indeksów bez zmian.
     // 021/022 (ticket 185) to triggery i migracja danych (tabela tymczasowa znika) — bilans bez zmian.
     // 023 (ticket 195) dokłada `selly_usuniecia` (historia usunięć z Selly) z dwoma indeksami: +1 tabela, +2.
-    // 028 (ticket 227) dokłada `partner_zamowienia` i `partner_zamowienia_pozycje` z jednym indeksem (`idx_partner_zamowienia_pozycje_zam`): +2 tabele, +1.
+    // 028 (ticket 228) dokłada `partner_zamowienia` i `partner_zamowienia_pozycje` z jednym indeksem (`idx_partner_zamowienia_pozycje_zam`): +2 tabele, +1.
     // 027 (ticket 219) dokłada `partner_logi` i `partner_error_log`, każda z jednym indeksem: +2 tabele, +2.
     // 026 (ticket 212) dokłada `geis_kraje` i `geis_stawki` (klucze główne, bez osobnych indeksów): +2 tabele, +0.
     // 025 (ticket 210) dokłada tabelę `kursy_nbp` (klucz tekstowy, bez osobnego indeksu): +1 tabela, +0.

@@ -1,4 +1,4 @@
--- Ticket 227 (227-FEATURE-partnerzy-model-zamowien, PRT-7.1): zamówienia odbierane od partnerów B2B.
+-- Ticket 228 (228-FEATURE-partnerzy-model-zamowien, PRT-7.1): zamówienia odbierane od partnerów B2B.
 --
 -- ⚠ NOWE TABELE, NIE ODTWORZENIE PRODUKCJI; powstają puste, bez kroków ręcznych. Sam model i parser — odbiór (FTP/e-mail), walidacja
 -- biznesowa i wysyłka do Selly to kolejne tickety (7.2–7.5).

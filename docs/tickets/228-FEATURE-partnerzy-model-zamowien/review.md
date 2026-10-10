@@ -1,4 +1,4 @@
-# 227-FEATURE-partnerzy-model-zamowien — Code review
+# 228-FEATURE-partnerzy-model-zamowien — Code review
 
 > Reviewed: 2026-10-10
 > Branch: claude/peaceful-gates-a8yebr
@@ -19,7 +19,7 @@
   - W jednym procesie (better-sqlite3 jest synchroniczny) jest poprawnie. Ale baza ma WAL i `busy_timeout=5000` (`src/db/index.ts:17-20`), a kroki wdrożenia, CLI i przyszły odbiornik 7.2 mogą pisać z drugiego połączenia. Wtedy dwa równoległe zapisy tego samego `NUMBER` dają `SQLITE_BUSY` przy awansie transakcji do zapisu albo wyjątek `UNIQUE constraint failed`, zamiast `nowe: false`.
   - Suggestion: `db.transaction(fn, { behavior: "immediate" })` (drizzle to wspiera) albo `INSERT … ON CONFLICT(partner_id, numer_partnera) DO NOTHING` + sprawdzenie `changes`. Dodać test: dwa kolejne zapisy w jednej transakcji / przechwycenie wyjątku UNIQUE.
 - [ ] `rebuild/backend/src/repos/partnerzy-zamowienia.ts:25` — `skrot` liczony z surowego tekstu, więc inny zapis końców linii / BOM / wcięć tego samego zamówienia daje `zmieniony: true`.
-  - Fałszywe alarmy „zmieniony” przy ponownym pobraniu z FTP po przeformatowaniu. Rozważyć skrót z postaci znormalizowanej (np. z `Zamowienie`, nie z XML) albo udokumentować w `wpis-227.md`, że to świadome.
+  - Fałszywe alarmy „zmieniony” przy ponownym pobraniu z FTP po przeformatowaniu. Rozważyć skrót z postaci znormalizowanej (np. z `Zamowienie`, nie z XML) albo udokumentować w `wpis-228.md`, że to świadome.
 - [ ] `rebuild/backend/src/partnerzy/zamowienie-xml.ts:49` — wykrywanie DOCTYPE/ENTITY regexem na całym tekście.
   - Odrzuci też poprawny plik, w którym `<!DOCTYPE` występuje w CDATA lub komentarzu (np. nazwa/uwaga). Praktycznie rzadkie, a kierunek błędu bezpieczny (odrzucenie), więc nie blokuje. Zabezpieczenie XXE/billion laughs jest skuteczne: encje poza 5 predefiniowanymi i numerycznymi nie są rozwijane (`dekoduj`, :36-44), a dekodowanie jest jednoprzebiegowe (`&amp;lt;` → `&lt;`). Dodać test z DOCTYPE w CDATA, żeby zachowanie było jawne.
 - [ ] `rebuild/backend/src/partnerzy/zamowienie-xml.ts:56,71` — tekst niebędący białymi znakami poza elementem głównym (przed/po `DOCUMENTORDER`) jest przyjmowany do `korzen.tekst` i ignorowany.

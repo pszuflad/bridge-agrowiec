@@ -1,4 +1,4 @@
-/** Parser zamówienia partnera `DOCUMENTORDER` (ticket 227, PRT-7.1). */
+/** Parser zamówienia partnera `DOCUMENTORDER` (ticket 228, PRT-7.1). */
 import { describe, expect, it } from "vitest";
 
 import { BladZamowienia, MAKS_POZYCJI, MAKS_ROZMIAR_XML, parsujZamowienie } from "../src/partnerzy/zamowienie-xml.js";

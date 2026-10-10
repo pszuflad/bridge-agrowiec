@@ -1,4 +1,4 @@
-/** Repo zamówień partnerów (ticket 227, PRT-7.1): idempotencja po NUMBER, zmiana treści, kaskada, izolacja partnerów. */
+/** Repo zamówień partnerów (ticket 228, PRT-7.1): idempotencja po NUMBER, zmiana treści, kaskada, izolacja partnerów. */
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { partnerzy } from "../src/db/schema.js";

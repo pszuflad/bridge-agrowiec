@@ -1,4 +1,4 @@
-/** Przykładowy plik zamówienia partnera (wg `docs/karty/PARTNERZY/karta.md`) — wspólny dla testów ticketu 227. */
+/** Przykładowy plik zamówienia partnera (wg `docs/karty/PARTNERZY/karta.md`) — wspólny dla testów ticketu 228. */
 export const XML_PRZYKLAD = `<?xml version="1.0" encoding="UTF-8"?>
 <DOCUMENTORDER>
   <INVOICE><NUMBER>A01UF90224</NUMBER><FROM>04358</FROM><NAME>AD TYRES INTERNATIONAL SLU</NAME><TAXID>ATU71690869</TAXID><COUNTRY>AD</COUNTRY></INVOICE>

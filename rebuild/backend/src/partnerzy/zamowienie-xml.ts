@@ -1,4 +1,4 @@
-// Parser zamówienia partnera — `DOCUMENTORDER` (karta PARTNERZY, ticket 227 / PRT-7.1). Przykład pliku: `docs/karty/PARTNERZY/karta.md`.
+// Parser zamówienia partnera — `DOCUMENTORDER` (karta PARTNERZY, ticket 228 / PRT-7.1). Przykład pliku: `docs/karty/PARTNERZY/karta.md`.
 //
 // Parser zgłasza WYŁĄCZNIE błędy strukturalne (zły XML, brak `NUMBER`, brak pozycji, pusty `CODE`, ilość lub cena nieliczbowa). Walidacja biznesowa
 // (nieznany kod, brak stanu, cena poza tolerancją) należy do PRT-7.4: takie zamówienie ma trafić do Selly ze statusem „błąd importu”, więc nie może

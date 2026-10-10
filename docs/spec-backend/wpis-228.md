@@ -1,6 +1,6 @@
-# Wpis 227 — zamówienia partnerów: model i parser XML
+# Wpis 228 — zamówienia partnerów: model i parser XML
 
-Ticket `227-FEATURE-partnerzy-model-zamowien` (PRT-7.1). Nowa funkcjonalność, nie odtworzenie produkcji.
+Ticket `228-FEATURE-partnerzy-model-zamowien` (PRT-7.1). Nowa funkcjonalność, nie odtworzenie produkcji.
 
 - Migracja `028_partner_zamowienia.sql`: `partner_zamowienia` (numer partnera i `numer_wlasny` osobno; `numer_wlasny` jest NULL do czasu wysyłki do sklepu) oraz
   `partner_zamowienia_pozycje`. `UNIQUE(partner_id, numer_partnera)` = idempotencja po `NUMBER`.

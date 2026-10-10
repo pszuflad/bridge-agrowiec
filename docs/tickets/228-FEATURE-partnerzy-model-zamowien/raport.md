@@ -1,4 +1,4 @@
-# 227 — Raport (PRT-7.1)
+# 228 — Raport (PRT-7.1)
 
 ## Summary
 Dodano model zamówień partnerów (migracja 028, dwie tabele) oraz bezzależnościowy parser `DOCUMENTORDER` i idempotentne repo zapisu. Moduł wewnętrzny — bez tras REST.
@@ -7,7 +7,7 @@ Dodano model zamówień partnerów (migracja 028, dwie tabele) oraz bezzależno�
 - **Nowe:** `rebuild/schema/028_partner_zamowienia.sql`, `src/partnerzy/zamowienie-xml.ts`, `src/repos/partnerzy-zamowienia.ts`
 - `src/db/schema.ts` — modele `partnerZamowienia`, `partnerZamowieniaPozycje`
 - Testy: `partnerzy.zamowienie-xml.test.ts`, `partnerzy.zamowienia.test.ts`, `db.migracja-028.test.ts` (+ fixture `partnerzy.zamowienie-przyklad.ts`); liczniki w `db.migracje.test.ts`, `db.migracje-produkcja.test.ts`
-- Docs: `docs/spec-backend/wpis-227.md`, `docs/karty/PARTNERZY/{karta.md,decyzje-do-konsultacji-marty.md}`, `rebuild/schema/README.md`
+- Docs: `docs/spec-backend/wpis-228.md`, `docs/karty/PARTNERZY/{karta.md,decyzje-do-konsultacji-marty.md}`, `rebuild/schema/README.md`
 
 ## Deviations from plan
 Brak. Praca w gałęzi wskazanej przez środowisko (`claude/peaceful-gates-a8yebr`), bez osobnego worktree — gałąź zresetowana do `origin/develop` (nie miała własnych commitów).

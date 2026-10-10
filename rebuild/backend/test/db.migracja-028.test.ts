@@ -1,4 +1,4 @@
-/** Migracja 028 (ticket 227, PRT-7.1) — zamówienia partnerów: domyślne wartości i unikalność numeru partnera. */
+/** Migracja 028 (ticket 228, PRT-7.1) — zamówienia partnerów: domyślne wartości i unikalność numeru partnera. */
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";

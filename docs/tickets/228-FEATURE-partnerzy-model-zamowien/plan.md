@@ -1,4 +1,4 @@
-# 227 — model zamówień partnera i parser XML (PRT-7.1)
+# 228 — model zamówień partnera i parser XML (PRT-7.1)
 
 > Status: Approved (użytkownik 2026-10-10: „rób wszystko automatycznie, bez pytań") · Gałąź: `claude/peaceful-gates-a8yebr` (wskazana przez środowisko; bez osobnego worktree)
 

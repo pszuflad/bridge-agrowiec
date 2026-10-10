@@ -737,7 +737,7 @@ export const partnerErrorLog = sqliteTable("partner_error_log", {
 	komunikat: text().notNull(),
 }, (table) => [index("idx_partner_error_log_partner").on(table.partnerId, table.kiedy)]);
 
-// Ticket 227 (PRT-7.1; migracja 028) — zamówienia odbierane od partnerów. Numer partnera i nasz numer osobno; UNIQUE(partner, numer partnera) = idempotencja.
+// Ticket 228 (PRT-7.1; migracja 028) — zamówienia odbierane od partnerów. Numer partnera i nasz numer osobno; UNIQUE(partner, numer partnera) = idempotencja.
 export const partnerZamowienia = sqliteTable("partner_zamowienia", {
 	id: integer().primaryKey({ autoIncrement: true }),
 	partnerId: integer("partner_id").notNull().references(() => partnerzy.id, { onDelete: "cascade" }),

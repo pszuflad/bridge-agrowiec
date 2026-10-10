@@ -1,4 +1,4 @@
-// Zamówienia partnerów — zapis i odczyt (karta PARTNERZY, ticket 227 / PRT-7.1). Walidacja biznesowa (7.4) i Selly (7.5) to osobne tickety.
+// Zamówienia partnerów — zapis i odczyt (karta PARTNERZY, ticket 228 / PRT-7.1). Walidacja biznesowa (7.4) i Selly (7.5) to osobne tickety.
 
 import { createHash } from "node:crypto";
 
