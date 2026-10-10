@@ -1,6 +1,6 @@
 # PARTNERZY — moduł partnerów B2B (cenniki EUR, zamówienia, tracking)
 
-> **Stan:** ⏸ specyfikacja zebrana 2026-10-06, czeka na plan i podział na bloki
+> **Stan:** ⏸ specyfikacja zebrana 2026-10-06; podział na tickety: `podzial-na-tickety.md` (2026-10-10), czeka na zatwierdzenie i start F0
 > **Iteracja:** poza planem odbudowy — NOWA funkcjonalność · **Wpisy backlogu:** — · **Zależy od:** —
 > **Ticket:** —
 
