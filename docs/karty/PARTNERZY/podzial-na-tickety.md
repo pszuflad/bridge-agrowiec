@@ -2,11 +2,12 @@
 
 > **Stan:** plan podziału, 2026-10-10 · właściciel: koordynator · źródło zakresu: `karta.md` (ten sam katalog)
 > **Nie mają jeszcze numerów ticketów.** Numer rezerwuje się atomowo przy starcie każdego ticketu
-> (`feature.md`, Krok 4). Do tego czasu tickety nazywa się identyfikatorem `PRT-…` z tego pliku.
+> (`feature.md`, Krok 4). Do tego czasu tickety nazywa się identyfikatorem `PRT-…` z tego pliku. Przydzielone: PRT-1.1 = ticket 208.
 
 ## Zasady układu
 
-1. **Budujemy od fundamentu do góry:** decyzje → dane → silnik obliczeń → pliki → automat → panel → kanały zewnętrzne → zamówienia → tracking → wdrożenie. Ticket nie startuje, dopóki nie są zamknięte jego zależności (kolumna „Zależy od”).
+0. **Decyzje otwarte i spike’i nie są osobnymi ticketami** (zmiana 2026-10-10). Każdy ticket zaczyna od krótkiej listy „Pytań na start” do użytkownika i dopiero potem koduje. Gdzie to dotyczy: PRT-1.2 (numeracja `KK PP NNNNN`, Optima/Selly), PRT-2.4 (rentowność, opcjonalnie), PRT-3.4 i 6.2 i 8.2 (schematy nazw plików), PRT-6.1 (protokół FTP, konta; wymaga odczytu z serwera), PRT-7.4 (tolerancja cenowa, zasada dla ceny wyższej, błędy bez powiadomienia), PRT-7.5 (tworzenie zamówień w Selly przez API; wymaga dokumentacji/testu Selly; NO-GO zmienia poziom 7–8).
+1. **Budujemy od fundamentu do góry:** dane → silnik obliczeń → pliki → automat → panel → kanały zewnętrzne → zamówienia → tracking → wdrożenie. Ticket nie startuje, dopóki nie są zamknięte jego zależności (kolumna „Zależy od”).
 2. **Pierwsza wartość = poziomy 1–4 + panel minimalny (5.1–5.2):** pliki cenników dla obu partnerów. Zamówienia i tracking (poziomy 7–8) niosą największe ryzyko, więc idą po tym, jak pliki działają na produkcji.
 3. **Jeden ticket = jedna zmiana weryfikowalna osobno** (własny PR do `develop`, bramki `lint/typecheck/build/test`, kontrakt `openapi.yaml` + fixtures tam, gdzie dotyka API).
 4. **Nowy moduł obok istniejącego kodu** — nie ruszamy `src/import/legacy/` ani odtwarzanych tras. Kod: `rebuild/backend/src/partnerzy/` (+ `repos/partnerzy*.ts`, `routes/partnerzy*.ts`), front: `rebuild/frontend/src/pages/partnerzy/`.
@@ -16,7 +17,6 @@
 ## Mapa hierarchii
 
 ```
-POZIOM 0  Decyzje i rozpoznanie (bez kodu produkcyjnego)         ── odblokowują 1.2, 6, 7
 POZIOM 1  Fundament danych: model partnera, numer katalogowy, CRUD
 POZIOM 2  Silnik obliczeń: kurs NBP, GEIS, formuły, kalkulator ceny
 POZIOM 3  Generator plików: selekcja pozycji, CSV, XML, zapis atomowy
@@ -32,35 +32,25 @@ POZIOM 9  Wdrożenie i zamknięcie: partnerzy startowi, test na środowisku test
 
 | Fala | Tickety | Uwagi |
 |---|---|---|
-| **F0** | PRT-00a, 00b, 00c, 00d | spike’i i decyzje — równolegle, głównie rozmowa z użytkownikiem i odczyt dokumentacji |
-| **F1** | PRT-1.1 → PRT-1.3 | 1.1 najpierw; 1.2 równolegle po decyzji 00c |
+| **F1** | PRT-1.1 → PRT-1.3 | 1.1 (**ticket 208**) najpierw; 1.2 po odpowiedzi na pytania startowe numeracji |
 | **F2** | PRT-2.1, 2.2, 2.3 równolegle → PRT-2.4 | 2.1/2.2/2.3 są niezależne od siebie; 2.4 scala je |
 | **F3** | PRT-3.1 → 3.2 ‖ 3.3 → 3.4 → 3.5 | 3.2 i 3.3 równolegle (dwa formaty) |
 | **F4** | PRT-4.1 ‖ PRT-4.2 | po 3.4 |
 | **F5** | PRT-5.1 → 5.2 → 5.3 → 5.4 | 5.1/5.2 mogą ruszyć już po 1.3 (równolegle z F2–F4); 5.3/5.4 po F3–F4 |
 | **Wdrożenie I** | PRT-9.1 | pliki cenników dla obu partnerów na produkcji (bez FTP: ręczne pobranie/podgląd) |
-| **F6** | PRT-6.1 → 6.2 | po decyzji 00b; po wdrożeniu I partner może już pobierać pliki |
-| **F7** | PRT-7.1 → 7.2 ‖ 7.3 → 7.4 → 7.5 → 7.6 | 7.5 zależy od wyniku spike’a 00a |
+| **F6** | PRT-6.1 → 6.2 | po odpowiedziach na pytania o FTP; po wdrożeniu I partner może już pobierać pliki |
+| **F7** | PRT-7.1 → 7.2 ‖ 7.3 → 7.4 → 7.5 → 7.6 | 7.5 zależy od wyniku spike’a Selly (na starcie ticketu) |
 | **F8** | PRT-8.1 → 8.2 → 8.3 | po 7.5 |
 | **Wdrożenie II** | PRT-9.2, 9.3 | instrukcja testów, synchronizacja dokumentacji |
 
 ---
-
-## POZIOM 0 — Decyzje i rozpoznanie
-
-| ID | Tytuł | Zakres | Zależy od | Wynik |
-|---|---|---|---|---|
-| **PRT-00a** | Spike: tworzenie zamówień w Selly przez API | Ustalić z dokumentacji/testu endpoint, pola, adres dostawy klienta końcowego, numer zewnętrzny, idempotencję, statusy (w tym „błąd importu”). Klient `src/selly/klient.ts` ma dziś tylko `listOrders`, `getOrder`. Bez sekretów produkcyjnych; atrapa w `test/gate/selly-atrapa.ts`. | — | raport w `docs/tickets/<N>/`; GO/NO-GO dla 7.5. Jeśli NO-GO — zmiana planu poziomu 7 (np. CSV do importu ręcznego) |
-| **PRT-00b** | Spike: serwer plików partnerów | Protokół (FTP/FTPS/SFTP), sposób zakładania kont, izolacja do własnego katalogu (chroot), polityka haseł, jak automatyzować przez krok wdrożenia. Weryfikacja na serwerze (nie z sesji chmurowej) — użytkownik/Ania dostarcza odczyt. | — | decyzja architektoniczna dla 6.1/7.2 |
-| **PRT-00c** | Decyzja: numeracja katalogowa `KK PP NNNNN` | Kto jest właścicielem generatora (Bridge), jak wpływa na Optimę i Selly, polityka dla istniejących numerów (stary numer przy pozycji z najniższą ceną), obsługa 10-cyfrowych numerów marki Gri, kategoria 05, producenci >63 (Deli 67), numer wspólny dla kilku marek. | — | zatwierdzony opis reguł dla 1.2 |
-| **PRT-00d** | Decyzje otwarte z karty | Wartość tolerancji cenowej (%) i zasada dla ceny WYŻSZEJ niż w cenniku; zasada „bez powiadomienia” dla innych błędów (nieznany kod, brak stanu); hierarchia reguł cen i minimalna rentowność (czy w zakresie V1); schematy nazw plików (cennik, tracking, archiwum); dokładne nazwy kolumn wzorca Ceneo. | — | wpisane do `karta.md`/`wejscie-<N>.md` odpowiednich ticketów |
 
 ## POZIOM 1 — Fundament danych
 
 | ID | Tytuł | Zakres | Zależy od | Dotyka |
 |---|---|---|---|---|
 | **PRT-1.1** | Model danych partnera | Migracja (`rebuild/schema/024_…`) + model Drizzle: `partnerzy` (nazwa, aktywny, stan_min domyślnie 2, zaokrąglanie, harmonogram w minutach, kanały zamówień, tolerancja ceny), `partner_magazyny`, `partner_wykluczenia` (produkty), `partner_kraje` (narzut, źródło kursu NBP/ręczny + wartość, koszty dodatkowe, przesyłka), `partner_kolumny` i `partner_pola_obliczeniowe`, `partner_paliwo_historia`, `partner_kursy` (użyty kurs per plik). Bez logiki. Kopia bazy przed migracją. | — | `schema/`, `db/schema.ts` |
-| **PRT-1.2** | Numer katalogowy pozycji | Kolumna numeru katalogowego w `products` (unikalna per pozycja), generator `KK PP NNNNN`, słowniki kategorii i producentów, backfill jako **krok wdrożenia** (zachowanie istniejących numerów; reguła „najniższa cena zachowuje stary”). Reguła `nazwa_pamiec`/`manual_overrides` nie dotyczy (numer ≠ nazwa), ale sprawdzić. Uwaga na pułapkę typów INTEGER/boolean przy odczycie. | 00c, 1.1 | `db/schema.ts`, `kroki/rejestr.ts`, import (nadawanie dla nowych) |
+| **PRT-1.2** | Numer katalogowy pozycji | Kolumna numeru katalogowego w `products` (unikalna per pozycja), generator `KK PP NNNNN`, słowniki kategorii i producentów, backfill jako **krok wdrożenia** (zachowanie istniejących numerów; reguła „najniższa cena zachowuje stary”). Reguła `nazwa_pamiec`/`manual_overrides` nie dotyczy (numer ≠ nazwa), ale sprawdzić. Uwaga na pułapkę typów INTEGER/boolean przy odczycie. | 1.1 + pytania na start | `db/schema.ts`, `kroki/rejestr.ts`, import (nadawanie dla nowych) |
 | **PRT-1.3** | Repo i REST: CRUD partnera | `repos/partnerzy.ts`, `routes/partnerzy.ts`: lista, szczegół, dodanie/edycja, aktywacja/dezaktywacja bez usuwania, magazyny, wykluczenia, kraje (dodawanie/usuwanie dowolnej liczby). Wpis w `openapi.yaml` + fixtures, autoryzacja jak reszta panelu. | 1.1 | `routes/`, `contract/` |
 
 ## POZIOM 2 — Silnik obliczeń
@@ -108,7 +98,7 @@ POZIOM 9  Wdrożenie i zamknięcie: partnerzy startowi, test na środowisku test
 
 | ID | Tytuł | Zakres | Zależy od |
 |---|---|---|---|
-| **PRT-6.1** | Konta i katalogi partnerów | Struktura `NAZWAPARTNERA_<16 znaków>/public/{orders,tracking,pricelist}` i `private/{archive,conf}`, konta z izolacją do własnego katalogu, tworzenie jako krok wdrożenia; hasła z `.env`, nigdy w repo. | 00b, 1.3 |
+| **PRT-6.1** | Konta i katalogi partnerów | Struktura `NAZWAPARTNERA_<16 znaków>/public/{orders,tracking,pricelist}` i `private/{archive,conf}`, konta z izolacją do własnego katalogu, tworzenie jako krok wdrożenia; hasła z `.env`, nigdy w repo. | 1.3 + pytania na start |
 | **PRT-6.2** | Publikacja plików na serwer partnera | Generator zapisuje do `public/pricelist`, archiwum do `private/archive`, retencja 30 dni; test, że partner widzi tylko swój katalog. | 6.1, 3.4 |
 
 ## POZIOM 7 — Zamówienia
@@ -118,8 +108,8 @@ POZIOM 9  Wdrożenie i zamknięcie: partnerzy startowi, test na środowisku test
 | **PRT-7.1** | Model zamówień i parser XML | Tabele zamówień (numer partnera + nasz numer, powiązanie), parser `DOCUMENTORDER` (przykład w `karta.md`), idempotencja po `NUMBER`, adres dostawy klienta końcowego. | 1.1 |
 | **PRT-7.2** | Odbiór zamówień przez FTP | Pobieranie z `orders/`, przeniesienie do przetworzonych, obsługa uszkodzonych plików. | 7.1, 6.1 |
 | **PRT-7.3** | Odbiór zamówień przez e-mail | Osobna skrzynka partnera (IMAP), załącznik XML, sekret w `.env`, pominięcie z logiem gdy brak konfiguracji. | 7.1 |
-| **PRT-7.4** | Walidacja zamówienia | `CODE` = numer katalogowy (1.2), nieznany kod, brak stanu, cena poza tolerancją względem ostatniego cennika partnera → zamówienie idzie do Selly ze statusem „błąd importu”, **bez powiadomienia do partnera**. | 7.1, 1.2, 00d |
-| **PRT-7.5** | Wysyłka zamówień do Selly | Rozszerzenie `src/selly/klient.ts` o tworzenie zamówień (za interfejsem, atrapa w testach — testy NIGDY nie wołają prawdziwego Selly), mapowanie pól, ponowienia, idempotencja. Zależy od wyniku spike’a 00a. | 00a, 7.4 |
+| **PRT-7.4** | Walidacja zamówienia | `CODE` = numer katalogowy (1.2), nieznany kod, brak stanu, cena poza tolerancją względem ostatniego cennika partnera → zamówienie idzie do Selly ze statusem „błąd importu”, **bez powiadomienia do partnera**. | 7.1, 1.2 + pytania na start |
+| **PRT-7.5** | Wysyłka zamówień do Selly | Rozszerzenie `src/selly/klient.ts` o tworzenie zamówień (za interfejsem, atrapa w testach — testy NIGDY nie wołają prawdziwego Selly), mapowanie pól, ponowienia, idempotencja. Zależy od wyniku spike’a Selly na starcie ticketu. | 7.4 + spike Selly na start |
 | **PRT-7.6** | Panel zamówień | Lista zamówień partnera, statusy, błędy importu do rozwiązania przez człowieka, powiązanie numeru partnera z naszym. | 7.5, 5.1 |
 
 ## POZIOM 8 — Tracking
@@ -141,13 +131,13 @@ POZIOM 9  Wdrożenie i zamknięcie: partnerzy startowi, test na środowisku test
 
 ## Ryzyka, które mogą zmienić podział
 
-- **00a NO-GO** (Selly nie tworzy zamówień przez API) → poziom 7.5–8 do przeprojektowania; poziomy 1–6 niezmienione.
-- **00b** (FTP na serwerze Bridge niemożliwy lub bez izolacji) → 6.1 zmienia się na inny kanał; 3.4 nadal działa na dysku, więc pliki można dostarczyć inaczej.
-- **1.2 dotyka Optimy i Selly** — numery katalogowe wychodzą poza Bridge; wdrażać dopiero po jawnej zgodzie użytkownika.
+- **Selly NO-GO** (Selly nie tworzy zamówień przez API) → poziom 7.5–8 do przeprojektowania; poziomy 1–6 niezmienione.
+- **FTP** (FTP na serwerze Bridge niemożliwy lub bez izolacji) → 6.1 zmienia się na inny kanał; 3.4 nadal działa na dysku, więc pliki można dostarczyć inaczej.
+- **PRT-1.2 dotyka Optimy i Selly** — numery katalogowe wychodzą poza Bridge; wdrażać dopiero po jawnej zgodzie użytkownika.
 - **Nazwy produktów:** żaden z ticketów nie zmienia nazw w katalogu; gdyby tak się stało, obowiązuje reguła `nazwa_pamiec`/`manual_overrides` z `CLAUDE.md`.
 - **Brak planu rentowności** (otwarta pozycja 5 karty) — jeśli wejdzie do V1, dodać ticket po 2.4 (blokada/ostrzeżenie poniżej minimum).
 - **V2 transportu** (strefy 2–N, kody pocztowe) — poza tym podziałem; osobny ticket po wdrożeniu I.
 
 ## Liczba i rozmiar
 
-36 ticketów: P0 — 4, P1 — 3, P2 — 4, P3 — 5, P4 — 2, P5 — 4, wdrożenie I — 1, P6 — 2, P7 — 6, P8 — 3, zamknięcie — 2. Największe: 2.2 (GEIS), 7.5 (Selly), 1.2 (numeracja).
+32 tickety: P1 — 3, P2 — 4, P3 — 5, P4 — 2, P5 — 4, wdrożenie I — 1, P6 — 2, P7 — 6, P8 — 3, zamknięcie — 2. Największe: 2.2 (GEIS), 7.5 (Selly), 1.2 (numeracja).
