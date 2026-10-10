@@ -9,6 +9,7 @@ import type { Baza } from "../db/index.js";
 import { requireAuth } from "../middleware/auth.js";
 import { zapiszAudyt } from "../repos/audit.js";
 import { pobierzBledy, pobierzLogi } from "../partnerzy/logi.js";
+import { GenerowanieTrwaError, type SerwisPartnerow } from "../partnerzy/scheduler.js";
 import {
   czyBlad,
   dodajPartnera,
@@ -26,9 +27,9 @@ import {
   walidujUstawieniaPartnera,
 } from "../repos/partnerzy.js";
 
-export type ZaleznosciPartnerzy = { db: Baza };
+export type ZaleznosciPartnerzy = { db: Baza; serwis?: SerwisPartnerow };
 
-export function trasyPartnerzy({ db }: ZaleznosciPartnerzy): Router {
+export function trasyPartnerzy({ db, serwis }: ZaleznosciPartnerzy): Router {
   const router = Router();
 
   const audytuj = (req: Request, akcja: string, id: number, szczegoly?: unknown): void => {
@@ -77,6 +78,22 @@ export function trasyPartnerzy({ db }: ZaleznosciPartnerzy): Router {
     const poziom = req.query.poziom === "blad" || req.query.poziom === "ostrzezenie" ? req.query.poziom : undefined;
     const { limit, offset } = stronicowanie(req);
     res.json({ bledy: pobierzBledy(db, id, limit, offset, poziom) });
+  });
+
+  /** Ręczne „generuj teraz” (też dla partnera nieaktywnego). Zwraca wynik generowania: pliki, błędy, ostrzeżenia. */
+  router.post("/api/partnerzy/:id/generuj", requireAuth, async (req, res) => {
+    const id = idZParametru(req, res);
+    if (id === null) return;
+    if (!serwis) return void res.status(503).json({ error: "Generowanie plików partnerów nie jest skonfigurowane na tym serwerze." });
+    try {
+      const wynik = await serwis.generujTeraz(id);
+      audytuj(req, "partner_generowanie_reczne", id, { pliki: wynik.pliki.map((p) => p.nazwa), bledy: wynik.bledy.length });
+      res.json(wynik);
+    } catch (e) {
+      if (e instanceof GenerowanieTrwaError) return void res.status(409).json({ error: e.message });
+      console.error("[partnerzy] ręczne generowanie nie powiodło się:", e instanceof Error ? e.message : e);
+      res.status(500).json({ error: "Generowanie nie powiodło się — szczegóły w logu błędów partnera." });
+    }
   });
 
   router.post("/api/partnerzy", requireAuth, (req, res) => {

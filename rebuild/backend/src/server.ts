@@ -2,6 +2,9 @@
 import { wczytajEnv } from "./config/env.js";
 import { otworzBaze } from "./db/index.js";
 import { stworzApp } from "./app.js";
+import { klientNbpHttp } from "./partnerzy/kurs-nbp.js";
+import { stworzSerwisPartnerow } from "./partnerzy/scheduler.js";
+import { dirname, join } from "node:path";
 import { stworzScheduler } from "./import/scheduler.js";
 import { synchronizujDostawce } from "./import/synchronizuj.js";
 import { stworzWygaszacz } from "./promocje/wygaszacz.js";
@@ -109,6 +112,13 @@ if (env.SELLY_TRYB === "wylaczony") {
   );
 }
 
+// Generowanie cenników partnerów (karta PARTNERZY): serwis zawsze (ręczne „generuj teraz”), timer tylko przy PARTNERZY_SCHEDULER.
+const serwisPartnerow = stworzSerwisPartnerow({
+  db,
+  klientNbp: klientNbpHttp(),
+  katalogBazowy: env.PARTNERZY_KATALOG ?? join(dirname(env.DB_PATH), "partnerzy"),
+});
+
 const app = stworzApp({
   env,
   db,
@@ -117,6 +127,7 @@ const app = stworzApp({
   przeplanujScheduler: () => scheduler.przeplanuj(),
   klientSelly,
   discoverySelly,
+  serwisPartnerow,
 });
 
 const server = app.listen(env.PORT, env.HOST, () => {
@@ -157,6 +168,13 @@ const server = app.listen(env.PORT, env.HOST, () => {
     console.log("[selly-scheduler] wyłączony (SELLY_SCHEDULER nie jest ustawione)");
   }
 
+  // Harmonogram cenników partnerów B2B (karta PARTNERZY, ticket 220) — domyślnie wyłączony.
+  if (env.PARTNERZY_SCHEDULER) {
+    serwisPartnerow.uruchom();
+  } else {
+    console.log("[partnerzy-scheduler] wyłączony (PARTNERZY_SCHEDULER nie jest ustawione)");
+  }
+
   // ⚠ ODSTĘPSTWO ŚWIADOME (karta 14f, zatwierdzone przez Anię 2026-09-18: „data ma naprawdę
   // kończyć promocje"). Bezwarunkowo, w odróżnieniu od schedulera wyżej — wygaszacz rusza
   // wyłącznie naszą bazę i JEST tą naprawą, więc za flagą domyślnie wyłączoną byłby martwy
@@ -169,6 +187,7 @@ function zamknij(sygnal: string): void {
   console.log(`${sygnal} — zamykam serwer…`);
   scheduler.zatrzymaj();
   harmonogramSelly.zatrzymaj();
+  serwisPartnerow.zatrzymaj();
   wygaszacz.zatrzymaj();
   // Wyrejestrowanie jest bezwarunkowe — zdjęcie instancji, której nie ma, jest no-opem.
   // Od tej chwili `zadajOdswiezenie()` nie ROZPOCZNIE już nowego biegu.
