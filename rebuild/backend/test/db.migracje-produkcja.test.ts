@@ -185,6 +185,7 @@ describe("pełny łańcuch migracji na schemacie produkcji @ 7d6cfc9 (bez `_migr
       "idx_products_scalone_kod",
       "idx_selly_usuniecia_at",
       "idx_selly_usuniecia_przebieg",
+      "kursy_nbp",
       "paliwo_historia",
       "partner_kolumny",
       "partner_kraje",

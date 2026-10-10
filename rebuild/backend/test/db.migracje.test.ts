@@ -62,9 +62,10 @@ describe("zastosujMigracje", () => {
     "022_przypisanie_kategorii_zastosowania_csv.sql",
     "023_selly_usuniecia.sql",
     "024_partnerzy.sql",
+    "025_kursy_nbp.sql",
   ];
 
-  it("stosuje wszystkie migracje po kolei: 48 tabel i 25 indeksów", () => {
+  it("stosuje wszystkie migracje po kolei: 49 tabel i 25 indeksów", () => {
     const wynik = zastosujMigracje(sqlite, KATALOG_SCHEMATU());
     expect(wynik.zastosowane).toEqual(MIGRACJE);
     // 002 dokłada wyłącznie KOLUMNY (plan.md D5/D9), a 003 PRZEBUDOWUJE `products`
@@ -84,8 +85,9 @@ describe("zastosujMigracje", () => {
     // 020 (ticket 180) dokłada dwie kolumny `selly_products_scalone` — bilans tabel i indeksów bez zmian.
     // 021/022 (ticket 185) to triggery i migracja danych (tabela tymczasowa znika) — bilans bez zmian.
     // 023 (ticket 195) dokłada `selly_usuniecia` (historia usunięć z Selly) z dwoma indeksami: +1 tabela, +2.
+    // 025 (ticket 210) dokłada tabelę `kursy_nbp` (klucz tekstowy, bez osobnego indeksu): +1 tabela, +0.
     // 024 (ticket 208) dokłada osiem tabel modułu partnerów i jeden indeks (`idx_partner_kursy_partner`): +8 tabel, +1.
-    expect(policzTabele(sqlite)).toBe(48);
+    expect(policzTabele(sqlite)).toBe(49);
 
     const indeksy = (
       sqlite
@@ -115,7 +117,7 @@ describe("zastosujMigracje", () => {
 
     const liczba = (sqlite.prepare(`SELECT count(*) AS c FROM users`).get() as { c: number }).c;
     expect(liczba).toBe(1);
-    expect(policzTabele(sqlite)).toBe(48);
+    expect(policzTabele(sqlite)).toBe(49);
   });
 
   /**
