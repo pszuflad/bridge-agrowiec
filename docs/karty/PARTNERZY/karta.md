@@ -2,7 +2,7 @@
 
 > **Stan:** 🟡 w trakcie (2026-10-10) — zrobione poziomy 1–5 (bez numeracji katalogowej) + krok wdrożenia (tickety 208–226); zostają numeracja, serwer plików, zamówienia, tracking — czekają na decyzje użytkownika (sekcja „Do koordynatora”)
 > **Iteracja:** poza planem odbudowy — NOWA funkcjonalność · **Wpisy backlogu:** — · **Zależy od:** —
-> **Tickety:** 208–227 (plan podziału: `podzial-na-tickety.md`; instrukcja testów: `docs/instrukcja-testow-PARTNERZY.md`)
+> **Tickety:** 208–228 (plan podziału: `podzial-na-tickety.md`; instrukcja testów: `docs/instrukcja-testow-PARTNERZY.md`)
 
 **To NIE jest odtworzenie produkcji.** Moduł jest świadomym odstępstwem od reguły „wierna
 odbudowa 1:1" (`CLAUDE.md`) — decyzja użytkownika, 2026-10-06. Nie zmienia niczego z
@@ -191,6 +191,7 @@ Stan na 2026-10-10 (wszystko na `develop`, PR-y #323–#342; **nic nie jest jesz
 | 3 | selekcja pozycji (magazyny, wykluczenia, stan min.), szablony CSV i XML (Ceneo), generator z zapisem atomowym i archiwum 30 dni, test zgodności z układem plików wzorcowych (dane syntetyczne) | 214–218 |
 | 4 | logi operacji i błędów z retencją 30 dni (migracja 027), harmonogram per partner (domyślnie wyłączony) i ręczne „generuj teraz” | 219, 220 |
 | 5 | panel: lista, konfiguracja, kolumny i pola obliczeniowe z podglądem, logi i „Generuj teraz” | 221–225 |
+| 7 | model zamówień (migracja 028) i parser XML `DOCUMENTORDER`, idempotentny zapis po numerze partnera (bez tras REST) | 228 |
 | 9 | krok wdrożenia: partnerzy TyreWorld i Adtyres jako nieaktywni | 226 |
 
 Założenia wykonawcze do potwierdzenia: przesyłka GEIS w EUR (nie dzielona przez kurs), narzut w %, koszty dodatkowe w PLN; do pliku tylko produkty `status='aktywny'`; nazwy plików robocze; struktura XML wg publicznego formatu Ceneo.

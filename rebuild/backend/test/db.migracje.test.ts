@@ -65,9 +65,10 @@ describe("zastosujMigracje", () => {
     "025_kursy_nbp.sql",
     "026_geis.sql",
     "027_partner_logi.sql",
+    "028_partner_zamowienia.sql",
   ];
 
-  it("stosuje wszystkie migracje po kolei: 53 tabel i 27 indeksów", () => {
+  it("stosuje wszystkie migracje po kolei: 55 tabel i 28 indeksów", () => {
     const wynik = zastosujMigracje(sqlite, KATALOG_SCHEMATU());
     expect(wynik.zastosowane).toEqual(MIGRACJE);
     // 002 dokłada wyłącznie KOLUMNY (plan.md D5/D9), a 003 PRZEBUDOWUJE `products`
@@ -87,11 +88,12 @@ describe("zastosujMigracje", () => {
     // 020 (ticket 180) dokłada dwie kolumny `selly_products_scalone` — bilans tabel i indeksów bez zmian.
     // 021/022 (ticket 185) to triggery i migracja danych (tabela tymczasowa znika) — bilans bez zmian.
     // 023 (ticket 195) dokłada `selly_usuniecia` (historia usunięć z Selly) z dwoma indeksami: +1 tabela, +2.
+    // 028 (ticket 228) dokłada `partner_zamowienia` i `partner_zamowienia_pozycje` z jednym indeksem (`idx_partner_zamowienia_pozycje_zam`): +2 tabele, +1.
     // 027 (ticket 219) dokłada `partner_logi` i `partner_error_log`, każda z jednym indeksem: +2 tabele, +2.
     // 026 (ticket 212) dokłada `geis_kraje` i `geis_stawki` (klucze główne, bez osobnych indeksów): +2 tabele, +0.
     // 025 (ticket 210) dokłada tabelę `kursy_nbp` (klucz tekstowy, bez osobnego indeksu): +1 tabela, +0.
     // 024 (ticket 208) dokłada osiem tabel modułu partnerów i jeden indeks (`idx_partner_kursy_partner`): +8 tabel, +1.
-    expect(policzTabele(sqlite)).toBe(53);
+    expect(policzTabele(sqlite)).toBe(55);
 
     const indeksy = (
       sqlite
@@ -100,7 +102,7 @@ describe("zastosujMigracje", () => {
         )
         .get() as { c: number }
     ).c;
-    expect(indeksy).toBe(27);
+    expect(indeksy).toBe(28);
   });
 
   it("baza działa w trybie WAL (jak produkcja)", () => {
@@ -121,7 +123,7 @@ describe("zastosujMigracje", () => {
 
     const liczba = (sqlite.prepare(`SELECT count(*) AS c FROM users`).get() as { c: number }).c;
     expect(liczba).toBe(1);
-    expect(policzTabele(sqlite)).toBe(53);
+    expect(policzTabele(sqlite)).toBe(55);
   });
 
   /**
