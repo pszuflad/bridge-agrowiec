@@ -66,6 +66,57 @@ export type KrajPartnera = {
   kosztyDodatkowe: number;
 };
 
+export type KolumnaPartnera = { id: number; partnerId: number; pozycja: number; nazwaWPliku: string; zrodloTyp: "katalog" | "cena" | "pole"; zrodlo: string };
+export type PoleObliczeniowe = { id: number; partnerId: number; nazwa: string; formula: string };
+export type KolumnaDoZapisu = Pick<KolumnaPartnera, "nazwaWPliku" | "zrodloTyp" | "zrodlo">;
+export type PoleDoZapisu = Pick<PoleObliczeniowe, "nazwa" | "formula">;
+export type BladPola = { indeks: number; nazwa: string; komunikat: string; pozycja: number | null };
+export type WynikPodgladu = {
+  pliki: { nazwa: string; kraj: string | null; tekst: string; liczbaWierszy: number }[];
+  bledy: string[];
+  ostrzezenia: string[];
+  pozycjeWybrane: number;
+};
+
+/** Pola katalogu dostępne jako źródło kolumny — zgodne z białą listą `POLA_KATALOGU` backendu. */
+export const POLA_KATALOGU: { pole: string; etykieta: string }[] = [
+  { pole: "kod", etykieta: "kod (numer katalogowy)" },
+  { pole: "kodImportu", etykieta: "kod importu" },
+  { pole: "ean", etykieta: "EAN" },
+  { pole: "nazwa", etykieta: "nazwa" },
+  { pole: "marka", etykieta: "marka" },
+  { pole: "model", etykieta: "model" },
+  { pole: "rozmiar", etykieta: "rozmiar" },
+  { pole: "kategoria", etykieta: "kategoria" },
+  { pole: "dostawca", etykieta: "dostawca" },
+  { pole: "magazyn", etykieta: "magazyn" },
+  { pole: "stan", etykieta: "stan" },
+  { pole: "dot", etykieta: "DOT" },
+  { pole: "waga", etykieta: "waga [kg]" },
+  { pole: "dlugosc", etykieta: "długość [cm]" },
+  { pole: "szerokoscPaczki", etykieta: "szerokość paczki [cm]" },
+  { pole: "wysokosc", etykieta: "wysokość [cm]" },
+];
+export const ZMIENNE_POL = ["zakup", "stan", "waga", "dlugosc", "szerokosc_paczki", "wysokosc"];
+
+export const zapiszPola = async (id: number, pola: PoleDoZapisu[]): Promise<void> => void (await zadanie("PUT", `${KLUCZ_PARTNERZY}/${id}/pola-obliczeniowe`, { pola }));
+export const zapiszKolumny = async (id: number, kolumny: KolumnaDoZapisu[]): Promise<void> => void (await zadanie("PUT", `${KLUCZ_PARTNERZY}/${id}/kolumny`, { kolumny }));
+export async function pobierzPodglad(id: number): Promise<WynikPodgladu> {
+  return (await (await zadanie("POST", `${KLUCZ_PARTNERZY}/${id}/podglad`, {})).json()) as WynikPodgladu;
+}
+
+/** Błędy formuł z odpowiedzi 400 (`bledy[]`), albo pusta lista, gdy to inny błąd. */
+export function bledyPol(e: unknown): BladPola[] {
+  const m = /^\d{3}: (.*)$/s.exec(e instanceof Error ? e.message : String(e));
+  if (!m) return [];
+  try {
+    const json = JSON.parse(m[1]!) as { bledy?: unknown };
+    return Array.isArray(json.bledy) ? (json.bledy as BladPola[]) : [];
+  } catch {
+    return [];
+  }
+}
+
 export type SzczegolyPartnera = {
   id: number;
   nazwa: string;
@@ -83,6 +134,8 @@ export type SzczegolyPartnera = {
   magazyny: string[];
   wykluczenia: string[];
   kraje: KrajPartnera[];
+  kolumny: KolumnaPartnera[];
+  polaObliczeniowe: PoleObliczeniowe[];
 };
 
 export type UstawieniaDoZapisu = Pick<

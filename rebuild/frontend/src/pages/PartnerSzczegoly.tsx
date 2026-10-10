@@ -11,6 +11,8 @@ import { Badge } from "@/components/ui/badge";
 import { KLUCZ_PARTNERZY, komunikatBledu, type SzczegolyPartnera } from "./partnerzy/api";
 import { KrajePartnera } from "./partnerzy/KrajePartnera";
 import { MagazynyPartnera, WykluczeniaPartnera } from "./partnerzy/MagazynyIWykluczenia";
+import { KolumnyPliku, PolaObliczeniowe } from "./partnerzy/PolaIKolumny";
+import { PodgladPliku } from "./partnerzy/PodgladPliku";
 import { UstawieniaPartnera } from "./partnerzy/UstawieniaPartnera";
 
 export function PartnerSzczegoly() {
@@ -41,6 +43,10 @@ export function PartnerSzczegoly() {
           <MagazynyPartnera key={`m-${data.magazyny.join(",")}`} partner={data} />
           <WykluczeniaPartnera key={`w-${data.wykluczenia.join(",")}`} partner={data} />
           <KrajePartnera partner={data} />
+          {/* `key` z zapisanych danych — po zapisie formularz startuje od wartości z serwera */}
+          <PolaObliczeniowe key={`p-${JSON.stringify(data.polaObliczeniowe)}-${data.kraje.length}`} partner={data} />
+          <KolumnyPliku key={`k-${JSON.stringify(data.kolumny)}-${data.polaObliczeniowe.length}-${data.kraje.length}`} partner={data} />
+          <PodgladPliku partner={data} />
         </>
       ) : (
         <p className="text-sm text-muted-foreground">Nie ma takiego partnera.</p>
