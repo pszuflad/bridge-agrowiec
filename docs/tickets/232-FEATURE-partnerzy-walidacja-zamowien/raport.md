@@ -23,3 +23,10 @@ None. Migracja 029 dokłada kolumny do tabel z 028 (puste na produkcji).
 ## Follow-up
 - Kontrola ceny/tolerancji (decyzja o wartości i zasadzie dla ceny wyższej) oraz mapowanie `CODE` na numer katalogowy (`znajdzPozycjeKatalogu`).
 - Zasada „błąd importu” dla nieznanego kodu i braku stanu jest zakładana (karta: do potwierdzenia) — potwierdzić z użytkownikiem/Martą.
+
+## Review fixes applied (review.md, 0 BLOCKER / 5 SHOULD-FIX)
+- Stan sprawdzany dla łącznej ilości kodu w zamówieniu; test.
+- `zachowajPrzyjete`: automatyczny odbiór nie degraduje zamówienia już przyjętego po zmianie stanu (ręczne „Sprawdź ponownie” może); test.
+- Test ścieżki awarii walidacji w odbiorze (zamówienie `nowe`, wiadomość nieprzeczytana, dokończenie przy ponowieniu); transakcja `immediate`; zmienna `w` → `walid`.
+- Ramka błędu w panelu: „Bridge nie wysyła partnerowi automatycznego powiadomienia” (zamiast twierdzenia o fakcie po stronie partnera); wpis spec uzupełniony o opis trasy.
+- NICE-TO-HAVE z review.md (duplikat listy statusów, długi toast, audyt pustych wywołań): nie wdrożone. Drugi przebieg reviewera nie był uruchamiany — poprawki pokryte testami.

@@ -207,7 +207,7 @@ describe("zamówienia partnera", () => {
     ],
   });
 
-  it("zamówienie z błędem importu: czerwony status, opis zbiorczy, powód przy pozycji i informacja, że partner nic nie dostał", async () => {
+  it("zamówienie z błędem importu: czerwony status, opis zbiorczy, powód przy pozycji i informacja o braku powiadomienia partnera", async () => {
     const uzytkownik = userEvent.setup();
     zamowienia = [{ ...naLiscie(1, "A01"), status: "blad_importu", bladImportu: "poz. 2 (0102 00001): nieznany kod" }];
     szczegolyNadpisanie = zBledem();
@@ -216,7 +216,7 @@ describe("zamówienia partnera", () => {
     await uzytkownik.click(screen.getByTestId("button-zamowienie-1"));
     const blad = await screen.findByTestId("blad-importu-1");
     expect(blad).toHaveTextContent("nieznany kod");
-    expect(blad).toHaveTextContent("Partner nie dostał żadnego powiadomienia");
+    expect(blad).toHaveTextContent("nie wysyła partnerowi automatycznego powiadomienia");
     expect(screen.getByTestId("pozycja-blad-1-2")).toHaveTextContent("nieznany kod");
     expect(screen.getByTestId("pozycja-blad-1-1")).toBeEmptyDOMElement();
   });

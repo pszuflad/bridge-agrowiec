@@ -123,7 +123,7 @@ function SzczegolyZamowieniaWidok({ partnerId, zamowienieId }: { partnerId: numb
     <div className="mt-2 space-y-3 rounded-md bg-muted/40 p-3" data-testid={`szczegoly-zamowienia-${zamowienieId}`}>
       {blad ? (
         <div className="space-y-1.5 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive" role="alert" data-testid={`blad-importu-${zamowienieId}`}>
-          <p className="font-medium">Błąd importu — zamówienie jest zapisane, ale wymaga sprawdzenia. Partner nie dostał żadnego powiadomienia.</p>
+          <p className="font-medium">Błąd importu — zamówienie jest zapisane, ale wymaga sprawdzenia. Bridge nie wysyła partnerowi automatycznego powiadomienia.</p>
           <p className="text-xs">{data.bladImportu}</p>
         </div>
       ) : null}

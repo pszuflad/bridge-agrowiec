@@ -30,7 +30,7 @@ export function znajdzPozycjeKatalogu(db: Czytnik, kod: string): PozycjaKatalogu
 
 export type WynikWalidacji = { status: string; bledy: number; zmieniony: boolean };
 
-/** Powód błędu pozycji albo `null`, gdy jest w porządku. */
+/** Powód błędu pozycji albo `null`, gdy jest w porządku. `ilosc` to łączna zamówiona ilość tego kodu w całym zamówieniu. */
 export function powodBleduPozycji(pozycja: PozycjaKatalogu | null, ilosc: number): string | null {
   if (!pozycja) return "nieznany kod";
   if (pozycja.status !== "aktywny") return `produkt nieaktywny (status: ${pozycja.status})`;
@@ -40,18 +40,22 @@ export function powodBleduPozycji(pozycja: PozycjaKatalogu | null, ilosc: number
 
 /**
  * Waliduje zamówienie i zapisuje wynik. Idempotentne (można ponawiać po poprawie katalogu). Zamówienia w późniejszych statusach zostają nietknięte.
- * Zwraca `null`, gdy zamówienia nie ma.
+ * Stan sprawdzamy dla ŁĄCZNEJ ilości danego kodu w zamówieniu (dwie linie tego samego kodu nie mogą razem przekroczyć stanu).
+ * `zachowajPrzyjete` (odbiór automatyczny): zamówienie już `przyjete` zostaje bez zmian — zmiana stanu w katalogu po odbiorze nie degraduje go samoczynnie;
+ * ponowne sprawdzenie na prośbę człowieka (domyślnie) może je zdegradować, bo jest świadomą akcją. Zwraca `null`, gdy zamówienia nie ma.
  */
-export function zwaliduj(db: Baza, zamowienieId: number): WynikWalidacji | null {
+export function zwaliduj(db: Baza, zamowienieId: number, opcje: { zachowajPrzyjete?: boolean } = {}): WynikWalidacji | null {
   return db.transaction((tx) => {
     const z = tx.select({ id: partnerZamowienia.id, status: partnerZamowienia.status }).from(partnerZamowienia).where(eq(partnerZamowienia.id, zamowienieId)).get();
     if (!z) return null;
-    if (!STATUSY_DO_WALIDACJI.includes(z.status)) return { status: z.status, bledy: 0, zmieniony: false };
+    if (!STATUSY_DO_WALIDACJI.includes(z.status) || (opcje.zachowajPrzyjete && z.status === STATUS_PRZYJETE)) return { status: z.status, bledy: 0, zmieniony: false };
 
     const pozycje = tx.select().from(partnerZamowieniaPozycje).where(eq(partnerZamowieniaPozycje.zamowienieId, zamowienieId)).all();
+    const lacznie = new Map<string, number>();
+    for (const p of pozycje) lacznie.set(p.kod.trim(), (lacznie.get(p.kod.trim()) ?? 0) + p.ilosc);
     const opisy: string[] = [];
     for (const p of pozycje) {
-      const powod = powodBleduPozycji(znajdzPozycjeKatalogu(tx, p.kod), p.ilosc);
+      const powod = powodBleduPozycji(znajdzPozycjeKatalogu(tx, p.kod), lacznie.get(p.kod.trim()) ?? p.ilosc);
       if (powod !== p.blad) tx.update(partnerZamowieniaPozycje).set({ blad: powod }).where(eq(partnerZamowieniaPozycje.id, p.id)).run();
       if (powod) opisy.push(`poz. ${p.lp} (${p.kod}): ${powod}`);
     }
@@ -60,5 +64,5 @@ export function zwaliduj(db: Baza, zamowienieId: number): WynikWalidacji | null 
     const zmieniony = z.status !== status;
     tx.update(partnerZamowienia).set({ status, bladImportu }).where(eq(partnerZamowienia.id, zamowienieId)).run();
     return { status, bledy: opisy.length, zmieniony };
-  });
+  }, { behavior: "immediate" });
 }

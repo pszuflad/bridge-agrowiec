@@ -156,11 +156,12 @@ async function obsluzWiadomosc(db: Baza, partnerId: number, w: WiadomoscPoczty, 
     for (const plik of pliki) {
       try {
         const z = zapiszZamowienie(db, partnerId, plik.tresc.toString("utf-8"), teraz);
-        // Walidacja względem katalogu (ticket 232) po KAŻDYM zapisie, także dla powtórzonego pliku: jest idempotentna, a po poprawie katalogu
-        // przywraca zamówienie z `blad_importu`. Zamówienie zostaje zapisane niezależnie od wyniku; partner NIE dostaje żadnego powiadomienia.
-        const w = zwaliduj(db, z.id);
-        if (w?.status === STATUS_BLAD_IMPORTU && w.zmieniony) {
-          zapiszBlad(db, partnerId, OPERACJA_ODBIOR_EMAIL, `${opis}, ${plik.nazwa}: zamówienie przyjęte ze statusem „błąd importu” (${w.bledy} poz.) — szczegóły w panelu zamówień.`, "ostrzezenie", teraz);
+        // Walidacja względem katalogu (ticket 232) po KAŻDYM zapisie, także dla powtórzonego pliku (zamówienie ze statusem `nowe` po awarii walidacji
+        // zostanie dokończone, a po poprawie katalogu wróci `blad_importu`). `zachowajPrzyjete`: zamówienie już przyjęte nie jest degradowane samoczynnie.
+        // Zamówienie zostaje zapisane niezależnie od wyniku; partner NIE dostaje żadnego powiadomienia.
+        const walid = zwaliduj(db, z.id, { zachowajPrzyjete: true });
+        if (walid?.status === STATUS_BLAD_IMPORTU && walid.zmieniony) {
+          zapiszBlad(db, partnerId, OPERACJA_ODBIOR_EMAIL, `${opis}, ${plik.nazwa}: zamówienie przyjęte ze statusem „błąd importu” (${walid.bledy} poz.) — szczegóły w panelu zamówień.`, "ostrzezenie", teraz);
         }
         if (z.nowe) wynik.nowe++;
         else {

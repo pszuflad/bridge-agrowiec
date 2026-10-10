@@ -85,6 +85,25 @@ describe("walidacja zamówień partnera", () => {
     expect(szczegolyZamowienia(s.db, id)!.pozycje.every((p) => p.blad === null)).toBe(true);
   });
 
+  it("stan sprawdzany dla łącznej ilości kodu: dwie linie tego samego kodu nie mogą razem przekroczyć stanu", () => {
+    wstaw(produkt("011200284", { stan: 3 }), produkt("0102 00001"));
+    // 2 + 2 sztuki tego samego kodu przy stanie 3 (każda linia osobno by przeszła)
+    const xml = XML_PRZYKLAD.replace("</PRODUCTS>", "<PRODUCT><CODE>011200284</CODE><NAME>drugi raz</NAME><ORDERQUANTITY>2</ORDERQUANTITY><SELL_PRICE>202.00</SELL_PRICE></PRODUCT></PRODUCTS>");
+    const id = zapiszZamowienie(s.db, partnerId, xml).id;
+    expect(zwaliduj(s.db, id)).toMatchObject({ status: "blad_importu", bledy: 2 });
+    expect(szczegolyZamowienia(s.db, id)!.pozycje.map((p) => p.blad)).toEqual(["brak stanu (jest 3, zamówiono 4)", null, "brak stanu (jest 3, zamówiono 4)"]);
+  });
+
+  it("zachowajPrzyjete: automatyczna walidacja nie degraduje przyjętego zamówienia po zmianie stanu, ręczna może", () => {
+    wstaw(produkt("011200284"), produkt("0102 00001"));
+    const id = zamowienie();
+    expect(zwaliduj(s.db, id)!.status).toBe("przyjete");
+    s.db.update(products).set({ stan: 0 }).where(eq(products.kod, "011200284")).run();
+    expect(zwaliduj(s.db, id, { zachowajPrzyjete: true })).toEqual({ status: "przyjete", bledy: 0, zmieniony: false });
+    expect(szczegolyZamowienia(s.db, id)!.status).toBe("przyjete");
+    expect(zwaliduj(s.db, id)).toMatchObject({ status: "blad_importu", zmieniony: true });
+  });
+
   it("nieistniejące zamówienie → null", () => {
     expect(zwaliduj(s.db, 9999)).toBeNull();
   });
@@ -96,6 +115,28 @@ describe("walidacja zamówień partnera", () => {
   });
 
   describe("w odbiorze z e-maila", () => {
+    it("po awarii walidacji zamówienie zostaje `nowe`, wiadomość nieprzeczytana; ponowny odbiór dokańcza walidację", async () => {
+      wstaw(produkt("011200284"), produkt("0102 00001"));
+      let przetworzone = 0;
+      const skrzynka: OtworzSkrzynke = async () => ({
+        pobierzNieprzeczytane: async () => [{
+          id: "1",
+          wczytaj: async () => ({ temat: "Zam", od: "p@example.test", zalaczniki: [{ nazwa: "z.xml", typ: "application/xml", tresc: Buffer.from(XML_PRZYKLAD) }] }),
+          oznaczPrzetworzona: async () => void przetworzone++,
+        }],
+        zamknij: async () => undefined,
+      });
+      // awaria infrastruktury w walidacji: brakuje tabeli katalogu
+      s.sqlite.exec("ALTER TABLE products RENAME TO products_tmp");
+      await odbierzZamowieniaEmail(s.db, skrzynka, partnerId, { host: "imap.example.test", port: 993, haslo: () => "tajne" });
+      expect(przetworzone).toBe(0);
+      expect(s.db.select().from(partnerZamowienia).get()!.status).toBe("nowe");
+      s.sqlite.exec("ALTER TABLE products_tmp RENAME TO products");
+      await odbierzZamowieniaEmail(s.db, skrzynka, partnerId, { host: "imap.example.test", port: 993, haslo: () => "tajne" });
+      expect(przetworzone).toBe(1);
+      expect(s.db.select().from(partnerZamowienia).get()!.status).toBe("przyjete");
+    });
+
     const otworz = (): OtworzSkrzynke => async () => ({
       pobierzNieprzeczytane: async () => [{
         id: "1",
