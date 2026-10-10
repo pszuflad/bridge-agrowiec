@@ -621,3 +621,76 @@ export const eanPary = sqliteTable("ean_pary", {
 	zastapiono: text(),
 	zastapionyPrzez: text("zastapiony_przez"),
 });
+
+// ── Moduł partnerów B2B (karta PARTNERZY, ticket 208 / PRT-1.1; migracja 024) ──
+// NOWA funkcjonalność, nie odtworzenie produkcji. Sam model — logika w kolejnych ticketach.
+// Ceny i koszty w PLN; kurs EUR zapisywany osobno przy pliku (`partnerKursy`).
+export const partnerzy = sqliteTable("partnerzy", {
+	id: integer().primaryKey({ autoIncrement: true }),
+	nazwa: text().notNull().unique(),
+	aktywny: integer({ mode: "boolean" }).default(false).notNull(),
+	stanMin: integer("stan_min").default(2).notNull(),
+	zaokraglanie: text().default("grosz").notNull(),
+	harmonogramMinuty: integer("harmonogram_minuty"),
+	tolerancjaCenyProc: real("tolerancja_ceny_proc"),
+	formatPliku: text("format_pliku").default("csv").notNull(),
+	csvSeparator: text("csv_separator").default(";").notNull(),
+	kanalFtp: integer("kanal_ftp", { mode: "boolean" }).default(false).notNull(),
+	kanalEmail: integer("kanal_email", { mode: "boolean" }).default(false).notNull(),
+	emailSkrzynka: text("email_skrzynka"),
+	utworzono: text().notNull(),
+	zmieniono: text().notNull(),
+});
+
+export const partnerMagazyny = sqliteTable("partner_magazyny", {
+	partnerId: integer("partner_id").notNull().references(() => partnerzy.id, { onDelete: "cascade" }),
+	magazyn: text().notNull(),
+}, (table) => [primaryKey({ columns: [table.partnerId, table.magazyn] })]);
+
+export const partnerWykluczenia = sqliteTable("partner_wykluczenia", {
+	partnerId: integer("partner_id").notNull().references(() => partnerzy.id, { onDelete: "cascade" }),
+	produktKod: text("produkt_kod").notNull(),
+}, (table) => [primaryKey({ columns: [table.partnerId, table.produktKod] })]);
+
+export const partnerKraje = sqliteTable("partner_kraje", {
+	id: integer().primaryKey({ autoIncrement: true }),
+	partnerId: integer("partner_id").notNull().references(() => partnerzy.id, { onDelete: "cascade" }),
+	kraj: text().notNull(),
+	narzutProc: real("narzut_proc").default(0).notNull(),
+	kursZrodlo: text("kurs_zrodlo").default("nbp").notNull(),
+	kursReczny: real("kurs_reczny"),
+	kosztyDodatkowe: real("koszty_dodatkowe").default(0).notNull(),
+}, (table) => [unique().on(table.partnerId, table.kraj)]);
+
+export const partnerPolaObliczeniowe = sqliteTable("partner_pola_obliczeniowe", {
+	id: integer().primaryKey({ autoIncrement: true }),
+	partnerId: integer("partner_id").notNull().references(() => partnerzy.id, { onDelete: "cascade" }),
+	nazwa: text().notNull(),
+	formula: text().notNull(),
+}, (table) => [unique().on(table.partnerId, table.nazwa)]);
+
+export const partnerKolumny = sqliteTable("partner_kolumny", {
+	id: integer().primaryKey({ autoIncrement: true }),
+	partnerId: integer("partner_id").notNull().references(() => partnerzy.id, { onDelete: "cascade" }),
+	pozycja: integer().notNull(),
+	nazwaWPliku: text("nazwa_w_pliku").notNull(),
+	zrodloTyp: text("zrodlo_typ").notNull(),
+	zrodlo: text().notNull(),
+}, (table) => [unique().on(table.partnerId, table.pozycja)]);
+
+export const paliwoHistoria = sqliteTable("paliwo_historia", {
+	id: integer().primaryKey({ autoIncrement: true }),
+	kraj: text().notNull(),
+	procent: real().notNull(),
+	obowiazujeOd: text("obowiazuje_od").notNull(),
+}, (table) => [unique().on(table.kraj, table.obowiazujeOd)]);
+
+export const partnerKursy = sqliteTable("partner_kursy", {
+	id: integer().primaryKey({ autoIncrement: true }),
+	partnerId: integer("partner_id").notNull().references(() => partnerzy.id, { onDelete: "cascade" }),
+	kraj: text().notNull(),
+	kurs: real().notNull(),
+	zrodlo: text().notNull(),
+	plik: text(),
+	zapisano: text().notNull(),
+}, (table) => [index("idx_partner_kursy_partner").on(table.partnerId, table.zapisano)]);
