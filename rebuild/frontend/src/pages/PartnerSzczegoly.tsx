@@ -7,8 +7,8 @@ import { ArrowLeft } from "lucide-react";
 import { Link, useParams } from "wouter";
 
 import { PageHeader } from "@/components/PageHeader";
-import { Badge } from "@/components/ui/badge";
 import { KLUCZ_PARTNERZY, komunikatBledu, type SzczegolyPartnera } from "./partnerzy/api";
+import { AkcjePartnera, LogiPartnera } from "./partnerzy/GenerowanieILogi";
 import { KrajePartnera } from "./partnerzy/KrajePartnera";
 import { MagazynyPartnera, WykluczeniaPartnera } from "./partnerzy/MagazynyIWykluczenia";
 import { KolumnyPliku, PolaObliczeniowe } from "./partnerzy/PolaIKolumny";
@@ -37,7 +37,7 @@ export function PartnerSzczegoly() {
         <p className="text-sm text-muted-foreground">Ładowanie…</p>
       ) : data ? (
         <>
-          <Badge variant={data.aktywny ? "default" : "secondary"} data-testid="badge-partner-szczegoly-status">{data.aktywny ? "Aktywny" : "Nieaktywny"}</Badge>
+          <AkcjePartnera partner={data} />
           {/* `key` z `zmieniono` — po zapisie i odświeżeniu formularze startują od zapisanych wartości */}
           <UstawieniaPartnera key={`u-${data.zmieniono}`} partner={data} />
           <MagazynyPartnera key={`m-${data.magazyny.join(",")}`} partner={data} />
@@ -47,6 +47,7 @@ export function PartnerSzczegoly() {
           <PolaObliczeniowe key={`p-${JSON.stringify(data.polaObliczeniowe)}-${data.kraje.length}`} partner={data} />
           <KolumnyPliku key={`k-${JSON.stringify(data.kolumny)}-${data.polaObliczeniowe.length}-${data.kraje.length}`} partner={data} />
           <PodgladPliku partner={data} />
+          <LogiPartnera partner={data} />
         </>
       ) : (
         <p className="text-sm text-muted-foreground">Nie ma takiego partnera.</p>

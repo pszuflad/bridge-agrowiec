@@ -28,6 +28,8 @@ let podglad: { status: number; cialo: object } = { status: 200, cialo: {} };
 function zamockujApi() {
   server.use(
     http.get("*/api/partnerzy/magazyny", () => HttpResponse.json({ magazyny: [] })),
+    http.get("*/api/partnerzy/:id/logi", () => HttpResponse.json({ logi: [] })),
+    http.get("*/api/partnerzy/:id/error-log", () => HttpResponse.json({ bledy: [] })),
     http.get("*/api/partnerzy/:id", () => HttpResponse.json(partner)),
     http.put("*/api/partnerzy/:id/pola-obliczeniowe", async ({ request }) => {
       const cialo = (await request.json()) as { pola: { nazwa: string; formula: string }[] };
