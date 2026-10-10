@@ -9,6 +9,7 @@ import type { Baza } from "../db/index.js";
 import { requireAuth } from "../middleware/auth.js";
 import { zapiszAudyt } from "../repos/audit.js";
 import { pobierzBledy, pobierzLogi } from "../partnerzy/logi.js";
+import { walidujKolumny, walidujPola, zapiszKolumny, zapiszPola } from "../repos/partnerzy-kolumny.js";
 import { GenerowanieTrwaError, type SerwisPartnerow } from "../partnerzy/scheduler.js";
 import {
   czyBlad,
@@ -154,6 +155,42 @@ export function trasyPartnerzy({ db, serwis }: ZaleznosciPartnerzy): Router {
   });
 
   /** Dodaje albo nadpisuje kraj (np. `PUT /api/partnerzy/1/kraje/FR`). */
+  /** Zastępuje pola obliczeniowe `{pola: [{nazwa, formula}]}`; błędy formuł z pozycją znaku w `bledy`. */
+  router.put("/api/partnerzy/:id/pola-obliczeniowe", requireAuth, (req, res) => {
+    const id = idZParametru(req, res);
+    if (id === null) return;
+    const w = walidujPola(db, id, (req.body as { pola?: unknown } | undefined)?.pola);
+    if ("blad" in w) return void res.status(400).json({ error: w.blad, bledy: w.bledy ?? [] });
+    const odmowa = zapiszPola(db, id, w.pola);
+    if (odmowa) return void res.status(409).json({ error: odmowa.blad });
+    audytuj(req, "partner_pola_obliczeniowe", id, { liczba: w.pola.length });
+    res.json(szczegolyPartnera(db, id));
+  });
+
+  /** Zastępuje kolumny pliku `{kolumny: [{nazwaWPliku, zrodloTyp: katalog|cena|pole, zrodlo}]}`; kolejność tablicy = kolejność kolumn. */
+  router.put("/api/partnerzy/:id/kolumny", requireAuth, (req, res) => {
+    const id = idZParametru(req, res);
+    if (id === null) return;
+    const w = walidujKolumny(db, id, (req.body as { kolumny?: unknown } | undefined)?.kolumny);
+    if ("blad" in w) return void res.status(400).json({ error: w.blad });
+    zapiszKolumny(db, id, w.kolumny);
+    audytuj(req, "partner_kolumny", id, { liczba: w.kolumny.length });
+    res.json(szczegolyPartnera(db, id));
+  });
+
+  /** Podgląd pliku bez zapisu: pierwsze pozycje, tekst CSV/XML, błędy i ostrzeżenia. */
+  router.post("/api/partnerzy/:id/podglad", requireAuth, async (req, res) => {
+    const id = idZParametru(req, res);
+    if (id === null) return;
+    if (!serwis) return void res.status(503).json({ error: "Podgląd plików partnerów nie jest skonfigurowany na tym serwerze." });
+    try {
+      res.json(await serwis.podglad(id));
+    } catch (e) {
+      console.error("[partnerzy] podgląd nie powiódł się:", e instanceof Error ? e.message : e);
+      res.status(500).json({ error: "Podgląd nie powiódł się." });
+    }
+  });
+
   router.put("/api/partnerzy/:id/kraje/:kraj", requireAuth, (req, res) => {
     const id = idZParametru(req, res);
     if (id === null) return;

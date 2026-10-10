@@ -73,21 +73,29 @@ function zapiszAtomowo(katalogPricelist: string, katalogArchiwum: string, nazwa:
   copyFileSync(docelowy, join(katalogArchiwum, `${znacznik(teraz)}_${nazwa}`));
 }
 
-export async function generujPlikiPartnera(
+type PlikDoZapisu = { nazwa: string; kraj: string | null; tekst: string; liczbaWierszy: number; pominiete: number };
+type Przygotowane = { wynik: WynikGenerowania; pliki: PlikDoZapisu[]; teraz: Date };
+
+/**
+ * Wspólny rdzeń generowania i podglądu: wybór pozycji → kurs → wycena → budowa tekstu plików. NIC nie zapisuje na dysk ani do `partner_kursy`.
+ * `limitPozycji` (podgląd) obcina listę pozycji PRZED wyceną.
+ */
+async function przygotujPliki(
   db: Baza,
   klientNbp: KlientNbp,
   partnerId: number,
-  opcje: { katalog: string; teraz?: () => Date },
-): Promise<WynikGenerowania> {
+  opcje: { teraz?: () => Date; limitPozycji?: number },
+): Promise<Przygotowane> {
   const teraz = (opcje.teraz ?? (() => new Date()))();
   const data = teraz.toISOString().slice(0, 10);
   const partner = db.select().from(partnerzy).where(eq(partnerzy.id, partnerId)).get();
   if (!partner) throw new Error(`Nie ma partnera o id ${partnerId}.`);
   const kraje = db.select().from(partnerKraje).where(eq(partnerKraje.partnerId, partnerId)).orderBy(asc(partnerKraje.kraj)).all();
   const wynik: WynikGenerowania = { pliki: [], bledy: [], ostrzezenia: [], kursy: {}, pozycjeWybrane: 0, usunieteZArchiwum: 0 };
+  const pliki: PlikDoZapisu[] = [];
   if (kraje.length === 0) {
     wynik.bledy.push("Partner nie ma żadnego kraju — nie ma czego generować.");
-    return wynik;
+    return { wynik, pliki, teraz };
   }
 
   let kolumny: KolumnaPliku[];
@@ -96,16 +104,17 @@ export async function generujPlikiPartnera(
   } catch (e) {
     if (!(e instanceof BladFormuly)) throw e;
     wynik.bledy.push(`Błąd konfiguracji kolumn: ${e.message}`);
-    return wynik;
+    return { wynik, pliki, teraz };
   }
   if (kolumny.length === 0) {
     wynik.bledy.push("Partner nie ma skonfigurowanych kolumn pliku.");
-    return wynik;
+    return { wynik, pliki, teraz };
   }
 
   const selekcja = wybierzPozycje(db, partnerId);
   wynik.pozycjeWybrane = selekcja.pozycje.length;
   wynik.ostrzezenia.push(...selekcja.ostrzezenia);
+  const pozycje = opcje.limitPozycji === undefined ? selekcja.pozycje : selekcja.pozycje.slice(0, opcje.limitPozycji);
 
   // Kurs raz na kraj; kraj bez kursu zostaje bez cen (błąd, nie zgadywanie).
   const kursy: Record<string, number> = {};
@@ -121,14 +130,9 @@ export async function generujPlikiPartnera(
     }
   }
 
-  const wycena = wycenPozycje(db, partnerId, selekcja.pozycje, kursy, data);
+  const wycena = wycenPozycje(db, partnerId, pozycje, kursy, data);
   wynik.ostrzezenia.push(...wycena.ostrzezenia);
   wynik.bledy.push(...wycena.bledy.map((b) => `Błąd kalkulacji ${b.kod} (${b.kraj}): ${b.powod}`));
-
-  const katalogPricelist = join(opcje.katalog, "pricelist");
-  const katalogArchiwum = join(opcje.katalog, "archive");
-  mkdirSync(katalogPricelist, { recursive: true });
-  mkdirSync(katalogArchiwum, { recursive: true });
 
   const ext = partner.formatPliku === "xml" ? "xml" : "csv";
   const cenyKolumnKrajow = new Set(kolumny.filter((k) => k.typ === "cena").map((k) => (k as { kraj: string }).kraj));
@@ -158,18 +162,58 @@ export async function generujPlikiPartnera(
             kraj: z.kraj ?? undefined,
           });
     wynik.bledy.push(...w.bledy.map((b) => `Błąd pola „${b.kolumna}” (${b.kod}): ${b.powod}`));
-    const plik: PlikWynik = { nazwa: z.nazwa, kraj: z.kraj, liczbaWierszy: w.liczbaWierszy, pominiete: w.pominiete, zapisany: false };
-    if (w.liczbaWierszy === 0) {
-      wynik.bledy.push(`${z.nazwa}: brak wierszy do zapisania — poprzedni cennik zostaje bez zmian.`);
+    pliki.push({ nazwa: z.nazwa, kraj: z.kraj, tekst: w.tekst, liczbaWierszy: w.liczbaWierszy, pominiete: w.pominiete });
+  }
+  return { wynik, pliki, teraz };
+}
+
+export async function generujPlikiPartnera(
+  db: Baza,
+  klientNbp: KlientNbp,
+  partnerId: number,
+  opcje: { katalog: string; teraz?: () => Date },
+): Promise<WynikGenerowania> {
+  const { wynik, pliki, teraz } = await przygotujPliki(db, klientNbp, partnerId, { teraz: opcje.teraz });
+  if (pliki.length === 0) return wynik; // błąd konfiguracji — nic do zapisania, katalogi nie powstają
+
+  const katalogPricelist = join(opcje.katalog, "pricelist");
+  const katalogArchiwum = join(opcje.katalog, "archive");
+  mkdirSync(katalogPricelist, { recursive: true });
+  mkdirSync(katalogArchiwum, { recursive: true });
+
+  for (const p of pliki) {
+    const plik: PlikWynik = { nazwa: p.nazwa, kraj: p.kraj, liczbaWierszy: p.liczbaWierszy, pominiete: p.pominiete, zapisany: false };
+    if (p.liczbaWierszy === 0) {
+      wynik.bledy.push(`${p.nazwa}: brak wierszy do zapisania — poprzedni cennik zostaje bez zmian.`);
     } else {
-      zapiszAtomowo(katalogPricelist, katalogArchiwum, z.nazwa, w.tekst, teraz);
+      zapiszAtomowo(katalogPricelist, katalogArchiwum, p.nazwa, p.tekst, teraz);
       plik.zapisany = true;
       for (const [kraj, u] of Object.entries(wynik.kursy)) {
-        if (z.kraj === null || z.kraj === kraj) zapiszUzytyKurs(db, { partnerId, kraj, kurs: u, plik: z.nazwa }, () => teraz);
+        if (p.kraj === null || p.kraj === kraj) zapiszUzytyKurs(db, { partnerId, kraj, kurs: u, plik: p.nazwa }, () => teraz);
       }
     }
     wynik.pliki.push(plik);
   }
   wynik.usunieteZArchiwum = wyczyscArchiwum(katalogArchiwum, teraz);
   return wynik;
+}
+
+export const LIMIT_PODGLADU = 20;
+export type WynikPodgladu = {
+  /** Fragmenty plików, które powstałyby przy generowaniu (nagłówek + pierwsze wiersze). */
+  pliki: { nazwa: string; kraj: string | null; tekst: string; liczbaWierszy: number }[];
+  bledy: string[];
+  ostrzezenia: string[];
+  pozycjeWybrane: number;
+};
+
+/** Podgląd bez zapisu: to samo co generowanie, ale na pierwszych `LIMIT_PODGLADU` pozycjach; nie dotyka dysku ani `partner_kursy`. */
+export async function podgladPartnera(db: Baza, klientNbp: KlientNbp, partnerId: number, opcje: { teraz?: () => Date; limit?: number } = {}): Promise<WynikPodgladu> {
+  const { wynik, pliki } = await przygotujPliki(db, klientNbp, partnerId, { teraz: opcje.teraz, limitPozycji: opcje.limit ?? LIMIT_PODGLADU });
+  return {
+    pliki: pliki.map((p) => ({ nazwa: p.nazwa, kraj: p.kraj, tekst: p.tekst, liczbaWierszy: p.liczbaWierszy })),
+    bledy: wynik.bledy,
+    ostrzezenia: wynik.ostrzezenia,
+    pozycjeWybrane: wynik.pozycjeWybrane,
+  };
 }
