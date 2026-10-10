@@ -7,6 +7,7 @@ import {
 } from "../import/podmien-zrodla.js";
 import { dirname, join } from "node:path";
 import { usunWszystkieKartyAuto } from "../import/migracje/scal-karty-auto.js";
+import { dodajPartnera } from "../repos/partnerzy.js";
 import { ustawWEnvPliku } from "./env-plik.js";
 import type { Krok } from "./runner.js";
 
@@ -88,6 +89,15 @@ export const KROKI_WDROZENIA: Krok[] = [
       const w = usunWszystkieKartyAuto(sqlite);
       const pominiete = w.pominiete.length ? `; pominięte ${w.pominiete.map((p) => `${p.kod} (${p.powod})`).join(", ")}` : "";
       return `usunięto ${w.usuniete.length}: ${w.usuniete.join(", ") || "—"}${pominiete}`;
+    },
+  },
+  {
+    id: "2026-10-10-partnerzy-startowi",
+    opis: "moduł partnerów B2B: założenie dwóch pierwszych partnerów (TyreWorld, Adtyres) jako NIEAKTYWNYCH, z ustawieniami domyślnymi — bez krajów, magazynów i kolumn (do uzupełnienia w panelu)",
+    async uruchom({ db }) {
+      // Idempotentne: partner o tej nazwie już istnieje (np. dodany ręcznie w panelu) → bez zmian. Niczego nie aktywuje i nie uruchamia generowania.
+      const wyniki = ["TyreWorld", "Adtyres"].map((nazwa) => `${nazwa}: ${dodajPartnera(db, { nazwa }) === null ? "już istnieje" : "założony (nieaktywny)"}`);
+      return wyniki.join("; ");
     },
   },
 ];
