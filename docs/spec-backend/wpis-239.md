@@ -1,0 +1,4 @@
+# Wpis 239 — odbiór zamówień z plików XML
+
+Drugi kanał obok e-maila (wpis 229). `odbierzZamowieniaZPlikow(db, partnerId, katalogOrders)`: `*.xml` (zwykłe pliki, ≥ 30 s od modyfikacji, ≤ 2 MB) → `zapiszZamowienie` (idempotentnie po numerze partnera) → `zwaliduj` (informacyjnie, `zachowajPrzyjete`) → `orders/done/<plik>` (kolizja nazwy: dopisany znacznik czasu; błąd pliku: prefiks `BLAD_`, błąd w `partner_error_log`, operacja `odbior-zamowien-pliki`). Wyjątek infrastruktury (baza, brak praw do przeniesienia) zostawia plik do ponowienia.
+Flagi: `PARTNERZY_ODBIOR_PLIKOW` (domyślnie wyłączone), `PARTNERZY_ODBIOR_PLIKOW_MINUTY`, `PARTNERZY_KATALOGI_ZAMOWIEN`. Środowisko testowe działa na tym samym serwerze jako ten sam użytkownik — mapowanie wyłącznie w `.env` produkcji, inaczej TEST przeniósłby zamówienia produkcyjne do `done/`.

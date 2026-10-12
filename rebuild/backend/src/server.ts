@@ -5,6 +5,7 @@ import { stworzApp } from "./app.js";
 import { klientNbpHttp } from "./partnerzy/kurs-nbp.js";
 import { stworzHarmonogramOdbioru, type OdbiorEmail } from "./partnerzy/odbior-email.js";
 import { otworzSkrzynkeImap } from "./partnerzy/poczta-imap.js";
+import { stworzHarmonogramOdbioruPlikow } from "./partnerzy/odbior-plikow.js";
 import { parsujKatalogiPublikacji } from "./partnerzy/publikacja.js";
 import { stworzSerwisPartnerow } from "./partnerzy/scheduler.js";
 import { dirname, join } from "node:path";
@@ -137,6 +138,15 @@ const odbiorEmail: OdbiorEmail = {
 };
 const harmonogramOdbioru = stworzHarmonogramOdbioru({ db, ...odbiorEmail, interwalMs: env.PARTNERZY_ODBIOR_EMAIL_MINUTY * 60_000 });
 
+// Odbiór zamówień z plików XML na serwerze plików (ticket 239): błędna wartość mapowania NIE przewraca backendu — loguje błąd i nic nie odbiera.
+let katalogiZamowien = new Map<string, string>();
+try {
+  katalogiZamowien = parsujKatalogiPublikacji(env.PARTNERZY_KATALOGI_ZAMOWIEN);
+} catch (e) {
+  console.error("[partnerzy] odbiór plików wyłączony:", e instanceof Error ? e.message : e);
+}
+const harmonogramOdbioruPlikow = stworzHarmonogramOdbioruPlikow({ db, katalogi: katalogiZamowien, interwalMs: env.PARTNERZY_ODBIOR_PLIKOW_MINUTY * 60_000 });
+
 const app = stworzApp({
   env,
   db,
@@ -201,6 +211,12 @@ const server = app.listen(env.PORT, env.HOST, () => {
     console.log("[partnerzy-odbior-email] wyłączony (PARTNERZY_ODBIOR_EMAIL nie jest ustawione)");
   }
 
+  if (env.PARTNERZY_ODBIOR_PLIKOW) {
+    harmonogramOdbioruPlikow.uruchom();
+  } else {
+    console.log("[partnerzy-odbior-plikow] wyłączony (PARTNERZY_ODBIOR_PLIKOW nie jest ustawione)");
+  }
+
   // ⚠ ODSTĘPSTWO ŚWIADOME (karta 14f, zatwierdzone przez Anię 2026-09-18: „data ma naprawdę
   // kończyć promocje"). Bezwarunkowo, w odróżnieniu od schedulera wyżej — wygaszacz rusza
   // wyłącznie naszą bazę i JEST tą naprawą, więc za flagą domyślnie wyłączoną byłby martwy
@@ -215,6 +231,7 @@ function zamknij(sygnal: string): void {
   harmonogramSelly.zatrzymaj();
   serwisPartnerow.zatrzymaj();
   harmonogramOdbioru.zatrzymaj();
+  harmonogramOdbioruPlikow.zatrzymaj();
   wygaszacz.zatrzymaj();
   // Wyrejestrowanie jest bezwarunkowe — zdjęcie instancji, której nie ma, jest no-opem.
   // Od tej chwili `zadajOdswiezenie()` nie ROZPOCZNIE już nowego biegu.
