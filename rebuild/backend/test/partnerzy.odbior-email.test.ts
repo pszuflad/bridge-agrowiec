@@ -7,6 +7,7 @@ import { LIMIT_ZAMKA_MS, OdbiorTrwaError, _zresetujZamkiOdbioru, odbierzDlaWszys
 import type { KonfiguracjaSkrzynki, OtworzSkrzynke, WiadomoscPoczty, ZalacznikPoczty } from "../src/partnerzy/poczta.js";
 import { listaZamowien, szczegolyZamowienia } from "../src/repos/partnerzy-zamowienia.js";
 import { stworzSrodowiskoTestowe, type SrodowiskoTestowe } from "./gate/index.js";
+import { XML_BESTELLUNG } from "./partnerzy.zamowienie-bestellung-przyklad.js";
 import { XML_PRZYKLAD } from "./partnerzy.zamowienie-przyklad.js";
 
 const xmlZ = (z: string, tresc: string): ZalacznikPoczty => ({ nazwa: z, typ: "application/xml", tresc: Buffer.from(tresc, "utf-8") });
@@ -135,6 +136,23 @@ describe("odbiór zamówień przez e-mail", () => {
     expect(bledy().map((b) => [b.poziom, b.komunikat])).toEqual([["ostrzezenie", expect.stringContaining("brak załącznika XML")]]);
     const id = listaZamowien(s.db, partnerId)[0]!.id;
     expect(szczegolyZamowienia(s.db, id)!.dostawa.CUSTOMERNAME).toBe("Jan Kował");
+  });
+
+  it("odbiera zamówienie w formacie TyreWorld (bestellung) tym samym kanałem; walidacja po artnr (zera wiodące zachowane)", async () => {
+    for (const kod of ["011300258", "013100077"]) {
+      s.db.insert(products).values({
+        kod, nazwa: "OPONA", marka: "KLEBER", kategoria: "Rolnicze", dostawca: "MO1", magazyn: "MO1", stan: 100, cenaZakupu: 100, cenaSprzedazy: 150, marzaPct: 50,
+        dataAktualizacji: "2026-10-10T00:00:00.000Z", kodImportu: `IMP_${kod}`,
+      }).run();
+    }
+    const skrzynka = new AtrapaSkrzynki([wiad("1", [xmlZ("2026-100000001.xml", XML_BESTELLUNG)])]);
+    const w = await odbierzZamowieniaEmail(s.db, skrzynka.otworz, partnerId, USTAWIENIA);
+    expect(w).toMatchObject({ nowe: 1, bledy: 0 });
+    const id = listaZamowien(s.db, partnerId)[0]!.id;
+    const z = szczegolyZamowienia(s.db, id)!;
+    expect(z).toMatchObject({ numerPartnera: "2026-100000001", status: "przyjete", krajDostawy: "DE", waluta: null });
+    expect(z.pozycje.map((p) => [p.kod, p.ilosc, p.cenaSprzedazy])).toEqual([["011300258", 1, 779.06], ["013100077", 2, 650.08]]);
+    expect(bledy()).toHaveLength(0);
   });
 
   it("rozpoznaje XML po typie MIME, gdy nazwa nie ma rozszerzenia", async () => {
