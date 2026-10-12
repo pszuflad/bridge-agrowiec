@@ -1,0 +1,8 @@
+-- Ticket 243 (243-FEATURE-partnerzy-koszt-przesylki-skladniki): składniki kosztu przesyłki per kraj partnera edytowane w panelu.
+--
+-- ⚠ NOWE KOLUMNY w tabeli z migracji 024 (puste na produkcji), NIE ODTWORZENIE PRODUKCJI.
+--   partner_kraje.myto_eur      — opłata drogowa (myto) w EUR, dodawana do kosztu przesyłki; domyślnie 0
+--   partner_kraje.pakowanie_eur — koszt pakowania w EUR, dodawany do kosztu przesyłki; domyślnie 0
+-- Koszt przesyłki ze stałej bazy kraju = baza × (1 + paliwo %) + myto + pakowanie (paliwo: `paliwo_historia`, edytowane w panelu).
+-- @dodaj-kolumne-jesli-brak partner_kraje myto_eur REAL NOT NULL DEFAULT 0
+-- @dodaj-kolumne-jesli-brak partner_kraje pakowanie_eur REAL NOT NULL DEFAULT 0

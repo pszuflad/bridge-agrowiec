@@ -7,6 +7,7 @@ import { Router, type Request, type Response } from "express";
 
 import type { Baza } from "../db/index.js";
 import type { KlientSelly } from "../selly/klient.js";
+import { ustawPaliwo } from "../partnerzy/transport.js";
 import { requireAuth } from "../middleware/auth.js";
 import { zapiszAudyt } from "../repos/audit.js";
 import { pobierzBledy, pobierzLogi } from "../partnerzy/logi.js";
@@ -277,7 +278,10 @@ export function trasyPartnerzy({ db, serwis, odbiorEmail, klientSelly }: Zalezno
     if (kraj === null) return void res.status(400).json({ error: "Kraj musi być dwuliterowym kodem (np. FR)." });
     const u = walidujUstawieniaKraju(req.body);
     if (czyBlad(u)) return void res.status(400).json({ error: u.blad });
-    ustawKraj(db, id, kraj, u);
+    const { paliwoProc, ...ustawienia } = u;
+    ustawKraj(db, id, kraj, ustawienia);
+    // Opłata paliwowa: nowy okres od dziś (historia, zmiana nie przelicza wstecz) — tylko gdy podana.
+    if (paliwoProc !== null) ustawPaliwo(db, kraj, paliwoProc, new Date().toISOString().slice(0, 10));
     audytuj(req, "partner_kraj", id, { kraj, ...u });
     res.json(szczegolyPartnera(db, id));
   });

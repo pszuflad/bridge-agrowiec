@@ -639,6 +639,12 @@ export const partnerzy = sqliteTable("partnerzy", {
 	kanalEmail: integer("kanal_email", { mode: "boolean" }).default(false).notNull(),
 	emailSkrzynka: text("email_skrzynka"),
 	nazwaPliku: text("nazwa_pliku"),
+	fakturaNazwa: text("faktura_nazwa"),
+	fakturaNip: text("faktura_nip"),
+	fakturaUlica: text("faktura_ulica"),
+	fakturaKod: text("faktura_kod"),
+	fakturaMiasto: text("faktura_miasto"),
+	fakturaKraj: text("faktura_kraj"),
 	utworzono: text().notNull(),
 	zmieniono: text().notNull(),
 });
@@ -662,6 +668,8 @@ export const partnerKraje = sqliteTable("partner_kraje", {
 	kursReczny: real("kurs_reczny"),
 	kosztyDodatkowe: real("koszty_dodatkowe").default(0).notNull(),
 	przesylkaStalaEur: real("przesylka_stala_eur"),
+	mytoEur: real("myto_eur").default(0).notNull(),
+	pakowanieEur: real("pakowanie_eur").default(0).notNull(),
 }, (table) => [unique().on(table.partnerId, table.kraj)]);
 
 export const partnerPolaObliczeniowe = sqliteTable("partner_pola_obliczeniowe", {
