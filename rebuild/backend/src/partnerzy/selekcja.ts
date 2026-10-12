@@ -20,6 +20,8 @@ export type PozycjaEksportu = {
   kod: string;
   kodImportu: string | null;
   ean: string | null;
+  /** Numer katalogowy dla partnera: `<EAN>-<numer dostawcy>` (np. `745384925-MO4`); `null`, gdy brak EAN albo dostawcy. */
+  numerPartnera: string | null;
   nazwa: string;
   marka: string;
   model: string | null;
@@ -44,6 +46,13 @@ export type WynikSelekcji = {
   pominiete: { stanPonizejMinimum: number; wykluczone: number; bezCenyZakupu: number; bezKodu: number };
   ostrzezenia: string[];
 };
+
+/** Numer katalogowy partnera `<EAN>-<dostawca>` (decyzja z 2026-10-12); `null`, gdy brakuje któregokolwiek składnika. */
+export function numerPartnera(ean: string | null | undefined, dostawca: string | null | undefined): string | null {
+  const e = (ean ?? "").replace(/\s+/g, "");
+  const d = (dostawca ?? "").replace(/\s+/g, "");
+  return e === "" || d === "" ? null : `${e}-${d}`;
+}
 
 /** Przycina i zwija białe znaki; pusty tekst → `null`. */
 export function czysc(v: string | null | undefined): string | null {
@@ -102,6 +111,7 @@ export function wybierzPozycje(db: Baza, partnerId: number): WynikSelekcji {
         kod: w.kod.trim(),
         kodImportu: czysc(w.kodImportu),
         ean: czysc(w.ean),
+        numerPartnera: numerPartnera(w.ean, w.dostawca),
         nazwa: czysc(w.nazwa) ?? "",
         marka: czysc(w.marka) ?? "",
         model: czysc(w.model),

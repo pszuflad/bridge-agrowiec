@@ -12,7 +12,7 @@ import type { PozycjaEksportu, WierszWyceniony } from "../src/partnerzy/selekcja
 import { KATALOG_SCHEMATU } from "./gate/repo.js";
 
 const pozycja = (kod: string, nad: Partial<PozycjaEksportu> = {}): PozycjaEksportu => ({
-  id: 1, kod, kodImportu: `IMP_${kod}`, ean: "5901234123457", nazwa: "Mitas AC85", marka: "MITAS", model: null, rozmiar: "600/65R38",
+  id: 1, kod, kodImportu: `IMP_${kod}`, ean: "5901234123457", numerPartnera: "5901234123457-MO1", nazwa: "Mitas AC85", marka: "MITAS", model: null, rozmiar: "600/65R38",
   kategoria: "Rolnicze", dostawca: "MO1", magazyn: "MO1", stan: 5, dot: null, cenaZakupu: 1000, waga: 56, dlugosc: 80, szerokoscPaczki: 60, wysokosc: 85,
   wagaAutoUzupelniona: false, wagaSzacowana: false, ...nad,
 });
@@ -42,6 +42,16 @@ describe("zbudujCsv", () => {
   it("kolumny krajów: wiersz bez ceny w żadnym kraju wypada", () => {
     const w = zbudujCsv({ kolumny: KOLUMNY, separator: ";", uklad: "kolumny-krajow", wiersze: [wiersz("A", { FR: null, DE: null }), wiersz("B", { FR: 1, DE: null })] });
     expect(w).toMatchObject({ liczbaWierszy: 1, pominiete: 1 });
+  });
+
+  it("numer katalogowy partnera: kolumna `numerPartnera` = EAN-dostawca; pozycja bez EAN wypada i jest policzona", () => {
+    const kolumny: KolumnaPliku[] = [{ nazwa: "CatNumber", typ: "katalog", pole: "numerPartnera" }, { nazwa: "FR", typ: "cena", kraj: "FR" }];
+    const w = zbudujCsv({
+      kolumny, separator: ";", uklad: "kolumny-krajow",
+      wiersze: [wiersz("A", { FR: 1 }), wiersz("B", { FR: 1 }, { ean: null, numerPartnera: null })],
+    });
+    expect(w).toMatchObject({ liczbaWierszy: 1, bezNumeru: 1 });
+    expect(w.tekst.split("\n")).toEqual(["CatNumber;FR", "5901234123457-MO1;1.00", ""]);
   });
 
   it("plik na kraj: wiersz bez ceny w TYM kraju wypada, reszta zostaje", () => {

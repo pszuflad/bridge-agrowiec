@@ -17,7 +17,7 @@ import type { PozycjaEksportu, WierszWyceniony } from "./selekcja.js";
 
 /** Pola pozycji, które wolno wskazać jako źródło kolumny `katalog`. */
 export const POLA_KATALOGU = [
-  "kod", "kodImportu", "ean", "nazwa", "marka", "model", "rozmiar", "kategoria", "dostawca", "magazyn", "stan", "dot",
+  "kod", "kodImportu", "ean", "numerPartnera", "nazwa", "marka", "model", "rozmiar", "kategoria", "dostawca", "magazyn", "stan", "dot",
   "waga", "dlugosc", "szerokoscPaczki", "wysokosc",
 ] as const satisfies readonly (keyof PozycjaEksportu)[];
 export type PoleKatalogu = (typeof POLA_KATALOGU)[number];
@@ -35,6 +35,8 @@ export type WynikCsv = {
   liczbaWierszy: number;
   /** Wiersze, które wypadły z pliku, bo nie miały ceny. */
   pominiete: number;
+  /** Wiersze pominięte, bo kolumna `numerPartnera` byłaby pusta (brak EAN albo dostawcy) — pusty numer katalogowy to defekt pliku. */
+  bezNumeru: number;
   /** Błędy liczenia pól obliczeniowych (komórka zostaje pusta). */
   bledy: { kod: string; kolumna: string; powod: string }[];
 };
@@ -91,12 +93,16 @@ export function zbudujCsv(opcje: {
   const { kolumny, separator, uklad } = opcje;
   if (uklad === "plik-na-kraj" && !opcje.kraj) throw new Error("Układ „plik-na-kraj” wymaga kraju.");
   const linie = [kolumny.map((k) => komorka(k.nazwa, separator)).join(separator)];
-  const wynik: WynikCsv = { tekst: "", liczbaWierszy: 0, pominiete: 0, bledy: [] };
+  const wynik: WynikCsv = { tekst: "", liczbaWierszy: 0, pominiete: 0, bezNumeru: 0, bledy: [] };
 
   for (const { pozycja: p, ceny } of opcje.wiersze) {
     const maCene = uklad === "plik-na-kraj" ? ceny[opcje.kraj!] != null : Object.values(ceny).some((c) => c != null);
     if (!maCene) {
       wynik.pominiete++;
+      continue;
+    }
+    if (kolumny.some((k) => k.typ === "katalog" && k.pole === "numerPartnera") && p.numerPartnera === null) {
+      wynik.bezNumeru++;
       continue;
     }
     const zmienne: Record<string, number | null> = {

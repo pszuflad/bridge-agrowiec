@@ -5,7 +5,8 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { partnerErrorLog, partnerZamowienia, partnerzy, products } from "../src/db/schema.js";
 import { odbierzZamowieniaEmail } from "../src/partnerzy/odbior-email.js";
 import type { OtworzSkrzynke } from "../src/partnerzy/poczta.js";
-import { powodBleduPozycji, STATUS_BLAD_IMPORTU, STATUS_PRZYJETE, zwaliduj } from "../src/partnerzy/walidacja-zamowienia.js";
+import { numerPartnera } from "../src/partnerzy/selekcja.js";
+import { powodBleduPozycji, znajdzPozycjeKatalogu, STATUS_BLAD_IMPORTU, STATUS_PRZYJETE, zwaliduj } from "../src/partnerzy/walidacja-zamowienia.js";
 import { szczegolyZamowienia, zapiszZamowienie } from "../src/repos/partnerzy-zamowienia.js";
 import { stworzSrodowiskoTestowe, type SrodowiskoTestowe } from "./gate/index.js";
 import { XML_PRZYKLAD } from "./partnerzy.zamowienie-przyklad.js";
@@ -35,6 +36,30 @@ describe("walidacja zamówień partnera", () => {
     expect(powodBleduPozycji({ kod: "A", stan: 5, status: "wycofany" }, 1)).toMatch(/nieaktywny.*wycofany/);
     expect(powodBleduPozycji({ kod: "A", stan: 1, status: "aktywny" }, 2)).toBe("brak stanu (jest 1, zamówiono 2)");
     expect(powodBleduPozycji({ kod: "A", stan: 2, status: "aktywny" }, 2)).toBeNull();
+  });
+
+  it("CODE w formie EAN-dostawca wskazuje pozycję katalogu (dzielenie na ostatnim `-`, dostawca bez wielkości liter); wśród kilku wybiera aktywną z największym stanem", () => {
+    wstaw(
+      produkt("K_A", { ean: "745384925", dostawca: "MO4", magazyn: "MO4", stan: 3 }),
+      produkt("K_B", { ean: "745384925", dostawca: "MO4", magazyn: "MO5", stan: 9 }),
+      produkt("K_C", { ean: "745384925", dostawca: "MO4", magazyn: "MO6", stan: 50, status: "wycofany" }),
+    );
+    expect(znajdzPozycjeKatalogu(s.db, "745384925-mo4")).toMatchObject({ kod: "K_B", stan: 9 });
+    expect(znajdzPozycjeKatalogu(s.db, " 745384925-MO4 ")).toMatchObject({ kod: "K_B" });
+    expect(znajdzPozycjeKatalogu(s.db, "745384925-MO9")).toBeNull();
+    expect(znajdzPozycjeKatalogu(s.db, "745384925-")).toBeNull();
+    expect(znajdzPozycjeKatalogu(s.db, "-MO4")).toBeNull();
+    expect(znajdzPozycjeKatalogu(s.db, "K_A")).toMatchObject({ kod: "K_A" }); // dokładny products.kod ma pierwszeństwo
+  });
+
+  it("round-trip: numer z pliku (numerPartnera) odnajduje pozycję także przy spacjach w EAN/dostawcy i remisie stanów", () => {
+    wstaw(
+      produkt("R_B", { ean: "590 123", dostawca: "mo 2", magazyn: "MO2", stan: 4 }),
+      produkt("R_A", { ean: "590 123", dostawca: "mo 2", magazyn: "MO3", stan: 4 }),
+    );
+    const numer = numerPartnera("590 123", "mo 2")!;
+    expect(numer).toBe("590123-mo2");
+    expect(znajdzPozycjeKatalogu(s.db, numer)).toMatchObject({ kod: "R_A" }); // remis stanów → kod alfabetycznie
   });
 
   it("wszystko w katalogu i na stanie → przyjęte, bez błędów", () => {
