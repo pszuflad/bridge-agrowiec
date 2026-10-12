@@ -65,4 +65,18 @@ describe("parsujZamowienie — bestellung (TyreWorld)", () => {
   it("DOCTYPE/ENTITY nadal odrzucane także w formacie bestellung", () => {
     expect(blad(`<!DOCTYPE x [<!ENTITY a "b">]>${XML_BESTELLUNG}`)[0]).toMatch(/DOCTYPE/);
   });
+
+  it("przypadki brzegowe: pusty `preis` i `lkz`, `lieferadresse` bez `lkz`, przecinek w `menge`/`preis`", () => {
+    const z = parsujZamowienie(`<bestellung><bestellnummer>N1</bestellnummer><lieferadresse><lkz></lkz><ort>X</ort></lieferadresse><positionen>${poz("A1", "2", "<preis></preis>")}${poz("A2", "1", "<preis>12,50</preis>")}</positionen></bestellung>`);
+    expect(z.krajDostawy).toBeNull();
+    expect(z.dostawa).toMatchObject({ lkz: "", ort: "X" });
+    expect(z.pozycje.map((p) => p.cenaSprzedazy)).toEqual([null, 12.5]);
+    expect(parsujZamowienie(zam(poz("A1", "1"))).krajDostawy).toBeNull(); // brak lieferadresse
+    expect(blad(zam(poz("A1", "dwa")))[0]).toMatch(/menge/);
+    expect(parsujZamowienie(zam(poz("A1", "2,0"))).pozycje[0]!.ilosc).toBe(2); // przecinek dziesiętny przyjmowany jak kropka: „2,0” = 2
+  });
+
+  it("elementy rozróżniane są wielkością liter: `Bestellung` to nieznany format", () => {
+    expect(blad(XML_BESTELLUNG.replace(/bestellung>/g, "Bestellung>").replace("<bestellung", "<Bestellung"))[0]).toMatch(/Nieznany format.*<Bestellung>/);
+  });
 });

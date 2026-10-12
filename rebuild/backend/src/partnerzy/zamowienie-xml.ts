@@ -196,7 +196,8 @@ function parsujDocumentOrder(korzen: Wezel): Zamowienie {
 }
 
 /**
- * Format TyreWorld (`bestellung`, TopM R6). Jedno zamówienie na plik. `artnr` = klucz pozycji (nasz numer katalogowy, 9 cyfr — tekst, zera wiodące znaczą),
+ * Format TyreWorld (`bestellung`, TopM R6). Jedno zamówienie na plik. `artnr` = klucz pozycji; traktujemy go jako `CODE` (kod pozycji katalogu — w przykładach 9 cyfr zgodnych z `CatNumber` z cennika TyreWorld; dokumentacja TopM mówi o „5-znakowym ID, także alfanumerycznym”,
+ * więc to ZAŁOŻENIE do potwierdzenia). Zawsze tekst — zera wiodące znaczą,
  * `preis` OPCJONALNY (w TopM to tylko wartość porównawcza z ostrzeżeniem przy rozbieżności; netto/brutto zależy od ustawień u partnera — nieustalone),
  * format NIE ma waluty ani kosztu dostawy (zostają `null`). Adres dostawy (`lieferadresse`) jest opcjonalny; `lkz` = kraj. Uwagi (`bemerkung`, `bemerkungintern`)
  * i `neutralversand` zapisujemy w mapie `dostawa` pod oryginalnymi nazwami, żeby nic nie zginęło.

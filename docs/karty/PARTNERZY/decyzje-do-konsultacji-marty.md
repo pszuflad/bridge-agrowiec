@@ -25,7 +25,7 @@ wpisuje się je raz do `.env` na serwerze. Do ustalenia:
 ## Fakty z przykładów i zrzutów serwera plików (użytkownik, 2026-10-12) — do potwierdzenia
 **Dwa formaty zamówień (ticket 234 obsługuje oba):** Adtyres = `DOCUMENTORDER` (angielski), TyreWorld = `bestellung` (niemiecki, TopM R6: `bestellnummer`, `positionen/pos/artnr`, `menge`, `preis`, `lieferadresse/lkz`).
 W `bestellung` `preis` jest OPCJONALNY i — wg komentarza w pliku — w TopM bywa tylko wartością porównawczą z ostrzeżeniem przy rozbieżności (to dokładnie nasza „tolerancja cenowa”); format NIE ma waluty ani kosztu dostawy.
-Z czterech kodów z przykładów dwa nie istnieją już w dzisiejszych cennikach (`011300258`, `010101076`) — potwierdza „kody wygasają”. Zamówienie TyreWorld na `013100077` miało cenę 650,08, a dzisiejszy cennik DE ma 576,75 (inna data) — reguła dla ceny wyższej/niższej ma realne znaczenie.
+Z czterech kodów z przykładów dwa nie istnieją już w dzisiejszych cennikach (`011300258`, `010101076`) — potwierdza „kody wygasają”. Przykładowo zamówienie TyreWorld na `013100077` miało cenę 650,08, a dzisiejszy cennik pokazuje dla DE 576,75 — ale nie wiemy, czy `preis` jest netto/brutto ani w jakiej walucie, a próbki są z innych dat, więc to tylko ilustracja, że cena w zamówieniu i w cenniku mogą się rozjeżdżać (to temat kontroli ceny, PRT-7.4b).
 
 **Układ katalogów na obecnym serwerze (zrzuty):** `/<8 znaków>_adtyres/` z `archiwum/`, `customer/orders/` (+`done/`), `customer/trackings/` (+`done/`) oraz plikami cenników w korzeniu; `/<8 znaków>_tyreworld/` z `archiwum/` (bez widocznego `customer/`);
 `/<8 znaków>_marketplace/` (zawartość nieznana). To INNY układ niż w karcie (`NAZWA_<16>/public/{orders,tracking,pricelist}` + `private/…`).
@@ -36,7 +36,8 @@ Pytania:
 2. **Co oznacza `done/`** — kto przenosi tam pliki (partner, obecny system, my) i czy po przetworzeniu zamówienia mamy robić to samo?
 3. **Jak dziś przychodzą zamówienia TyreWorld** (nie ma folderu `customer/orders` — e-mail? inny kanał?) i jak wygląda ich tracking?
 4. **`preis` w `bestellung`: netto czy brutto, w jakiej walucie** (format nie podaje waluty — zakładamy EUR)?
-5. Jaki jest ten trzeci katalog (`marketplace`) i czy wchodzi w zakres modułu?
+5. **Czy `artnr` z `bestellung` to nasz kod pozycji (`CatNumber` z cennika)?** Dokumentacja TopM w pliku mówi o „5-znakowym ID, także alfanumerycznym”, a w przykładach jest 9 cyfr zgodnych z `CatNumber` (sprawdzone dla jednego z dwóch kodów, które nadal są w cenniku). Parser przyjmuje `artnr` jako `CODE`.
+6. Jaki jest ten trzeci katalog (`marketplace`) i czy wchodzi w zakres modułu?
 
 ## Zależy od numeru katalogowego
 PRT-7.4 (walidacja `CODE` zamówienia = numer katalogowy) i PRT-3.1 (selekcja wymaga unikalnych numerów).

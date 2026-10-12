@@ -23,3 +23,9 @@ None.
 ## Follow-up
 - Decyzje z `decyzje-do-konsultacji-marty.md`: układ katalogów i nazwy plików na istniejącym serwerze, znaczenie `done/`, kanał zamówień TyreWorld, netto/brutto i waluta `preis`.
 - Zmiana nazw plików generatora na istniejące (`adtyres_agrowiec_<kraj>.csv`, `tyreworld_agrowiec.csv`) — po potwierdzeniu.
+
+## Review fixes applied (review.md, 0 BLOCKER / 5 SHOULD-FIX)
+- `artnr` → `CODE` opisane jako ZAŁOŻENIE do potwierdzenia (dokumentacja TopM mówi o „5-znakowym ID”, w przykładach 9 cyfr zgodnych z `CatNumber`); dopisane pytanie w `decyzje-do-konsultacji-marty.md`.
+- Złagodzony wniosek z porównania cen 650,08 / 576,75 (netto/brutto, waluta i data nieustalone — to tylko ilustracja); `karta.md` bez twierdzenia „na main”.
+- Testy przypadków brzegowych: pusty `preis`/`lkz`, `lieferadresse` bez `lkz`, przecinek w `menge`/`preis`, `Bestellung` z wielką literą.
+- NICE-TO-HAVE z review.md (m.in. zmiana cen w fixture): nie wdrożone. Drugi przebieg reviewera nie był uruchamiany — poprawki pokryte testami.

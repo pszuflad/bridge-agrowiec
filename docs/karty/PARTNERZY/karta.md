@@ -1,6 +1,6 @@
 # PARTNERZY — moduł partnerów B2B (cenniki EUR, zamówienia, tracking)
 
-> **Stan:** 🟡 w trakcie (2026-10-10) — na `main`: poziomy 1–5 (bez numeracji katalogowej), krok wdrożenia (226), a z poziomu 7 odbiór zamówień z e-maila, podgląd, walidacja względem katalogu i utwardzenie (tickety 208–234). Zostają: numeracja katalogowa, serwer plików/FTP, kontrola ceny zamówienia, wysyłka do Selly, tracking — wszystkie czekają na decyzje (sekcja „Do koordynatora”, `decyzje-do-konsultacji-marty.md`)
+> **Stan:** 🟡 w trakcie (2026-10-10) — zrobione: poziomy 1–5 (bez numeracji katalogowej), krok wdrożenia (226), a z poziomu 7 odbiór zamówień z e-maila, podgląd, walidacja względem katalogu i utwardzenie (tickety 208–234). Zostają: numeracja katalogowa, serwer plików/FTP, kontrola ceny zamówienia, wysyłka do Selly, tracking — wszystkie czekają na decyzje (sekcja „Do koordynatora”, `decyzje-do-konsultacji-marty.md`)
 > **Iteracja:** poza planem odbudowy — NOWA funkcjonalność · **Wpisy backlogu:** — · **Zależy od:** —
 > **Tickety:** 208–234 (plan podziału: `podzial-na-tickety.md`; instrukcja testów: `docs/instrukcja-testow-PARTNERZY.md`)
 
