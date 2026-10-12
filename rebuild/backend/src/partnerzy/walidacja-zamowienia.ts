@@ -4,10 +4,9 @@
 // Wynik: status `przyjete` albo `blad_importu` z opisem (zbiorczym i per pozycja). Zamówienie ZAWSZE zostaje zapisane — nic nie ginie przed wysyłką do sklepu —
 // i NIE wychodzi żadne powiadomienie do partnera (decyzja z karty). Kontrola ceny/tolerancji czeka na decyzję o wartości tolerancji (karta, „Otwarte” pkt 2).
 //
-// `CODE` jest dziś kodem pozycji katalogu (`products.kod`, UNIKALNY — jednoznacznie wskazuje też magazyn). Po decyzji o numerze katalogowym `KK PP NNNNN`
-// przestawia się wyłącznie `znajdzPozycjeKatalogu`.
+// `CODE` to kod pozycji katalogu (`products.kod`, UNIKALNY) albo numer katalogowy partnera `<EAN>-<dostawca>` (decyzja z 2026-10-12) — rozstrzyga `znajdzPozycjeKatalogu`.
 
-import { eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 
 import type { Baza } from "../db/index.js";
 import { partnerZamowienia, partnerZamowieniaPozycje, products } from "../db/schema.js";
@@ -26,9 +25,25 @@ export type PozycjaKatalogu = { kod: string; stan: number; status: string };
 /** Baza albo transakcja Drizzle — oba mają `select`; sama transakcja nie jest typem `Baza`. */
 type Czytnik = Pick<Baza, "select">;
 
-/** Jedyne miejsce, które mapuje `CODE` z zamówienia na pozycję katalogu (później: numer katalogowy). */
+/**
+ * Jedyne miejsce, które mapuje `CODE` z zamówienia na pozycję katalogu. Najpierw dokładne `products.kod`; potem numer katalogowy partnera
+ * `<EAN>-<numer dostawcy>` (dzielony na OSTATNIM `-`; dostawca bez rozróżniania wielkości liter). Gdy ten sam EAN+dostawca ma kilka pozycji
+ * (np. kilka magazynów), wybieramy aktywną z największym stanem, żeby nie odrzucić zamówienia, które da się zrealizować.
+ */
 export function znajdzPozycjeKatalogu(db: Czytnik, kod: string): PozycjaKatalogu | null {
-  return db.select({ kod: products.kod, stan: products.stan, status: products.status }).from(products).where(eq(products.kod, kod.trim())).get() ?? null;
+  const k = kod.trim();
+  const pola = { kod: products.kod, stan: products.stan, status: products.status };
+  const wprost = db.select(pola).from(products).where(eq(products.kod, k)).get();
+  if (wprost) return wprost;
+  const i = k.lastIndexOf("-");
+  if (i <= 0 || i === k.length - 1) return null;
+  const kandydaci = db
+    .select(pola)
+    .from(products)
+    .where(and(eq(products.ean, k.slice(0, i)), sql`upper(${products.dostawca}) = ${k.slice(i + 1).toUpperCase()}`))
+    .all();
+  if (kandydaci.length === 0) return null;
+  return [...kandydaci].sort((a, b) => Number(b.status === "aktywny") - Number(a.status === "aktywny") || b.stan - a.stan)[0]!;
 }
 
 export type WynikWalidacji = { status: string; bledy: number; zmieniony: boolean };

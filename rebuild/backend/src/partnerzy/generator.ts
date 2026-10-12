@@ -164,6 +164,8 @@ async function przygotujPliki(
             kraj: z.kraj ?? undefined,
           });
     wynik.bledy.push(...w.bledy.map((b) => `Błąd pola „${b.kolumna}” (${b.kod}): ${b.powod}`));
+    const bezNumeru = (w as { bezNumeru?: number }).bezNumeru ?? 0;
+    if (bezNumeru > 0) wynik.ostrzezenia.push(`${z.nazwa}: ${bezNumeru} pozycji pominięto — brak EAN lub dostawcy (numer katalogowy EAN-dostawca).`);
     pliki.push({ nazwa: z.nazwa, kraj: z.kraj, tekst: w.tekst, liczbaWierszy: w.liczbaWierszy, pominiete: w.pominiete });
   }
   return { wynik, pliki, teraz };

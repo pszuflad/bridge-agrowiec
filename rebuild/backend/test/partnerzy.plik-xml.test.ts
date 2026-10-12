@@ -7,7 +7,7 @@ import { escapujXml, zbudujXml } from "../src/partnerzy/plik-xml.js";
 import type { PozycjaEksportu, WierszWyceniony } from "../src/partnerzy/selekcja.js";
 
 const pozycja = (kod: string, nad: Partial<PozycjaEksportu> = {}): PozycjaEksportu => ({
-  id: 1, kod, kodImportu: `IMP_${kod}`, ean: "5901234123457", nazwa: "Mitas AC85", marka: "MITAS", model: null, rozmiar: "600/65R38",
+  id: 1, kod, kodImportu: `IMP_${kod}`, ean: "5901234123457", numerPartnera: "5901234123457-MO1", nazwa: "Mitas AC85", marka: "MITAS", model: null, rozmiar: "600/65R38",
   kategoria: "Rolnicze", dostawca: "MO1", magazyn: "MO1", stan: 5, dot: null, cenaZakupu: 1000, waga: 56, dlugosc: 80, szerokoscPaczki: 60, wysokosc: 85,
   wagaAutoUzupelniona: false, wagaSzacowana: false, ...nad,
 });
