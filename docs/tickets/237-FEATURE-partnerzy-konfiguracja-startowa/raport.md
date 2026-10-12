@@ -1,2 +1,3 @@
 # 237 — raport
-Dowiezione wg planu. Testy: `test/partnerzy.konfiguracja-startowa.test.ts` (konfiguracja po kroku, brak nadpisywania i powtarzalność, brak publikacji bez narzutu, plik z numerem EAN-dostawca po ustawieniu narzutu). Bramki: patrz CI w PR.
+Dowiezione wg planu. Review (`review.md`, 0 BLOCKER): poprawione — aktywacja warunkowa (nie aktywujemy partnera skonfigurowanego przez użytkowniczkę), odłożenie kroku przy pustym katalogu, test bez obejścia typów, testy dla obu przypadków. Przesyłka 15 EUR (+15 EUR do każdej opony) i migawka magazynów opisane w `wpis-237.md` i w PR jako ustawienia do przejrzenia w panelu.
+Testy: `test/partnerzy.konfiguracja-startowa.test.ts` (4 przypadki). Bramki: lint/tsc lokalnie zielone, pełne — w CI PR.

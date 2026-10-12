@@ -45,9 +45,14 @@ export const SZABLONY: Szablon[] = [
   },
 ];
 
-/** Uzupełnia konfigurację obu partnerów i ich aktywuje. Zwraca opis do `kroki_wdrozenia.wynik`. */
-export function ustawKonfiguracjeStartowa(db: Baza): string {
+/**
+ * Uzupełnia konfigurację obu partnerów i ich aktywuje. Zwraca opis do `kroki_wdrozenia.wynik` albo `{ odloz }`, gdy katalog jest pusty
+ * (brak magazynów do wskazania — krok wykona się przy następnym wdrożeniu). Aktywacja tylko wtedy, gdy żaden kraj partnera nie ma jeszcze
+ * narzutu > 0 (użytkowniczka nie zaczęła konfiguracji — jeśli już ustawiła narzuty i zostawiła partnera nieaktywnym, to jej decyzja).
+ */
+export function ustawKonfiguracjeStartowa(db: Baza): string | { odloz: string } {
   const magazyny = dostepneMagazyny(db).map((m) => m.magazyn).filter((m) => !(WYKLUCZONE_MAGAZYNY as readonly string[]).includes(m));
+  if (magazyny.length === 0) return { odloz: "katalog nie ma jeszcze aktywnych pozycji w magazynach spoza MO6/MO7/MO8 — brak magazynów do przypisania" };
   const wyniki: string[] = [];
   for (const s of SZABLONY) {
     let p = db.select().from(partnerzy).where(eq(partnerzy.nazwa, s.nazwa)).get();
@@ -72,7 +77,8 @@ export function ustawKonfiguracjeStartowa(db: Baza): string {
       zapiszKolumny(db, p.id, s.kolumny);
       opis.push("kolumny");
     }
-    if (!p.aktywny) {
+    const skonfigurowana = db.select().from(partnerKraje).where(eq(partnerKraje.partnerId, p.id)).all().some((k) => k.narzutProc > 0);
+    if (!p.aktywny && !skonfigurowana) {
       ustawAktywnosc(db, p.id, true);
       opis.push("aktywowany");
     }

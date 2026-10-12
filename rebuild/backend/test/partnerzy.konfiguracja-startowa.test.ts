@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { otworzBaze, type BazaSqlite } from "../src/db/index.js";
-import { partnerKraje, partnerMagazyny, partnerzy, products } from "../src/db/schema.js";
+import { partnerKraje, partnerzy, products } from "../src/db/schema.js";
 import { zastosujMigracje } from "../src/db/migrate.js";
 import { KROKI_WDROZENIA } from "../src/kroki/rejestr.js";
 import { uruchomKroki } from "../src/kroki/runner.js";
@@ -56,12 +56,26 @@ describe("konfiguracja startowa partnerów", () => {
   it("nie nadpisuje tego, co użytkowniczka już ustawiła, i jest powtarzalne", async () => {
     await uruchomKroki(sqlite, db, KROKI_WDROZENIA, {});
     sqlite.prepare("UPDATE partner_kraje SET narzut_proc = 17, przesylka_stala_eur = 20 WHERE kraj = 'AT'").run();
-    db.delete(partnerMagazyny).where(undefined as never).run();
+    sqlite.prepare("DELETE FROM partner_magazyny").run();
     sqlite.prepare("INSERT INTO partner_magazyny (partner_id, magazyn) SELECT id, 'MO4' FROM partnerzy").run();
     const opis = ustawKonfiguracjeStartowa(db);
     expect(opis).toContain("bez zmian");
     expect(db.select().from(partnerKraje).all().filter((k) => k.kraj === "AT").every((k) => k.narzutProc === 17 && k.przesylkaStalaEur === 20)).toBe(true);
     expect(szczegolyPartnera(db, id("Adtyres"))!.magazyny).toEqual(["MO4"]);
+  });
+
+  it("pusty katalog → krok odłożony (bez zapisu); partner już skonfigurowany przez użytkowniczkę i nieaktywny nie jest aktywowany", async () => {
+    sqlite.prepare("DELETE FROM products").run();
+    expect(ustawKonfiguracjeStartowa(db)).toMatchObject({ odloz: expect.any(String) });
+    expect(db.select().from(partnerzy).all().filter((p) => p.aktywny)).toEqual([]);
+
+    db.insert(products).values(produkt("K_MO1", "MO1")).run();
+    const pid = Number(sqlite.prepare("INSERT INTO partnerzy (nazwa, aktywny, utworzono, zmieniono) VALUES ('TyreWorld', 0, 'x', 'x')").run().lastInsertRowid);
+    sqlite.prepare("INSERT INTO partner_kraje (partner_id, kraj, narzut_proc) VALUES (?, 'FR', 9)").run(pid);
+    ustawKonfiguracjeStartowa(db);
+    expect(szczegolyPartnera(db, pid)!.aktywny).toBe(false); // konfiguracja uzupełniona, aktywność zostawiona
+    expect(szczegolyPartnera(db, pid)!.kraje.find((k) => k.kraj === "FR")!.narzutProc).toBe(9);
+    expect(szczegolyPartnera(db, id("Adtyres"))!.aktywny).toBe(true);
   });
 
   it("do ustawienia narzutu nic się nie publikuje; po ustawieniu powstaje plik z numerem EAN-dostawca", async () => {
