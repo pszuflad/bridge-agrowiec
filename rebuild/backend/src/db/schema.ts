@@ -639,6 +639,12 @@ export const partnerzy = sqliteTable("partnerzy", {
 	kanalEmail: integer("kanal_email", { mode: "boolean" }).default(false).notNull(),
 	emailSkrzynka: text("email_skrzynka"),
 	nazwaPliku: text("nazwa_pliku"),
+	fakturaNazwa: text("faktura_nazwa"),
+	fakturaNip: text("faktura_nip"),
+	fakturaUlica: text("faktura_ulica"),
+	fakturaKod: text("faktura_kod"),
+	fakturaMiasto: text("faktura_miasto"),
+	fakturaKraj: text("faktura_kraj"),
 	utworzono: text().notNull(),
 	zmieniono: text().notNull(),
 });

@@ -33,6 +33,13 @@ export type UstawieniaPartnera = {
   emailSkrzynka: string | null;
   /** Baza nazwy pliku cennika (bez rozszerzenia i kraju); `null` = slug nazwy partnera. */
   nazwaPliku: string | null;
+  /** Dane do faktury (zamawiający w zamówieniu Selly) — wszystkie opcjonalne; `null` = nie ustawione. */
+  fakturaNazwa: string | null;
+  fakturaNip: string | null;
+  fakturaUlica: string | null;
+  fakturaKod: string | null;
+  fakturaMiasto: string | null;
+  fakturaKraj: string | null;
 };
 export type UstawieniaKraju = {
   narzutProc: number;
@@ -118,6 +125,19 @@ export function walidujUstawieniaPartnera(
     if (n !== null && !(typeof n === "string" && /^[A-Za-z0-9_-]{1,60}$/.test(n)))
       return { blad: "Pole `nazwaPliku` musi być tekstem (litery, cyfry, _ i -, do 60 znaków) albo null." };
     w.nazwaPliku = n as string | null;
+  }
+  for (const pole of ["fakturaNazwa", "fakturaNip", "fakturaUlica", "fakturaKod", "fakturaMiasto"] as const) {
+    if (pole in cialo) {
+      const v = cialo[pole];
+      if (v !== null && (typeof v !== "string" || v.trim() === "" || v.length > 120)) return { blad: `Pole \`${pole}\` musi być niepustym tekstem (do 120 znaków) albo null.` };
+      w[pole] = v === null ? null : (v as string).trim();
+    }
+  }
+  if ("fakturaKraj" in cialo) {
+    const v = cialo.fakturaKraj;
+    const kraj = v === null ? null : normalizujKraj(v);
+    if (v !== null && kraj === null) return { blad: "Pole `fakturaKraj` musi być dwuliterowym kodem kraju (np. PL) albo null." };
+    w.fakturaKraj = kraj;
   }
   return w;
 }

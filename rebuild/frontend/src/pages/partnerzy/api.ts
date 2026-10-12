@@ -136,6 +136,13 @@ export type SzczegolyPartnera = {
   kanalEmail: boolean;
   emailSkrzynka: string | null;
   nazwaPliku: string | null;
+  /** Dane do faktury partnera (zamawiający w zamówieniu Selly) — backend zawsze je zwraca (null = nie ustawione). */
+  fakturaNazwa?: string | null;
+  fakturaNip?: string | null;
+  fakturaUlica?: string | null;
+  fakturaKod?: string | null;
+  fakturaMiasto?: string | null;
+  fakturaKraj?: string | null;
   zmieniono: string;
   magazyny: string[];
   wykluczenia: string[];
@@ -146,7 +153,7 @@ export type SzczegolyPartnera = {
 
 export type UstawieniaDoZapisu = Pick<
   SzczegolyPartnera,
-  "nazwa" | "stanMin" | "zaokraglanie" | "harmonogramMinuty" | "tolerancjaCenyProc" | "formatPliku" | "csvSeparator" | "kanalFtp" | "kanalEmail" | "emailSkrzynka" | "nazwaPliku"
+  "nazwa" | "stanMin" | "zaokraglanie" | "harmonogramMinuty" | "tolerancjaCenyProc" | "formatPliku" | "csvSeparator" | "kanalFtp" | "kanalEmail" | "emailSkrzynka" | "nazwaPliku" | "fakturaNazwa" | "fakturaNip" | "fakturaUlica" | "fakturaKod" | "fakturaMiasto" | "fakturaKraj"
 >;
 export type UstawieniaKraju = Pick<KrajPartnera, "narzutProc" | "kursZrodlo" | "kursReczny" | "kosztyDodatkowe" | "przesylkaStalaEur">;
 export type MagazynKatalogu = { magazyn: string; liczbaPozycji: number };

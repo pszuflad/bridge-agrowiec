@@ -39,6 +39,15 @@ export function UstawieniaPartnera({ partner }: { partner: SzczegolyPartnera }) 
   const [email, ustawEmail] = useState(partner.kanalEmail);
   const [skrzynka, ustawSkrzynke] = useState(partner.emailSkrzynka ?? "");
   const [nazwaPliku, ustawNazwePliku] = useState(partner.nazwaPliku ?? "");
+  const [faktura, ustawFakture] = useState({
+    fakturaNazwa: partner.fakturaNazwa ?? "",
+    fakturaNip: partner.fakturaNip ?? "",
+    fakturaUlica: partner.fakturaUlica ?? "",
+    fakturaKod: partner.fakturaKod ?? "",
+    fakturaMiasto: partner.fakturaMiasto ?? "",
+    fakturaKraj: partner.fakturaKraj ?? "",
+  });
+  const zmienFakture = (pole: keyof typeof faktura, wartosc: string) => ustawFakture((f) => ({ ...f, [pole]: wartosc }));
 
   const zapis = useMutation<void, Error, void>({
     mutationFn: async () => {
@@ -54,6 +63,7 @@ export function UstawieniaPartnera({ partner }: { partner: SzczegolyPartnera }) 
       await zapiszUstawienia(partner.id, {
         nazwa: nazwa.trim(), stanMin: stan, zaokraglanie, harmonogramMinuty: harm, tolerancjaCenyProc: tol,
         formatPliku: format, csvSeparator: separator, kanalFtp: ftp, kanalEmail: email, emailSkrzynka: skrzynka.trim() === "" ? null : skrzynka.trim(), nazwaPliku: np === "" ? null : np,
+        ...Object.fromEntries(Object.entries(faktura).map(([k, v]) => [k, v.trim() === "" ? null : k === "fakturaKraj" ? v.trim().toUpperCase() : v.trim()])),
       });
     },
     onSuccess: async () => {
@@ -89,6 +99,12 @@ export function UstawieniaPartnera({ partner }: { partner: SzczegolyPartnera }) 
             </select>
           </Pole>
           <Pole etykieta="Nazwa pliku cennika (bez rozszerzenia i kraju)"><Input value={nazwaPliku} placeholder="np. adtyres_agrowiec" onChange={(e) => ustawNazwePliku(e.target.value)} data-testid="input-ustawienia-nazwa-pliku" /></Pole>
+          <Pole etykieta="Faktura: nazwa firmy"><Input value={faktura.fakturaNazwa} onChange={(e) => zmienFakture("fakturaNazwa", e.target.value)} data-testid="input-ustawienia-faktura-nazwa" /></Pole>
+          <Pole etykieta="Faktura: NIP"><Input value={faktura.fakturaNip} onChange={(e) => zmienFakture("fakturaNip", e.target.value)} data-testid="input-ustawienia-faktura-nip" /></Pole>
+          <Pole etykieta="Faktura: ulica i numer"><Input value={faktura.fakturaUlica} onChange={(e) => zmienFakture("fakturaUlica", e.target.value)} data-testid="input-ustawienia-faktura-ulica" /></Pole>
+          <Pole etykieta="Faktura: kod pocztowy"><Input value={faktura.fakturaKod} onChange={(e) => zmienFakture("fakturaKod", e.target.value)} data-testid="input-ustawienia-faktura-kod" /></Pole>
+          <Pole etykieta="Faktura: miasto"><Input value={faktura.fakturaMiasto} onChange={(e) => zmienFakture("fakturaMiasto", e.target.value)} data-testid="input-ustawienia-faktura-miasto" /></Pole>
+          <Pole etykieta="Faktura: kraj (kod, np. AD, ES)"><Input maxLength={2} value={faktura.fakturaKraj} onChange={(e) => zmienFakture("fakturaKraj", e.target.value)} data-testid="input-ustawienia-faktura-kraj" /></Pole>
           <Pole etykieta="Skrzynka e-mail do zamówień"><Input type="email" value={skrzynka} onChange={(e) => ustawSkrzynke(e.target.value)} data-testid="input-ustawienia-skrzynka" /></Pole>
         </div>
         <div className="flex flex-wrap gap-5 text-sm">

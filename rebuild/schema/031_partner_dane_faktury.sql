@@ -1,0 +1,9 @@
+-- Ticket 242 (242-FEATURE-partnerzy-dane-do-faktury): dane do faktury partnera (zamawiający w zamówieniu Selly).
+--
+-- ⚠ NOWE KOLUMNY w tabeli z migracji 024 (puste na produkcji), NIE ODTWORZENIE PRODUKCJI. Wartości wpisuje użytkowniczka w panelu (nie trafiają do repo).
+-- @dodaj-kolumne-jesli-brak partnerzy faktura_nazwa TEXT
+-- @dodaj-kolumne-jesli-brak partnerzy faktura_nip TEXT
+-- @dodaj-kolumne-jesli-brak partnerzy faktura_ulica TEXT
+-- @dodaj-kolumne-jesli-brak partnerzy faktura_kod TEXT
+-- @dodaj-kolumne-jesli-brak partnerzy faktura_miasto TEXT
+-- @dodaj-kolumne-jesli-brak partnerzy faktura_kraj TEXT
