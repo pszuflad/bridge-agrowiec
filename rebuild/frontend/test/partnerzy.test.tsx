@@ -166,3 +166,34 @@ describe("pomocnicze", () => {
     expect(komunikatBledu(new Error("sieć padła"))).toBe("sieć padła");
   });
 });
+
+describe("słowniki zamówień Selly", () => {
+  it("pobiera dopiero po kliknięciu i pokazuje statusy, płatności i dostawy z dowolnymi kluczami", async () => {
+    let zapytan = 0;
+    zamockujApi();
+    server.use(
+      http.get("*/api/partnerzy/selly/slowniki-zamowien", () => {
+        zapytan++;
+        return HttpResponse.json({ statusy: [{ status_id: 3, name: "Nowe" }], platnosci: [{ payment_id: 7, name: "Przelew" }], dostawy: [] });
+      }),
+    );
+    await otworz();
+    const przycisk = await screen.findByTestId("button-slowniki-selly");
+    expect(zapytan).toBe(0);
+    await userEvent.setup().click(przycisk);
+    const statusy = await screen.findByTestId("tabela-selly-statusy");
+    expect(within(statusy).getByText("status_id")).toBeInTheDocument();
+    expect(within(statusy).getByText("Nowe")).toBeInTheDocument();
+    expect(within(screen.getByTestId("tabela-selly-platnosci")).getByText("Przelew")).toBeInTheDocument();
+    expect(within(screen.getByTestId("tabela-selly-dostawy")).getByText("brak pozycji")).toBeInTheDocument();
+    expect(zapytan).toBe(1);
+  });
+
+  it("błąd Selly pokazuje komunikat zamiast tabel", async () => {
+    zamockujApi();
+    server.use(http.get("*/api/partnerzy/selly/slowniki-zamowien", () => HttpResponse.json({ error: "[Selly] Integracja wyłączona" }, { status: 502 })));
+    await otworz();
+    await userEvent.setup().click(await screen.findByTestId("button-slowniki-selly"));
+    expect(await screen.findByTestId("text-slowniki-selly-blad")).toHaveTextContent("Integracja wyłączona");
+  });
+});
