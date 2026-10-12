@@ -62,6 +62,12 @@ describe("kalkulator ceny partnera", () => {
     expect(w.skladniki.przesylkaEur).toBeCloseTo(100 * 1.44 + 9.92 + 15, 9);
   });
 
+  it("ścieżka GEIS: stawka × (1 + paliwo %) + pakowanie z tabeli + myto i pakowanie kraju z panelu", () => {
+    const bez = obliczCene(db, { ...BAZA, pozycja: POZYCJA });
+    const z = obliczCene(db, { ...BAZA, kraj: { ...BAZA.kraj, mytoEur: 9.92, pakowanieEur: 15 }, pozycja: POZYCJA });
+    expect(z.skladniki.przesylkaEur).toBeCloseTo(bez.skladniki.przesylkaEur + 9.92 + 15, 9);
+  });
+
   it("zgadza się z wzorem z karty, gdy przesyłkę traktować jako PLN (przesylka_pln)", () => {
     const formula = parsujFormule("(zakup + zakup * narzut + przesylka_pln + koszty_dodatkowe) / kurs_EUR");
     const w = obliczCene(db, { ...BAZA, pozycja: POZYCJA, formula });

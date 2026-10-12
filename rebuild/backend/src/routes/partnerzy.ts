@@ -5,9 +5,13 @@
 
 import { Router, type Request, type Response } from "express";
 
+import multer from "multer";
+
 import type { Baza } from "../db/index.js";
 import type { KlientSelly } from "../selly/klient.js";
-import { ustawPaliwo } from "../partnerzy/transport.js";
+import { parsujGeisXlsx } from "../partnerzy/geis-xlsx.js";
+import { BladTransportu, importujTabeleGeis, ustawPaliwo, type TabeleGeisJson } from "../partnerzy/transport.js";
+import { listaGeis } from "../repos/partnerzy-geis.js";
 import { requireAuth } from "../middleware/auth.js";
 import { zapiszAudyt } from "../repos/audit.js";
 import { pobierzBledy, pobierzLogi } from "../partnerzy/logi.js";
@@ -38,6 +42,7 @@ export type ZaleznosciPartnerzy = { db: Baza; serwis?: SerwisPartnerow; odbiorEm
 
 export function trasyPartnerzy({ db, serwis, odbiorEmail, klientSelly }: ZaleznosciPartnerzy): Router {
   const router = Router();
+  const wgrywanieGeis = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5_000_000 } });
 
   const audytuj = (req: Request, akcja: string, id: number, szczegoly?: unknown): void => {
     try {
@@ -78,6 +83,44 @@ export function trasyPartnerzy({ db, serwis, odbiorEmail, klientSelly }: Zalezno
       console.error("[partnerzy] słowniki zamówień Selly:", e instanceof Error ? e.message : e);
       res.status(502).json({ error: e instanceof Error ? e.message : "Nie udało się pobrać słowników z Selly." });
     }
+  });
+
+  /**
+   * Tabele transportowe GEIS (ticket 244): podgląd (`GET`), edycja jednego kraju (`PUT`, ciało = `{wspGabarytowy, kosztPakowania, maks, stawki}`) i import z arkusza
+   * Excel (`POST /import`, pole `plik`). Stawka = kolumna „1” (cały kraj). MUSZĄ stać przed `/api/partnerzy/:id`.
+   */
+  router.get("/api/partnerzy/geis", requireAuth, (_req, res) => {
+    res.json({ kraje: listaGeis(db) });
+  });
+
+  router.put("/api/partnerzy/geis/:kraj", requireAuth, (req, res) => {
+    const kraj = normalizujKraj(req.params.kraj);
+    if (kraj === null) return void res.status(400).json({ error: "Kraj musi być dwuliterowym kodem (np. FR)." });
+    try {
+      importujTabeleGeis(db, { [kraj]: req.body as TabeleGeisJson[string] });
+    } catch (e) {
+      if (e instanceof BladTransportu) return void res.status(400).json({ error: e.message });
+      throw e;
+    }
+    audytuj(req, "partner_geis_edycja", 0, { kraj });
+    res.json({ kraje: listaGeis(db) });
+  });
+
+  router.post("/api/partnerzy/geis/import", requireAuth, (req, res, next) => {
+    wgrywanieGeis.single("plik")(req, res, (e: unknown) => {
+      if (e instanceof multer.MulterError) return void res.status(400).json({ error: e.code === "LIMIT_FILE_SIZE" ? "Plik większy niż 5 MB." : "Niepoprawny upload." });
+      if (e) return next(e);
+      if (!req.file) return void res.status(400).json({ error: "Brak pliku (pole `plik`)." });
+      try {
+        const { dane, ostrzezenia } = parsujGeisXlsx(req.file.buffer);
+        const liczba = importujTabeleGeis(db, dane);
+        audytuj(req, "partner_geis_import", 0, { kraje: Object.keys(dane), ostrzezenia: ostrzezenia.length });
+        res.json({ zaimportowano: liczba, kraje: Object.keys(dane).sort(), ostrzezenia });
+      } catch (err) {
+        if (err instanceof BladTransportu || err instanceof Error) return void res.status(400).json({ error: err.message });
+        next(err);
+      }
+    });
   });
 
   router.get("/api/partnerzy/:id", requireAuth, (req, res) => {
