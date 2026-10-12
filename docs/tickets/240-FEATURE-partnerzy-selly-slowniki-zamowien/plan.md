@@ -1,0 +1,4 @@
+# 240 — PARTNERZY: słowniki zamówień Selly (tylko odczyt)
+
+Pierwszy, bezpieczny krok integracji zamówień partnerów z Selly (decyzja użytkowniczki 2026-10-12: próbujemy na żywym sklepie, kontroluje ona). Zakres: metody klienta `listOrderStatuses`, `listOrderPayments`, `listOrderDeliveries` (`GET /api/order_statuses|order_payments|order_deliveries`), sklasyfikowane jako ODCZYT w `selly/tryb.ts` (blokada `SELLY_TRYB` działa bez zmian), atrapa testowa, trasa `GET /api/partnerzy/selly/slowniki-zamowien` (requireAuth, poza kontraktem). Po co: żeby użytkowniczka zobaczyła identyfikatory status/płatność/dostawa potrzebne do `POST /api/orders` (kolejny ticket: podgląd i ręczne utworzenie zamówienia jednym przyciskiem).
+Bez zapisu do Selly. Kształt kluczy odpowiedzi nieustalony (badanie dokumentacji 1.8) — przepuszczamy bez interpretacji.
