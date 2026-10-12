@@ -1,5 +1,5 @@
 /** Ticket 239: odbiór zamówień z plików XML na serwerze plików. */
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync, utimesSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync, symlinkSync, utimesSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -77,6 +77,18 @@ describe("odbiór zamówień z plików", () => {
     plik("duzy.xml", "x".repeat(2_100_000));
     expect(odbierzZamowieniaZPlikow(db, partnerId, orders, TERAZ)).toMatchObject({ plikow: 1, bledy: 1 });
     expect(existsSync(join(orders, "done", "BLAD_duzy.xml"))).toBe(true);
+  });
+
+  it("dowiązanie symboliczne *.xml jest pomijane (nie czytamy cudzych plików); trwała awaria nie zapisuje błędu co przebieg", () => {
+    const cel = join(katalog, "cudzy.xml");
+    writeFileSync(cel, XML_PRZYKLAD);
+    symlinkSync(cel, join(orders, "link.xml"));
+    expect(odbierzZamowieniaZPlikow(db, partnerId, orders, TERAZ)).toMatchObject({ plikow: 0, nowe: 0 });
+    expect(db.select().from(partnerZamowienia).all()).toHaveLength(0);
+
+    const brak = join(katalog, "brak");
+    for (let i = 0; i < 3; i++) odbierzZamowieniaZPlikow(db, partnerId, brak, new Date(TERAZ.getTime() + i * 300_000));
+    expect(pobierzBledy(db, partnerId).filter((b) => JSON.stringify(b).includes("niedostępny"))).toHaveLength(1);
   });
 
   it("niedostępny katalog: błąd w logu, bez wyjątku", () => {

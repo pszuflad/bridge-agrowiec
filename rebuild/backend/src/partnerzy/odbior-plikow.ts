@@ -7,13 +7,13 @@
 // Ochrona: tylko zwykłe pliki `*.xml`, rozmiar ≤ MAKS_ROZMIAR_XML (sprawdzany PRZED odczytem), pliki młodsze niż 30 s pomijamy (partner może jeszcze wgrywać).
 // Mapowanie partner → katalog `orders` w `PARTNERZY_KATALOGI_ZAMOWIEN` (`Nazwa=/ścieżka;…`); brak wpisu = partner pominięty. Bez powiadomień dla partnera.
 
-import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, statSync } from "node:fs";
+import { existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, renameSync } from "node:fs";
 import { join } from "node:path";
 
-import { and, eq } from "drizzle-orm";
+import { and, eq, gt } from "drizzle-orm";
 
 import type { Baza } from "../db/index.js";
-import { partnerzy } from "../db/schema.js";
+import { partnerErrorLog, partnerzy } from "../db/schema.js";
 import { zapiszZamowienie } from "../repos/partnerzy-zamowienia.js";
 import { dekodujXml } from "./dekoduj-xml.js";
 import { wyczyscLogi, zapiszBlad, zapiszOperacje } from "./logi.js";
@@ -25,6 +25,17 @@ export const OPERACJA_ODBIOR_PLIKOW = "odbior-zamowien-pliki";
 export const MIN_WIEK_PLIKU_MS = 30_000;
 
 export type WynikOdbioruPlikow = { plikow: number; nowe: number; duplikaty: number; bledy: number; pominiete: number };
+
+/** Trwała awaria (nieprzenoszalny plik, brak katalogu) nie może pisać nowego wiersza co przebieg: identyczny błąd z ostatniej doby pomijamy. */
+function zapiszBladRaz(db: Baza, partnerId: number, tekst: string, poziom: "blad" | "ostrzezenie", teraz: Date): void {
+  const doba = new Date(teraz.getTime() - 86_400_000).toISOString();
+  const jest = db
+    .select({ id: partnerErrorLog.id })
+    .from(partnerErrorLog)
+    .where(and(eq(partnerErrorLog.partnerId, partnerId), eq(partnerErrorLog.operacja, OPERACJA_ODBIOR_PLIKOW), eq(partnerErrorLog.komunikat, tekst), gt(partnerErrorLog.kiedy, doba)))
+    .get();
+  if (!jest) zapiszBlad(db, partnerId, OPERACJA_ODBIOR_PLIKOW, tekst, poziom, teraz);
+}
 
 const komunikat = (e: unknown): string => (e instanceof Error ? e.message : String(e));
 
@@ -43,14 +54,14 @@ export function odbierzZamowieniaZPlikow(db: Baza, partnerId: number, katalog: s
   try {
     nazwy = readdirSync(katalog).filter((n) => /\.xml$/i.test(n)).sort();
   } catch (e) {
-    zapiszBlad(db, partnerId, OPERACJA_ODBIOR_PLIKOW, `Katalog zamówień ${katalog} niedostępny: ${komunikat(e)}`, "blad", teraz);
+    zapiszBladRaz(db, partnerId, `Katalog zamówień ${katalog} niedostępny: ${komunikat(e)}`, "blad", teraz);
     wynik.bledy++;
     return wynik;
   }
   for (const nazwa of nazwy) {
     const sciezka = join(katalog, nazwa);
     try {
-      const st = statSync(sciezka);
+      const st = lstatSync(sciezka); // lstat: symlink nie jest zwykłym plikiem — nie czytamy cudzych plików przez dowiązanie
       if (!st.isFile()) continue;
       if (teraz.getTime() - st.mtimeMs < MIN_WIEK_PLIKU_MS) {
         wynik.pominiete++;
@@ -84,10 +95,10 @@ export function odbierzZamowieniaZPlikow(db: Baza, partnerId: number, katalog: s
     } catch (e) {
       // Wyjątek infrastruktury (baza, przeniesienie pliku): plik zostaje na miejscu i zostanie ponowiony (zapis jest idempotentny).
       wynik.bledy++;
-      zapiszBlad(db, partnerId, OPERACJA_ODBIOR_PLIKOW, `${nazwa}: ${komunikat(e)} (plik zostaje, zostanie ponowiony)`, "blad", teraz);
+      zapiszBladRaz(db, partnerId, `${nazwa}: ${komunikat(e)} (plik zostaje, zostanie ponowiony)`, "blad", teraz);
     }
   }
-  if (wynik.plikow > 0) {
+  if (wynik.nowe + wynik.duplikaty > 0) {
     zapiszOperacje(db, partnerId, OPERACJA_ODBIOR_PLIKOW, `Odebrano ${wynik.plikow} plików: ${wynik.nowe} nowych zamówień, ${wynik.duplikaty} powtórzonych, ${wynik.bledy} błędnych`, wynik.nowe, teraz);
   }
   return wynik;
