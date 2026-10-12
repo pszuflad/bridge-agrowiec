@@ -18,7 +18,13 @@ const ETYKIETY_STATUSOW: Record<string, string> = { nowe: "nowe", przyjete: "prz
 const przytnij = (tekst: string, maks = 240): string => (tekst.length > maks ? `${tekst.slice(0, maks)}…` : tekst);
 const etykietaStatusu = (status: string): string => ETYKIETY_STATUSOW[status] ?? status;
 /** Polskie etykiety znanych pól adresu dostawy; nieznane pola partnera pokazujemy pod ich nazwą z pliku. */
-const ETYKIETY_DOSTAWY: Record<string, string> = { CUSTOMERNAME: "Odbiorca", COUNTRY: "Kraj", PHONE: "Telefon", MODEOFTRANSPORT: "Sposób transportu", CODCOST: "Pobranie", DELIVERY_COST: "Koszt dostawy" };
+const ETYKIETY_DOSTAWY: Record<string, string> = {
+  // format Adtyres (DOCUMENTORDER)
+  CUSTOMERNAME: "Odbiorca", COUNTRY: "Kraj", PHONE: "Telefon", MODEOFTRANSPORT: "Sposób transportu", CODCOST: "Pobranie", DELIVERY_COST: "Koszt dostawy",
+  // format TyreWorld (bestellung, TopM R6)
+  name: "Odbiorca", name2: "Odbiorca (cd.)", strasse: "Ulica", plz: "Kod pocztowy", ort: "Miejscowość", lkz: "Kraj (kod)", land: "Kraj", email: "E-mail", telefon: "Telefon",
+  neutralversand: "Wysyłka neutralna", bemerkung: "Uwaga klienta", bemerkungintern: "Uwaga wewnętrzna",
+};
 
 export function ZamowieniaPartnera({ partner }: { partner: SzczegolyPartnera }) {
   const [otwarte, ustawOtwarte] = useState<number | null>(null);

@@ -139,9 +139,20 @@ const liczba = (s: string): number | null => {
   return /^-?\d+(\.\d+)?$/.test(t) ? Number(t) : null;
 };
 
+/**
+ * Parsuje zamówienie w jednym z OBSŁUGIWANYCH formatów, rozpoznawanym po elemencie głównym:
+ * - `DOCUMENTORDER` — format Adtyres (angielskie nazwy: NUMBER, PRODUCTS/PRODUCT/CODE…),
+ * - `bestellung` — format TyreWorld (niemiecki, system TopM R6: bestellnummer, positionen/pos/artnr…).
+ * Oba trafiają do tego samego modelu `Zamowienie`. Inny element główny = błąd pliku z listą obsługiwanych.
+ */
 export function parsujZamowienie(xml: string): Zamowienie {
   const korzen = czytajXml(xml);
-  if (korzen.nazwa !== "DOCUMENTORDER") throw new BladZamowienia([`Oczekiwano elementu DOCUMENTORDER, jest <${korzen.nazwa}>.`]);
+  if (korzen.nazwa === "DOCUMENTORDER") return parsujDocumentOrder(korzen);
+  if (korzen.nazwa === "bestellung") return parsujBestellung(korzen);
+  throw new BladZamowienia([`Nieznany format zamówienia: element główny <${korzen.nazwa}> (obsługiwane: DOCUMENTORDER, bestellung).`]);
+}
+
+function parsujDocumentOrder(korzen: Wezel): Zamowienie {
   const bledy: string[] = [];
 
   // `NUMBER` zamówienia jest dzieckiem korzenia (INVOICE też ma własny NUMBER — nie mylić).
@@ -180,6 +191,55 @@ export function parsujZamowienie(xml: string): Zamowienie {
     krajDostawy: tekstDziecka(dostawaWezel, "COUNTRY"),
     faktura: mapa(dziecko(korzen, "INVOICE")),
     dostawa: mapa(dostawaWezel),
+    pozycje,
+  };
+}
+
+/**
+ * Format TyreWorld (`bestellung`, TopM R6). Jedno zamówienie na plik. `artnr` = klucz pozycji (nasz numer katalogowy, 9 cyfr — tekst, zera wiodące znaczą),
+ * `preis` OPCJONALNY (w TopM to tylko wartość porównawcza z ostrzeżeniem przy rozbieżności; netto/brutto zależy od ustawień u partnera — nieustalone),
+ * format NIE ma waluty ani kosztu dostawy (zostają `null`). Adres dostawy (`lieferadresse`) jest opcjonalny; `lkz` = kraj. Uwagi (`bemerkung`, `bemerkungintern`)
+ * i `neutralversand` zapisujemy w mapie `dostawa` pod oryginalnymi nazwami, żeby nic nie zginęło.
+ */
+function parsujBestellung(korzen: Wezel): Zamowienie {
+  const bledy: string[] = [];
+  const numerPartnera = tekstDziecka(korzen, "bestellnummer");
+  if (!numerPartnera) bledy.push("Brak numeru zamówienia (bestellnummer).");
+
+  const pozycje: PozycjaZamowienia[] = [];
+  const pozycjeWezel = (dziecko(korzen, "positionen")?.dzieci ?? []).filter((p) => p.nazwa === "pos");
+  if (pozycjeWezel.length > MAKS_POZYCJI) throw new BladZamowienia([`Za dużo pozycji (${pozycjeWezel.length}, limit ${MAKS_POZYCJI}).`]);
+  if (pozycjeWezel.length === 0) bledy.push("Brak pozycji zamówienia (positionen/pos).");
+  pozycjeWezel.forEach((p, i) => {
+    const lp = i + 1;
+    const kod = tekstDziecka(p, "artnr");
+    if (!kod) bledy.push(`Pozycja ${lp}: brak artnr.`);
+    const iloscTekst = tekstDziecka(p, "menge");
+    const ilosc = iloscTekst === null ? null : liczba(iloscTekst);
+    if (ilosc === null || !Number.isSafeInteger(ilosc) || ilosc < 1) bledy.push(`Pozycja ${lp}: menge musi być liczbą całkowitą ≥ 1.`);
+    const cenaTekst = tekstDziecka(p, "preis");
+    const cena = cenaTekst === null ? null : liczba(cenaTekst);
+    if (cenaTekst !== null && (cena === null || cena < 0)) bledy.push(`Pozycja ${lp}: preis nie jest poprawną ceną.`);
+    if (kod && ilosc !== null) pozycje.push({ lp, kod, nazwa: tekstDziecka(p, "bezeichnung"), ilosc, cenaSprzedazy: cena });
+  });
+  if (bledy.length > 0) throw new BladZamowienia(bledy);
+
+  const adres = dziecko(korzen, "lieferadresse");
+  const dostawa = mapa(adres);
+  for (const klucz of ["neutralversand", "bemerkung", "bemerkungintern"]) {
+    const w = dziecko(korzen, klucz);
+    const t = w?.tekst.trim();
+    if (t) dostawa[klucz] = t;
+  }
+  return {
+    numerPartnera: numerPartnera!,
+    dataZamowienia: tekstDziecka(korzen, "bestelldatum"),
+    dataDostawy: null,
+    waluta: null,
+    kosztDostawy: null,
+    krajDostawy: tekstDziecka(adres, "lkz"),
+    faktura: {},
+    dostawa,
     pozycje,
   };
 }
