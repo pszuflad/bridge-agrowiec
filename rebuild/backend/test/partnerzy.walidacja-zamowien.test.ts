@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { partnerErrorLog, partnerZamowienia, partnerzy, products } from "../src/db/schema.js";
 import { odbierzZamowieniaEmail } from "../src/partnerzy/odbior-email.js";
 import type { OtworzSkrzynke } from "../src/partnerzy/poczta.js";
+import { numerPartnera } from "../src/partnerzy/selekcja.js";
 import { powodBleduPozycji, znajdzPozycjeKatalogu, STATUS_BLAD_IMPORTU, STATUS_PRZYJETE, zwaliduj } from "../src/partnerzy/walidacja-zamowienia.js";
 import { szczegolyZamowienia, zapiszZamowienie } from "../src/repos/partnerzy-zamowienia.js";
 import { stworzSrodowiskoTestowe, type SrodowiskoTestowe } from "./gate/index.js";
@@ -49,6 +50,16 @@ describe("walidacja zamówień partnera", () => {
     expect(znajdzPozycjeKatalogu(s.db, "745384925-")).toBeNull();
     expect(znajdzPozycjeKatalogu(s.db, "-MO4")).toBeNull();
     expect(znajdzPozycjeKatalogu(s.db, "K_A")).toMatchObject({ kod: "K_A" }); // dokładny products.kod ma pierwszeństwo
+  });
+
+  it("round-trip: numer z pliku (numerPartnera) odnajduje pozycję także przy spacjach w EAN/dostawcy i remisie stanów", () => {
+    wstaw(
+      produkt("R_B", { ean: "590 123", dostawca: "mo 2", magazyn: "MO2", stan: 4 }),
+      produkt("R_A", { ean: "590 123", dostawca: "mo 2", magazyn: "MO3", stan: 4 }),
+    );
+    const numer = numerPartnera("590 123", "mo 2")!;
+    expect(numer).toBe("590123-mo2");
+    expect(znajdzPozycjeKatalogu(s.db, numer)).toMatchObject({ kod: "R_A" }); // remis stanów → kod alfabetycznie
   });
 
   it("wszystko w katalogu i na stanie → przyjęte, bez błędów", () => {

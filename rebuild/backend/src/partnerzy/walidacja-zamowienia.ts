@@ -37,13 +37,19 @@ export function znajdzPozycjeKatalogu(db: Czytnik, kod: string): PozycjaKatalogu
   if (wprost) return wprost;
   const i = k.lastIndexOf("-");
   if (i <= 0 || i === k.length - 1) return null;
+  // Porównanie po tej samej normalizacji co `numerPartnera()` (bez białych znaków); `upper()` w SQLite jest ASCII-only — numery dostawców to ASCII.
   const kandydaci = db
     .select(pola)
     .from(products)
-    .where(and(eq(products.ean, k.slice(0, i)), sql`upper(${products.dostawca}) = ${k.slice(i + 1).toUpperCase()}`))
+    .where(
+      and(
+        sql`replace(replace(${products.ean}, ' ', ''), char(9), '') = ${k.slice(0, i).replace(/\s+/g, "")}`,
+        sql`upper(replace(${products.dostawca}, ' ', '')) = ${k.slice(i + 1).replace(/\s+/g, "").toUpperCase()}`,
+      ),
+    )
     .all();
   if (kandydaci.length === 0) return null;
-  return [...kandydaci].sort((a, b) => Number(b.status === "aktywny") - Number(a.status === "aktywny") || b.stan - a.stan)[0]!;
+  return [...kandydaci].sort((a, b) => Number(b.status === "aktywny") - Number(a.status === "aktywny") || b.stan - a.stan || a.kod.localeCompare(b.kod))[0]!;
 }
 
 export type WynikWalidacji = { status: string; bledy: number; zmieniony: boolean };
