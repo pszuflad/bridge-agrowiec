@@ -117,8 +117,15 @@ export type CialoWariantu = {
  * w `mirror/backend/selly/routes.cjs`), więc port bez konsumenta byłby martwym kodem.
  * `getProduct` doszedł z Torem 2 (karta I15.7) — woła go `sync_full.cjs` (ścieżka A, #81).
  */
+/** Pozycja słownika zamówień Selly (status/płatność/dostawa) — kształt kluczy nieustalony (badanie dokumentacji 1.8), więc przepuszczamy ją bez interpretacji. */
+export type PozycjaSlownikaZamowien = Record<string, unknown>;
+
 export type KlientSelly = {
   ping(): Promise<WynikPing>;
+  /** Słowniki do tworzenia zamówień (ticket 240): `GET /api/order_statuses|order_payments|order_deliveries` — tylko odczyt. */
+  listOrderStatuses(): Promise<OdpowiedzListy<PozycjaSlownikaZamowien>>;
+  listOrderPayments(): Promise<OdpowiedzListy<PozycjaSlownikaZamowien>>;
+  listOrderDeliveries(): Promise<OdpowiedzListy<PozycjaSlownikaZamowien>>;
   listProducers(query?: { limit?: number }): Promise<OdpowiedzListy<ProducentSelly>>;
   createProducer(producent: { name: string }): Promise<unknown>;
   listCategories(query?: { limit?: number }): Promise<OdpowiedzListy<KategoriaSelly>>;
@@ -384,6 +391,10 @@ export function stworzKlientaSelly(konfiguracja: KonfiguracjaSelly): KlientSelly
     createCategory: (kategoria) => dane("POST", "/api/categories", { body: kategoria }),
 
     listVatRates: async () => (await dane("GET", "/api/vat_rates")) as OdpowiedzListy<StawkaVatSelly>,
+
+    listOrderStatuses: async () => (await dane("GET", "/api/order_statuses")) as OdpowiedzListy<PozycjaSlownikaZamowien>,
+    listOrderPayments: async () => (await dane("GET", "/api/order_payments")) as OdpowiedzListy<PozycjaSlownikaZamowien>,
+    listOrderDeliveries: async () => (await dane("GET", "/api/order_deliveries")) as OdpowiedzListy<PozycjaSlownikaZamowien>,
 
     listWarehouses: async () =>
       (await dane("GET", "/api/warehouses")) as OdpowiedzListy<MagazynSelly>,

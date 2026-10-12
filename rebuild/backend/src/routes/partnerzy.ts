@@ -6,6 +6,7 @@
 import { Router, type Request, type Response } from "express";
 
 import type { Baza } from "../db/index.js";
+import type { KlientSelly } from "../selly/klient.js";
 import { requireAuth } from "../middleware/auth.js";
 import { zapiszAudyt } from "../repos/audit.js";
 import { pobierzBledy, pobierzLogi } from "../partnerzy/logi.js";
@@ -32,9 +33,9 @@ import {
   walidujUstawieniaPartnera,
 } from "../repos/partnerzy.js";
 
-export type ZaleznosciPartnerzy = { db: Baza; serwis?: SerwisPartnerow; odbiorEmail?: OdbiorEmail };
+export type ZaleznosciPartnerzy = { db: Baza; serwis?: SerwisPartnerow; odbiorEmail?: OdbiorEmail; klientSelly?: KlientSelly };
 
-export function trasyPartnerzy({ db, serwis, odbiorEmail }: ZaleznosciPartnerzy): Router {
+export function trasyPartnerzy({ db, serwis, odbiorEmail, klientSelly }: ZaleznosciPartnerzy): Router {
   const router = Router();
 
   const audytuj = (req: Request, akcja: string, id: number, szczegoly?: unknown): void => {
@@ -61,6 +62,21 @@ export function trasyPartnerzy({ db, serwis, odbiorEmail }: ZaleznosciPartnerzy)
   /** Magazyny katalogu do wyboru w panelu. MUSI stać przed `/api/partnerzy/:id`, inaczej „magazyny” zostałoby wzięte za id. */
   router.get("/api/partnerzy/magazyny", requireAuth, (_req, res) => {
     res.json({ magazyny: dostepneMagazyny(db) });
+  });
+
+  /**
+   * Słowniki zamówień Selly (statusy, formy płatności, formy dostawy) — TYLKO ODCZYT, do wyboru identyfikatorów przed tworzeniem zamówień w Selly
+   * (ticket 240). MUSI stać przed `/api/partnerzy/:id`. 503 bez klienta Selly; błąd Selly → 502 z komunikatem (bez sekretów).
+   */
+  router.get("/api/partnerzy/selly/slowniki-zamowien", requireAuth, async (_req, res) => {
+    if (!klientSelly) return void res.status(503).json({ error: "Klient Selly nie jest dostępny w tej instancji." });
+    try {
+      const [statusy, platnosci, dostawy] = await Promise.all([klientSelly.listOrderStatuses(), klientSelly.listOrderPayments(), klientSelly.listOrderDeliveries()]);
+      res.json({ statusy: statusy?.data ?? [], platnosci: platnosci?.data ?? [], dostawy: dostawy?.data ?? [] });
+    } catch (e) {
+      console.error("[partnerzy] słowniki zamówień Selly:", e instanceof Error ? e.message : e);
+      res.status(502).json({ error: e instanceof Error ? e.message : "Nie udało się pobrać słowników z Selly." });
+    }
   });
 
   router.get("/api/partnerzy/:id", requireAuth, (req, res) => {

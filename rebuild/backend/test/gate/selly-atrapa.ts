@@ -174,6 +174,21 @@ export function stworzAtrapeSelly(opcje: OpcjeAtrapy = {}): AtrapaSelly {
       return Promise.resolve(jakoLista<StawkaVatSelly>(slowniki.vat_rates, "rate", "vat_id"));
     },
 
+    listOrderStatuses() {
+      zapisz("listOrderStatuses");
+      return Promise.resolve({ data: [{ status_id: 1, name: "Nowe" }] });
+    },
+
+    listOrderPayments() {
+      zapisz("listOrderPayments");
+      return Promise.resolve({ data: [{ payment_id: 1, name: "Przelew" }] });
+    },
+
+    listOrderDeliveries() {
+      zapisz("listOrderDeliveries");
+      return Promise.resolve({ data: [{ delivery_id: 1, name: "Kurier" }] });
+    },
+
     listWarehouses() {
       zapisz("listWarehouses");
       return Promise.resolve(jakoLista<MagazynSelly>(slowniki.warehouses, "name", "warehouse_id"));
@@ -331,6 +346,9 @@ export function stworzAtrapeBezKonfiguracji(): KlientSelly {
     listCategories: rzuc,
     createCategory: rzuc,
     listVatRates: rzuc,
+    listOrderStatuses: rzuc,
+    listOrderPayments: rzuc,
+    listOrderDeliveries: rzuc,
     listWarehouses: rzuc,
     createProduct: rzuc,
     updateProduct: rzuc,

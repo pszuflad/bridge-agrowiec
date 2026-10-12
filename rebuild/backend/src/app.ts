@@ -260,7 +260,7 @@ export function stworzApp({
   app.use(trasyEksportuShoper({ db }));
   app.use(trasyWagiGabarytowej({ db }));
   app.use(trasyEanPary({ db }));
-  app.use(trasyPartnerzy({ db, serwis: serwisPartnerow, odbiorEmail }));
+  app.use(trasyPartnerzy({ db, serwis: serwisPartnerow, odbiorEmail, klientSelly: klientSellyDoUzycia }));
   app.use(trasyNieobecne({ db }));
   app.use(trasyAtrybutow({ db }));
 
