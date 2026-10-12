@@ -135,6 +135,13 @@ const schemaEnvBazowe = z.object({
   /** Publikacja cenników do katalogów partnerów na serwerze plików: `Nazwa=/ścieżka;Nazwa2=/ścieżka2` (ticket 238). Tylko w `.env` produkcji; brak = bez publikacji. */
   PARTNERZY_KATALOGI_PUBLIKACJI: z.string().min(1).optional(),
   /**
+   * Odbiór zamówień partnerów z plików XML na serwerze plików (ticket 239) — DOMYŚLNIE WYŁĄCZONY. `PARTNERZY_KATALOGI_ZAMOWIEN` =
+   * `Nazwa=/…/customer/orders;…` (tylko w `.env` produkcji); przetworzone pliki trafiają do podkatalogu `done/`.
+   */
+  PARTNERZY_ODBIOR_PLIKOW: flagaBoolDomyslnieWylaczona,
+  PARTNERZY_ODBIOR_PLIKOW_MINUTY: z.coerce.number().int().min(1).max(1440).default(5),
+  PARTNERZY_KATALOGI_ZAMOWIEN: z.string().min(1).optional(),
+  /**
    * Odbiór zamówień partnerów przez e-mail (karta PARTNERZY, ticket 229) — DOMYŚLNIE WYŁĄCZONY. Host/port IMAP wspólne; hasło skrzynki każdego
    * partnera w `PARTNERZY_IMAP_HASLO_<id partnera>` (czytane wprost ze środowiska, nie tutaj). Brak hosta lub hasła = kanał pomijany z wpisem w logu.
    */
