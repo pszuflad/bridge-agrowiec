@@ -131,7 +131,8 @@ describe("ustawienia", () => {
     await waitFor(() => expect(zadania).toHaveLength(1));
     expect(zadania[0]).toEqual({
       metoda: "PUT", sciezka: "/",
-      cialo: { nazwa: "TyreWorld", stanMin: 5, zaokraglanie: "gora10", harmonogramMinuty: null, tolerancjaCenyProc: 1.5, formatPliku: "xml", csvSeparator: ";", kanalFtp: true, kanalEmail: false, emailSkrzynka: null, nazwaPliku: null },
+      cialo: { nazwa: "TyreWorld", stanMin: 5, zaokraglanie: "gora10", harmonogramMinuty: null, tolerancjaCenyProc: 1.5, formatPliku: "xml", csvSeparator: ";", kanalFtp: true, kanalEmail: false, emailSkrzynka: null, nazwaPliku: null,
+        fakturaNazwa: null, fakturaNip: null, fakturaUlica: null, fakturaKod: null, fakturaMiasto: null, fakturaKraj: null },
     });
     expect(await screen.findByText("Zapisano ustawienia partnera")).toBeInTheDocument();
   });
@@ -221,6 +222,16 @@ describe("kraje", () => {
     await uzytkownik.type(pole, "15");
     await uzytkownik.click(screen.getByTestId("button-kraj-zapisz-FR"));
     await waitFor(() => expect(zadania[0]?.cialo).toMatchObject({ przesylkaStalaEur: 15, kosztyDodatkowe: 43 }));
+  });
+
+  it("dane do faktury partnera trafiają w PUT (kraj wielkimi literami, puste → null)", async () => {
+    const uzytkownik = userEvent.setup();
+    zamockujApi();
+    await otworz();
+    await uzytkownik.type(await screen.findByTestId("input-ustawienia-faktura-nazwa"), "Firma Test");
+    await uzytkownik.type(screen.getByTestId("input-ustawienia-faktura-kraj"), "ad");
+    await uzytkownik.click(screen.getByTestId("button-ustawienia-zapisz"));
+    await waitFor(() => expect(zadania[0]?.cialo).toMatchObject({ fakturaNazwa: "Firma Test", fakturaKraj: "AD", fakturaNip: null }));
   });
 
   it("walidacja: zły kod kraju i kurs ręczny bez wartości nie wysyłają żądania", async () => {

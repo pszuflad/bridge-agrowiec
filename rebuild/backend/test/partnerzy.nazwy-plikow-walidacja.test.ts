@@ -19,6 +19,12 @@ describe("ticket 235 — walidacja i szczegóły", () => {
       expect(czyBlad(walidujUstawieniaPartnera({ nazwaPliku: zla }, true))).toBe(true);
   });
 
+  it("dane do faktury: opcjonalne teksty, kraj dwuliterowy wielkimi literami, null czyści", () => {
+    expect(walidujUstawieniaPartnera({ fakturaNazwa: " Firma ", fakturaKraj: "pl", fakturaNip: null }, true)).toEqual({ fakturaNazwa: "Firma", fakturaKraj: "PL", fakturaNip: null });
+    for (const zle of [{ fakturaNazwa: "" }, { fakturaNip: 5 }, { fakturaKraj: "POL" }, { fakturaMiasto: "x".repeat(121) }])
+      expect(czyBlad(walidujUstawieniaPartnera(zle, true))).toBe(true);
+  });
+
   it("przesylkaStalaEur: liczba ≥ 0 albo null (domyślnie null)", () => {
     expect(walidujUstawieniaKraju({})).toMatchObject({ przesylkaStalaEur: null });
     expect(walidujUstawieniaKraju({ przesylkaStalaEur: 15 })).toMatchObject({ przesylkaStalaEur: 15 });
