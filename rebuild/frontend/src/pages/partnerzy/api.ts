@@ -86,6 +86,7 @@ export type WynikPodgladu = {
 export const POLA_KATALOGU: { pole: string; etykieta: string }[] = [
   { pole: "kod", etykieta: "kod (numer katalogowy)" },
   { pole: "kodImportu", etykieta: "kod importu" },
+  { pole: "numerPartnera", etykieta: "numer katalogowy EAN-dostawca" },
   { pole: "ean", etykieta: "EAN" },
   { pole: "nazwa", etykieta: "nazwa" },
   { pole: "marka", etykieta: "marka" },
