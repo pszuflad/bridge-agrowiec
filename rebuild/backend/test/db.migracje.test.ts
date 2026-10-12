@@ -67,6 +67,7 @@ describe("zastosujMigracje", () => {
     "027_partner_logi.sql",
     "028_partner_zamowienia.sql",
     "029_partner_zamowienia_walidacja.sql",
+    "030_partner_pliki_koszty_eur.sql",
   ];
 
   it("stosuje wszystkie migracje po kolei: 55 tabel i 28 indeksów", () => {
@@ -90,6 +91,7 @@ describe("zastosujMigracje", () => {
     // 021/022 (ticket 185) to triggery i migracja danych (tabela tymczasowa znika) — bilans bez zmian.
     // 023 (ticket 195) dokłada `selly_usuniecia` (historia usunięć z Selly) z dwoma indeksami: +1 tabela, +2.
     // 029 (ticket 232) dokłada dwie kolumny do tabel z 028 (`@dodaj-kolumne-jesli-brak`) — bilans tabel i indeksów bez zmian.
+    // 030 (ticket 235) dokłada po jednej kolumnie do `partnerzy` i `partner_kraje` — bilans bez zmian.
     // 028 (ticket 228) dokłada `partner_zamowienia` i `partner_zamowienia_pozycje` z jednym indeksem (`idx_partner_zamowienia_pozycje_zam`): +2 tabele, +1.
     // 027 (ticket 219) dokłada `partner_logi` i `partner_error_log`, każda z jednym indeksem: +2 tabele, +2.
     // 026 (ticket 212) dokłada `geis_kraje` i `geis_stawki` (klucze główne, bez osobnych indeksów): +2 tabele, +0.

@@ -3,8 +3,8 @@
 //
 // Układ plików: jeśli kolumny zawierają ceny co najmniej DWÓCH krajów → jeden plik z kolumnami krajów (TyreWorld); w przeciwnym razie osobny plik
 // na każdy kraj partnera (Adtyres) — wtedy kolumna `cena` w pliku kraju X pokazuje cenę kraju X. XML zawsze w układzie plik-na-kraj.
-// Nazwy plików są ROBOCZE (schematy ustali użytkownik): `<partner>.csv` / `<partner>_<KRAJ>.csv|xml`.
-// Zapis: `<katalog>/pricelist/<plik>` przez plik tymczasowy + rename (partner nigdy nie widzi pliku w połowie), kopia do `<katalog>/archive/<data_godz>_<plik>`;
+// Nazwy plików: `<baza>.csv` / `<baza>_<kraj małymi literami>.csv|xml`, gdzie baza = `partnerzy.nazwa_pliku` albo slug nazwy (np. `adtyres_agrowiec_at.csv`, `tyreworld_agrowiec.csv`).
+// Zapis: `<katalog>/pricelist/<plik>` przez plik tymczasowy + rename (partner nigdy nie widzi pliku w połowie), kopia do `<katalog>/archive/<YYYYMMDD>_<plik>` (jeden plik na dzień — najnowszy zastępuje wcześniejszy);
 // archiwum starsze niż 30 dni jest czyszczone. PUSTY wynik (0 wierszy) NIE nadpisuje poprzedniego cennika — to błąd operacji, nie nowy cennik.
 // Bez FTP i bez harmonogramu (poziomy 4 i 6).
 
@@ -38,7 +38,8 @@ export type WynikGenerowania = {
 const slug = (nazwa: string): string =>
   nazwa.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/ł/g, "l").replace(/Ł/g, "L").replace(/[^A-Za-z0-9]+/g, "_").replace(/^_+|_+$/g, "").toLowerCase() || "partner";
 
-const znacznik = (d: Date): string => d.toISOString().replace(/[-:]/g, "").replace(/\.\d+Z$/, "").replace("T", "_");
+/** Dzień archiwum `YYYYMMDD` — jeden plik na dzień, kolejne generowanie tego dnia zastępuje poprzednie. */
+const znacznik = (d: Date): string => d.toISOString().slice(0, 10).replace(/-/g, "");
 
 /** Usuwa z archiwum pliki starsze niż retencja (wiek z prefiksu `YYYYMMDD_HHMMSS_` w nazwie). Zwraca liczbę usuniętych. */
 export function wyczyscArchiwum(katalogArchiwum: string, teraz: Date, dni = RETENCJA_ARCHIWUM_DNI): number {
@@ -51,9 +52,10 @@ export function wyczyscArchiwum(katalogArchiwum: string, teraz: Date, dni = RETE
   }
   const granica = teraz.getTime() - dni * 86_400_000;
   for (const n of nazwy) {
-    const m = /^(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})_/.exec(n);
+    // Nowy format `YYYYMMDD_<plik>`; stare kopie `YYYYMMDD_HHMMSS_<plik>` też zaczynają się od daty.
+    const m = /^(\d{4})(\d{2})(\d{2})_/.exec(n);
     if (!m) continue;
-    if (Date.UTC(+m[1]!, +m[2]! - 1, +m[3]!, +m[4]!, +m[5]!, +m[6]!) < granica) {
+    if (Date.UTC(+m[1]!, +m[2]! - 1, +m[3]!) < granica) {
       rmSync(join(katalogArchiwum, n), { force: true });
       usuniete++;
     }
@@ -137,13 +139,13 @@ async function przygotujPliki(
   const ext = partner.formatPliku === "xml" ? "xml" : "csv";
   const cenyKolumnKrajow = new Set(kolumny.filter((k) => k.typ === "cena").map((k) => (k as { kraj: string }).kraj));
   const jedenPlik = ext === "csv" && cenyKolumnKrajow.size >= 2;
-  const baza = slug(partner.nazwa);
+  const baza = partner.nazwaPliku ?? slug(partner.nazwa);
 
   type Zadanie = { nazwa: string; kraj: string | null; wiersze: WierszWyceniony[]; kolumny: KolumnaPliku[] };
   const zadania: Zadanie[] = jedenPlik
     ? [{ nazwa: `${baza}.${ext}`, kraj: null, wiersze: wycena.wiersze, kolumny }]
     : kraje.map((k) => ({
-        nazwa: `${baza}_${k.kraj}.${ext}`,
+        nazwa: `${baza}_${k.kraj.toLowerCase()}.${ext}`,
         kraj: k.kraj,
         wiersze: wycena.wiersze,
         // w pliku kraju kolumna ceny pokazuje cenę TEGO kraju

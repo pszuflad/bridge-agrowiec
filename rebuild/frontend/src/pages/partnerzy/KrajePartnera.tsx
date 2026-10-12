@@ -12,6 +12,13 @@ import { KLUCZ_PARTNERZY, komunikatBledu, liczbaZPola, usunKraj, zapiszKraj, typ
 
 const KLASA_SELECT = "h-9 rounded-md border border-input bg-background px-2 text-sm";
 
+/** Kurs, którego system używa dla kraju: ręczny z formularza albo ostatnio użyty (NBP) w wygenerowanym pliku. */
+function opisKursu(kraj: KrajPartnera | null, zrodlo: "nbp" | "reczny", kursReczny: string): string {
+  if (zrodlo === "reczny") return kursReczny.trim() === "" ? "ręczny — brak wartości" : `${kursReczny} (ręczny)`;
+  if (!kraj?.ostatniKurs) return "NBP — jeszcze nie użyto";
+  return `${kraj.ostatniKurs.kurs} (${kraj.ostatniKurs.zrodlo}, ${kraj.ostatniKurs.zapisano.slice(0, 16).replace("T", " ")})`;
+}
+
 function WierszKraju({ partnerId, kraj, nowy }: { partnerId: number; kraj: KrajPartnera | null; nowy: boolean }) {
   const klient = useQueryClient();
   const { toast } = useToast();
@@ -20,6 +27,7 @@ function WierszKraju({ partnerId, kraj, nowy }: { partnerId: number; kraj: KrajP
   const [zrodlo, ustawZrodlo] = useState<"nbp" | "reczny">(kraj?.kursZrodlo ?? "nbp");
   const [kurs, ustawKurs] = useState(kraj?.kursReczny === null || kraj?.kursReczny === undefined ? "" : String(kraj.kursReczny));
   const [koszty, ustawKoszty] = useState(String(kraj?.kosztyDodatkowe ?? 0));
+  const [przesylka, ustawPrzesylke] = useState(kraj?.przesylkaStalaEur == null ? "" : String(kraj.przesylkaStalaEur));
   const [doUsuniecia, ustawDoUsuniecia] = useState(false);
   const testId = nowy ? "nowy" : (kraj?.kraj ?? "");
 
@@ -31,9 +39,11 @@ function WierszKraju({ partnerId, kraj, nowy }: { partnerId: number; kraj: KrajP
       const c = liczbaZPola(koszty) ?? 0;
       if (!/^[A-Z]{2}$/.test(kodKraju)) throw new Error("Kraj to dwuliterowy kod, np. FR.");
       if (Number.isNaN(n) || n < 0) throw new Error("Narzut musi być liczbą ≥ 0 (w procentach).");
-      if (Number.isNaN(c) || c < 0) throw new Error("Koszty dodatkowe muszą być liczbą ≥ 0 (PLN).");
+      const p = liczbaZPola(przesylka);
+      if (Number.isNaN(c) || c < 0) throw new Error("Koszty dodatkowe muszą być liczbą ≥ 0 (EUR).");
+      if (p !== null && (Number.isNaN(p) || p < 0)) throw new Error("Koszt przesyłki musi być liczbą ≥ 0 (EUR) albo pusty (wtedy tabele GEIS).");
       if (zrodlo === "reczny" && (k === null || Number.isNaN(k) || k <= 0)) throw new Error("Kurs ręczny wymaga wartości większej od zera.");
-      await zapiszKraj(partnerId, kodKraju, { narzutProc: n, kursZrodlo: zrodlo, kursReczny: zrodlo === "reczny" ? k : null, kosztyDodatkowe: c });
+      await zapiszKraj(partnerId, kodKraju, { narzutProc: n, kursZrodlo: zrodlo, kursReczny: zrodlo === "reczny" ? k : null, kosztyDodatkowe: c, przesylkaStalaEur: p });
     },
     onSuccess: async () => {
       toast({ title: nowy ? "Dodano kraj" : "Zapisano kraj", description: kod.trim().toUpperCase() });
@@ -42,6 +52,7 @@ function WierszKraju({ partnerId, kraj, nowy }: { partnerId: number; kraj: KrajP
         ustawNarzut("0");
         ustawKurs("");
         ustawKoszty("0");
+        ustawPrzesylke("");
         ustawZrodlo("nbp");
       }
       await klient.invalidateQueries({ queryKey: [KLUCZ_PARTNERZY] });
@@ -71,7 +82,9 @@ function WierszKraju({ partnerId, kraj, nowy }: { partnerId: number; kraj: KrajP
         </select>
       </td>
       <td className="px-2 py-2"><Input className="w-24" inputMode="decimal" disabled={zrodlo !== "reczny"} aria-label={`Kurs ręczny ${testId}`} value={kurs} onChange={(e) => ustawKurs(e.target.value)} data-testid={`input-kraj-kurs-${testId}`} /></td>
-      <td className="px-2 py-2"><Input className="w-28" inputMode="decimal" aria-label={`Koszty dodatkowe PLN ${testId}`} value={koszty} onChange={(e) => ustawKoszty(e.target.value)} data-testid={`input-kraj-koszty-${testId}`} /></td>
+      <td className="px-2 py-2"><Input className="w-28" inputMode="decimal" aria-label={`Koszty dodatkowe EUR ${testId}`} value={koszty} onChange={(e) => ustawKoszty(e.target.value)} data-testid={`input-kraj-koszty-${testId}`} /></td>
+      <td className="px-2 py-2"><Input className="w-28" inputMode="decimal" placeholder="GEIS" aria-label={`Przesyłka stała EUR ${testId}`} value={przesylka} onChange={(e) => ustawPrzesylke(e.target.value)} data-testid={`input-kraj-przesylka-${testId}`} /></td>
+      <td className="px-2 py-2 text-xs text-muted-foreground" data-testid={`kurs-uzywany-${testId}`}>{opisKursu(kraj, zrodlo, kurs)}</td>
       <td className="whitespace-nowrap px-2 py-2 text-right">
         <Button size="sm" variant="outline" disabled={zapis.isPending} onClick={() => zapis.mutate()} data-testid={`button-kraj-zapisz-${testId}`}>{nowy ? "Dodaj kraj" : "Zapisz"}</Button>
         {!nowy ? (
@@ -100,7 +113,7 @@ export function KrajePartnera({ partner }: { partner: SzczegolyPartnera }) {
       <CardContent className="space-y-3 p-4">
         <h2 className="text-sm font-semibold">Kraje, narzuty i kursy</h2>
         <p className="text-xs text-muted-foreground">
-          Narzut w procentach od ceny zakupu (zakup × (1 + narzut)), nie marża. Koszty dodatkowe w PLN, doliczane do każdej opony. Kurs EUR z NBP albo ręczny.
+          Narzut w procentach od ceny zakupu (zakup × (1 + narzut)), nie marża. Koszty dodatkowe w EUR, doliczane do każdej opony. Przesyłka: stały koszt w EUR dla kraju (np. paliwo, myto i pakowanie razem); puste = stawki z tabel GEIS. Narzut 0 % = ceny dla kraju nie są publikowane. Kurs EUR z NBP albo ręczny.
         </p>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -110,12 +123,14 @@ export function KrajePartnera({ partner }: { partner: SzczegolyPartnera }) {
                 <th className="px-2 py-2 font-medium">Narzut %</th>
                 <th className="px-2 py-2 font-medium">Kurs EUR</th>
                 <th className="px-2 py-2 font-medium">Kurs ręczny</th>
-                <th className="px-2 py-2 font-medium">Koszty dod. PLN</th>
+                <th className="px-2 py-2 font-medium">Koszty dod. EUR</th>
+                <th className="px-2 py-2 font-medium">Przesyłka EUR</th>
+                <th className="px-2 py-2 font-medium">Używany kurs</th>
                 <th className="px-2 py-2" aria-label="Akcje" />
               </tr>
             </thead>
             <tbody>
-              {partner.kraje.map((k) => <WierszKraju key={`${k.kraj}-${k.narzutProc}-${k.kursZrodlo}-${k.kursReczny}-${k.kosztyDodatkowe}`} partnerId={partner.id} kraj={k} nowy={false} />)}
+              {partner.kraje.map((k) => <WierszKraju key={`${k.kraj}-${k.narzutProc}-${k.kursZrodlo}-${k.kursReczny}-${k.kosztyDodatkowe}-${k.przesylkaStalaEur}`} partnerId={partner.id} kraj={k} nowy={false} />)}
               <WierszKraju key={`nowy-${partner.kraje.length}`} partnerId={partner.id} kraj={null} nowy />
             </tbody>
           </table>

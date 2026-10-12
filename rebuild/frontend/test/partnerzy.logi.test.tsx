@@ -14,7 +14,7 @@ import { TOKEN_TESTOWY, uzytkownikZFixtura } from "./msw/kontrakt";
 
 const startowy = (): SzczegolyPartnera => ({
   id: 1, nazwa: "TyreWorld", aktywny: false, stanMin: 2, zaokraglanie: "grosz", harmonogramMinuty: null, tolerancjaCenyProc: null, formatPliku: "csv", csvSeparator: ";",
-  kanalFtp: false, kanalEmail: false, emailSkrzynka: null, zmieniono: "2026-10-10T10:00:00.000Z", magazyny: [], wykluczenia: [], kraje: [], kolumny: [], polaObliczeniowe: [],
+  kanalFtp: false, kanalEmail: false, emailSkrzynka: null,nazwaPliku: null, zmieniono: "2026-10-10T10:00:00.000Z", magazyny: [], wykluczenia: [], kraje: [], kolumny: [], polaObliczeniowe: [],
 });
 const wpis = (id: number, opis: string): WpisLogu => ({ id, partnerId: 1, kiedy: "2026-10-10T12:00:00.000Z", operacja: "generowanie", opis, liczbaPozycji: 3000 });
 const blad = (id: number, poziom: WpisBledu["poziom"], komunikat: string): WpisBledu => ({ id, partnerId: 1, kiedy: "2026-10-10T12:00:00.000Z", operacja: "generowanie", poziom, komunikat });

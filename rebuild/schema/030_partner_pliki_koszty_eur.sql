@@ -1,0 +1,7 @@
+-- Ticket 235 (235-FEATURE-partnerzy-nazwy-plikow-koszty-eur): decyzje użytkowniczki z 2026-10-12 (docs/karty/PARTNERZY/wejscie-odpowiedzi-2026-10-12.md).
+--
+-- ⚠ NOWE KOLUMNY w tabelach z migracji 024 (puste na produkcji), NIE ODTWORZENIE PRODUKCJI.
+--   partnerzy.nazwa_pliku             — baza nazwy pliku cennika (np. `adtyres_agrowiec`); NULL = nazwa partnera zamieniona na slug
+--   partner_kraje.przesylka_stala_eur — stały koszt przesyłki do kraju w EUR; NULL = liczymy z tabel GEIS
+-- @dodaj-kolumne-jesli-brak partnerzy nazwa_pliku TEXT
+-- @dodaj-kolumne-jesli-brak partner_kraje przesylka_stala_eur REAL
