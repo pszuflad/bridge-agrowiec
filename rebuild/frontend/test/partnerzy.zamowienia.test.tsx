@@ -14,7 +14,7 @@ import { TOKEN_TESTOWY, uzytkownikZFixtura } from "./msw/kontrakt";
 
 const partner = (): SzczegolyPartnera => ({
   id: 1, nazwa: "TyreWorld", aktywny: false, stanMin: 2, zaokraglanie: "grosz", harmonogramMinuty: null, tolerancjaCenyProc: null, formatPliku: "csv", csvSeparator: ";",
-  kanalFtp: false, kanalEmail, emailSkrzynka: kanalEmail ? "zamowienia@example.test" : null, zmieniono: "2026-10-10T10:00:00.000Z", magazyny: [], wykluczenia: [], kraje: [], kolumny: [], polaObliczeniowe: [],
+  kanalFtp: false, kanalEmail, emailSkrzynka: kanalEmail ? "zamowienia@example.test" : null,nazwaPliku: null, zmieniono: "2026-10-10T10:00:00.000Z", magazyny: [], wykluczenia: [], kraje: [], kolumny: [], polaObliczeniowe: [],
 });
 const naLiscie = (id: number, numer: string): ZamowienieNaLiscie => ({
   id, numerPartnera: numer, numerWlasny: null, status: "przyjete", bladImportu: null, dataZamowienia: "2024-02-02 11:27:11", waluta: "EUR", krajDostawy: "AT", pobrano: "2026-10-10T12:00:00.000Z", liczbaPozycji: 2,

@@ -15,7 +15,7 @@ import { TOKEN_TESTOWY, uzytkownikZFixtura } from "./msw/kontrakt";
 const FR: KrajPartnera = { id: 1, partnerId: 1, kraj: "FR", narzutProc: 12, kursZrodlo: "nbp", kursReczny: null, kosztyDodatkowe: 43, przesylkaStalaEur: null, ostatniKurs: null };
 const startowy = (): SzczegolyPartnera => ({
   id: 1, nazwa: "TyreWorld", aktywny: false, stanMin: 2, zaokraglanie: "grosz", harmonogramMinuty: 60, tolerancjaCenyProc: null, formatPliku: "csv",
-  csvSeparator: ";", kanalFtp: false, kanalEmail: false, emailSkrzynka: null, zmieniono: "2026-10-10T10:00:00.000Z", magazyny: ["MO1"], wykluczenia: ["MO1_9"], kraje: [FR], kolumny: [], polaObliczeniowe: [],
+  csvSeparator: ";", kanalFtp: false, kanalEmail: false, emailSkrzynka: null,nazwaPliku: null, zmieniono: "2026-10-10T10:00:00.000Z", magazyny: ["MO1"], wykluczenia: ["MO1_9"], kraje: [FR], kolumny: [], polaObliczeniowe: [],
 });
 
 let partner: SzczegolyPartnera;
@@ -131,7 +131,7 @@ describe("ustawienia", () => {
     await waitFor(() => expect(zadania).toHaveLength(1));
     expect(zadania[0]).toEqual({
       metoda: "PUT", sciezka: "/",
-      cialo: { nazwa: "TyreWorld", stanMin: 5, zaokraglanie: "gora10", harmonogramMinuty: null, tolerancjaCenyProc: 1.5, formatPliku: "xml", csvSeparator: ";", kanalFtp: true, kanalEmail: false, emailSkrzynka: null },
+      cialo: { nazwa: "TyreWorld", stanMin: 5, zaokraglanie: "gora10", harmonogramMinuty: null, tolerancjaCenyProc: 1.5, formatPliku: "xml", csvSeparator: ";", kanalFtp: true, kanalEmail: false, emailSkrzynka: null, nazwaPliku: null },
     });
     expect(await screen.findByText("Zapisano ustawienia partnera")).toBeInTheDocument();
   });

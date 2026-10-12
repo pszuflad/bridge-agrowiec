@@ -4,7 +4,7 @@
 // odpowiada — ostatni zapisany kurs + ostrzeżenie; każdy plik zapisuje użyty kurs (`partner_kursy`).
 // Klient HTTP stoi za interfejsem i jest wstrzykiwany — testy NIGDY nie wołają prawdziwego NBP.
 
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 
 import type { Baza } from "../db/index.js";
 import { kursyNbp, partnerKursy } from "../db/schema.js";
@@ -118,10 +118,10 @@ export function ostatniUzytyKurs(db: Baza, partnerId: number, kraj: string) {
     db
       .select()
       .from(partnerKursy)
-      .where(eq(partnerKursy.partnerId, partnerId))
+      .where(and(eq(partnerKursy.partnerId, partnerId), eq(partnerKursy.kraj, kraj)))
       .orderBy(desc(partnerKursy.id))
-      .all()
-      .find((w) => w.kraj === kraj) ?? null
+      .limit(1)
+      .get() ?? null
   );
 }
 

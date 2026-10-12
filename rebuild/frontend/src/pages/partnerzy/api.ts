@@ -134,6 +134,7 @@ export type SzczegolyPartnera = {
   kanalFtp: boolean;
   kanalEmail: boolean;
   emailSkrzynka: string | null;
+  nazwaPliku: string | null;
   zmieniono: string;
   magazyny: string[];
   wykluczenia: string[];
@@ -144,7 +145,7 @@ export type SzczegolyPartnera = {
 
 export type UstawieniaDoZapisu = Pick<
   SzczegolyPartnera,
-  "nazwa" | "stanMin" | "zaokraglanie" | "harmonogramMinuty" | "tolerancjaCenyProc" | "formatPliku" | "csvSeparator" | "kanalFtp" | "kanalEmail" | "emailSkrzynka"
+  "nazwa" | "stanMin" | "zaokraglanie" | "harmonogramMinuty" | "tolerancjaCenyProc" | "formatPliku" | "csvSeparator" | "kanalFtp" | "kanalEmail" | "emailSkrzynka" | "nazwaPliku"
 >;
 export type UstawieniaKraju = Pick<KrajPartnera, "narzutProc" | "kursZrodlo" | "kursReczny" | "kosztyDodatkowe" | "przesylkaStalaEur">;
 export type MagazynKatalogu = { magazyn: string; liczbaPozycji: number };
