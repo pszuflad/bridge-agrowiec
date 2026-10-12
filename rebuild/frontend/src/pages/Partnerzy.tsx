@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
+import { GeisTabele } from "./partnerzy/GeisTabele";
 import { SlownikiSelly } from "./partnerzy/SlownikiSelly";
 import {
   KLUCZ_PARTNERZY,
@@ -172,6 +173,7 @@ export function Partnerzy() {
           )}
         </CardContent>
       </Card>
+      <GeisTabele />
       <SlownikiSelly />
     </div>
   );

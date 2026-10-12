@@ -86,18 +86,21 @@ export function obliczCene(db: Baza, w: WejscieKalkulatora): WynikKalkulatora {
   if (!(typeof p.cenaZakupu === "number" && Number.isFinite(p.cenaZakupu) && p.cenaZakupu > 0)) blad("Brak ceny zakupu.");
 
   const ostrzezenia: string[] = [];
+  // Myto i pakowanie kraju (panel, ticket 243) dochodzą do OBU ścieżek; paliwo liczy się od bazy (stała baza kraju albo stawka GEIS).
+  const dodatki = (kraj.mytoEur ?? 0) + (kraj.pakowanieEur ?? 0);
   let przesylkaEur: number;
   if (typeof kraj.przesylkaStalaEur === "number") {
-    // Baza kraju × (1 + paliwo %) + myto + pakowanie (paliwo z historii na dzień wyceny; składniki domyślnie 0 = sama baza).
-    przesylkaEur = kraj.przesylkaStalaEur * (1 + paliwoNaDzien(db, kraj.kraj, w.data) / 100) + (kraj.mytoEur ?? 0) + (kraj.pakowanieEur ?? 0);
+    // Stała baza kraju (nadpisuje tabele GEIS): baza × (1 + paliwo %) + myto + pakowanie.
+    przesylkaEur = kraj.przesylkaStalaEur * (1 + paliwoNaDzien(db, kraj.kraj, w.data) / 100) + dodatki;
   } else {
     try {
-      przesylkaEur = kosztPrzesylki(
-        db,
-        kraj.kraj,
-        { waga: p.waga, dlugosc: p.dlugosc, szerokosc: p.szerokoscPaczki, wysokosc: p.wysokosc },
-        w.data,
-      ).koszt;
+      przesylkaEur =
+        kosztPrzesylki(
+          db,
+          kraj.kraj,
+          { waga: p.waga, dlugosc: p.dlugosc, szerokosc: p.szerokoscPaczki, wysokosc: p.wysokosc },
+          w.data,
+        ).koszt + dodatki;
     } catch (e) {
       if (e instanceof BladTransportu) return blad(`Błąd kalkulacji transportu (${kraj.kraj}): ${e.message}`);
       throw e;
