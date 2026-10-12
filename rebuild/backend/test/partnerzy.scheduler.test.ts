@@ -52,9 +52,9 @@ describe("serwis partnerów (harmonogram + generuj teraz)", () => {
   it("generuj teraz: zapisuje plik w katalogu partnera i wpis w logu (także dla nieaktywnego)", async () => {
     const id = partner("Nieaktywny", false, null);
     const w = await serwis().generujTeraz(id);
-    expect(w.pliki[0]).toMatchObject({ nazwa: "nieaktywny_AT.csv", zapisany: true });
-    expect(existsSync(join(katalog, "partnerzy", String(id), "pricelist", "nieaktywny_AT.csv"))).toBe(true);
-    expect(pobierzLogi(db, id)[0]!.opis).toMatch(/Wygenerowano 1 plik: nieaktywny_AT\.csv \(1 pozycji\)/);
+    expect(w.pliki[0]).toMatchObject({ nazwa: "nieaktywny_at.csv", zapisany: true });
+    expect(existsSync(join(katalog, "partnerzy", String(id), "pricelist", "nieaktywny_at.csv"))).toBe(true);
+    expect(pobierzLogi(db, id)[0]!.opis).toMatch(/Wygenerowano 1 plik: nieaktywny_at\.csv \(1 pozycji\)/);
   });
 
   it("tick uruchamia tylko aktywnych z harmonogramem i tylko gdy minął interwał od ostatniej próby", async () => {

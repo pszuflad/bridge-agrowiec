@@ -12,10 +12,10 @@ import { liczbaZPola, type KrajPartnera, type SzczegolyPartnera } from "@/pages/
 import { server } from "./msw/server";
 import { TOKEN_TESTOWY, uzytkownikZFixtura } from "./msw/kontrakt";
 
-const FR: KrajPartnera = { id: 1, partnerId: 1, kraj: "FR", narzutProc: 12, kursZrodlo: "nbp", kursReczny: null, kosztyDodatkowe: 43 };
+const FR: KrajPartnera = { id: 1, partnerId: 1, kraj: "FR", narzutProc: 12, kursZrodlo: "nbp", kursReczny: null, kosztyDodatkowe: 43, przesylkaStalaEur: null, ostatniKurs: null };
 const startowy = (): SzczegolyPartnera => ({
   id: 1, nazwa: "TyreWorld", aktywny: false, stanMin: 2, zaokraglanie: "grosz", harmonogramMinuty: 60, tolerancjaCenyProc: null, formatPliku: "csv",
-  csvSeparator: ";", kanalFtp: false, kanalEmail: false, emailSkrzynka: null, zmieniono: "2026-10-10T10:00:00.000Z", magazyny: ["MO1"], wykluczenia: ["MO1_9"], kraje: [FR], kolumny: [], polaObliczeniowe: [],
+  csvSeparator: ";", kanalFtp: false, kanalEmail: false, emailSkrzynka: null,nazwaPliku: null, zmieniono: "2026-10-10T10:00:00.000Z", magazyny: ["MO1"], wykluczenia: ["MO1_9"], kraje: [FR], kolumny: [], polaObliczeniowe: [],
 });
 
 let partner: SzczegolyPartnera;
@@ -131,7 +131,7 @@ describe("ustawienia", () => {
     await waitFor(() => expect(zadania).toHaveLength(1));
     expect(zadania[0]).toEqual({
       metoda: "PUT", sciezka: "/",
-      cialo: { nazwa: "TyreWorld", stanMin: 5, zaokraglanie: "gora10", harmonogramMinuty: null, tolerancjaCenyProc: 1.5, formatPliku: "xml", csvSeparator: ";", kanalFtp: true, kanalEmail: false, emailSkrzynka: null },
+      cialo: { nazwa: "TyreWorld", stanMin: 5, zaokraglanie: "gora10", harmonogramMinuty: null, tolerancjaCenyProc: 1.5, formatPliku: "xml", csvSeparator: ";", kanalFtp: true, kanalEmail: false, emailSkrzynka: null, nazwaPliku: null },
     });
     expect(await screen.findByText("Zapisano ustawienia partnera")).toBeInTheDocument();
   });
@@ -198,7 +198,7 @@ describe("kraje", () => {
     await uzytkownik.type(screen.getByTestId("input-kraj-kurs-nowy"), "4,3");
     await uzytkownik.click(screen.getByTestId("button-kraj-zapisz-nowy"));
     await waitFor(() => expect(zadania).toHaveLength(1));
-    expect(zadania[0]).toEqual({ metoda: "PUT", sciezka: "/kraje/DE", cialo: { narzutProc: 10.5, kursZrodlo: "reczny", kursReczny: 4.3, kosztyDodatkowe: 0 } });
+    expect(zadania[0]).toEqual({ metoda: "PUT", sciezka: "/kraje/DE", cialo: { narzutProc: 10.5, kursZrodlo: "reczny", kursReczny: 4.3, kosztyDodatkowe: 0, przesylkaStalaEur: null } });
     expect(await screen.findByTestId("row-kraj-DE")).toBeInTheDocument();
   });
 
@@ -210,7 +210,17 @@ describe("kraje", () => {
     await uzytkownik.clear(narzut);
     await uzytkownik.type(narzut, "15");
     await uzytkownik.click(screen.getByTestId("button-kraj-zapisz-FR"));
-    await waitFor(() => expect(zadania).toEqual([{ metoda: "PUT", sciezka: "/kraje/FR", cialo: { narzutProc: 15, kursZrodlo: "nbp", kursReczny: null, kosztyDodatkowe: 43 } }]));
+    await waitFor(() => expect(zadania).toEqual([{ metoda: "PUT", sciezka: "/kraje/FR", cialo: { narzutProc: 15, kursZrodlo: "nbp", kursReczny: null, kosztyDodatkowe: 43, przesylkaStalaEur: null } }]));
+  });
+
+  it("stały koszt przesyłki trafia w PUT, a panel pokazuje używany kurs", async () => {
+    const uzytkownik = userEvent.setup();
+    await otworz();
+    const pole = await screen.findByTestId("input-kraj-przesylka-FR");
+    expect(screen.getByTestId("kurs-uzywany-FR")).toHaveTextContent("NBP — jeszcze nie użyto");
+    await uzytkownik.type(pole, "15");
+    await uzytkownik.click(screen.getByTestId("button-kraj-zapisz-FR"));
+    await waitFor(() => expect(zadania[0]?.cialo).toMatchObject({ przesylkaStalaEur: 15, kosztyDodatkowe: 43 }));
   });
 
   it("walidacja: zły kod kraju i kurs ręczny bez wartości nie wysyłają żądania", async () => {

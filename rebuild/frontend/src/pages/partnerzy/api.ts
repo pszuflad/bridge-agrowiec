@@ -62,8 +62,12 @@ export type KrajPartnera = {
   narzutProc: number;
   kursZrodlo: "nbp" | "reczny";
   kursReczny: number | null;
-  /** PLN. */
+  /** EUR (od ticketu 235; wcześniej PLN). */
   kosztyDodatkowe: number;
+  /** Stały koszt przesyłki w EUR; null = tabele GEIS. */
+  przesylkaStalaEur: number | null;
+  /** Kurs użyty w ostatnio wygenerowanym pliku; null = jeszcze nie generowano. */
+  ostatniKurs: { kurs: number; zrodlo: string; zapisano: string } | null;
 };
 
 export type KolumnaPartnera = { id: number; partnerId: number; pozycja: number; nazwaWPliku: string; zrodloTyp: "katalog" | "cena" | "pole"; zrodlo: string };
@@ -130,6 +134,7 @@ export type SzczegolyPartnera = {
   kanalFtp: boolean;
   kanalEmail: boolean;
   emailSkrzynka: string | null;
+  nazwaPliku: string | null;
   zmieniono: string;
   magazyny: string[];
   wykluczenia: string[];
@@ -140,9 +145,9 @@ export type SzczegolyPartnera = {
 
 export type UstawieniaDoZapisu = Pick<
   SzczegolyPartnera,
-  "nazwa" | "stanMin" | "zaokraglanie" | "harmonogramMinuty" | "tolerancjaCenyProc" | "formatPliku" | "csvSeparator" | "kanalFtp" | "kanalEmail" | "emailSkrzynka"
+  "nazwa" | "stanMin" | "zaokraglanie" | "harmonogramMinuty" | "tolerancjaCenyProc" | "formatPliku" | "csvSeparator" | "kanalFtp" | "kanalEmail" | "emailSkrzynka" | "nazwaPliku"
 >;
-export type UstawieniaKraju = Pick<KrajPartnera, "narzutProc" | "kursZrodlo" | "kursReczny" | "kosztyDodatkowe">;
+export type UstawieniaKraju = Pick<KrajPartnera, "narzutProc" | "kursZrodlo" | "kursReczny" | "kosztyDodatkowe" | "przesylkaStalaEur">;
 export type MagazynKatalogu = { magazyn: string; liczbaPozycji: number };
 
 export const ZAOKRAGLANIA: { wartosc: string; etykieta: string }[] = [

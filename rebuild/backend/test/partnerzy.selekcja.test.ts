@@ -125,10 +125,21 @@ describe("selekcja i wycena partnera", () => {
 
   it("brak kursu dla kraju jest błędem kalkulacji, nie ceną", () => {
     magazyny("MO1");
-    sqlite.prepare("INSERT INTO partner_kraje (partner_id, kraj) VALUES (?, 'FR')").run(partnerId);
+    sqlite.prepare("INSERT INTO partner_kraje (partner_id, kraj, narzut_proc) VALUES (?, 'FR', 12)").run(partnerId);
     wstaw(produkt("K1"));
     const w = wycenPozycje(db, partnerId, wybierzPozycje(db, partnerId).pozycje, {}, "2026-10-10");
     expect(w.wiersze[0]!.ceny.FR).toBeNull();
     expect(w.bledy[0]!.powod).toMatch(/Brak kursu/);
+  });
+
+  it("kraj bez ustawionego narzutu (0 %) nie dostaje cen — nie publikujemy cen zakupu", () => {
+    magazyny("MO1");
+    sqlite.prepare("INSERT INTO partner_kraje (partner_id, kraj) VALUES (?, 'FR')").run(partnerId);
+    wstaw(produkt("N1"));
+    wstaw(produkt("N2"));
+    const w = wycenPozycje(db, partnerId, wybierzPozycje(db, partnerId).pozycje, { FR: 4.3 }, "2026-10-10");
+    expect(w.wiersze.map((x) => x.ceny.FR)).toEqual([null, null]);
+    expect(w.bledy).toHaveLength(1); // jeden komunikat na kraj, nie na pozycję
+    expect(w.bledy[0]!.powod).toMatch(/Narzut kraju nie jest ustawiony/);
   });
 });

@@ -1,11 +1,11 @@
 // Kalkulator ceny partnera B2B (karta PARTNERZY, ticket 213 / PRT-2.4) — scala kurs (210), transport (212) i formuły (211).
 //
-// Domyślna formuła (EUR): zakup × (1 + narzut) / kurs  +  przesyłka GEIS (już w EUR, z paliwem)  +  koszty dodatkowe / kurs.
-// To odpowiednik wzoru z karty `(zakup + zakup×narzut + przesyłka + koszty) / kurs` przy założeniu, że przesyłka z tabel GEIS jest
-// ZAPISANA W EUR (tak ją czytamy z arkusza), a koszty dodatkowe partnera w PLN. Inną formułę ustawia partner (pole obliczeniowe).
+// Domyślna formuła (EUR): zakup × (1 + narzut) / kurs  +  przesyłka (w EUR)  +  koszty dodatkowe (w EUR).
+// Przesyłka to stały koszt kraju (`przesylkaStalaEur`, decyzja z 2026-10-12) albo, gdy go brak, stawka z tabel GEIS (z paliwem).
+// Koszty dodatkowe partnera są w EUR (od ticketu 235; wcześniej PLN). Inną formułę ustawia partner (pole obliczeniowe).
 //
 // Zmienne formuły: zakup [PLN], narzut [ułamek: 12 % = 0.12], przesylka_eur, przesylka_pln (= przesylka_eur × kurs_EUR),
-// koszty_dodatkowe [PLN], kurs_EUR, waga [kg]. Obliczenia pośrednie w pełnej precyzji; zaokrąglamy dopiero wynik wg reguły partnera.
+// koszty_dodatkowe [EUR], kurs_EUR, waga [kg]. Obliczenia pośrednie w pełnej precyzji; zaokrąglamy dopiero wynik wg reguły partnera.
 // Pozycja, której nie da się policzyć (brak ceny zakupu/wagi/wymiarów/tabeli, błąd formuły), to `BladKalkulacji` — wywołujący POMIJA ją
 // i loguje; nigdy cena 0. Waga uzupełniona automatycznie lub szacowana jest użyta, ale zwraca ostrzeżenie (mniej pewna).
 
@@ -13,7 +13,7 @@ import type { Baza } from "../db/index.js";
 import { BladFormuly, obliczFormule, parsujFormule, zaokraglij, type Wyrazenie } from "./formula.js";
 import { BladTransportu, kosztPrzesylki } from "./transport.js";
 
-export const FORMULA_DOMYSLNA = "zakup * (1 + narzut) / kurs_EUR + przesylka_eur + koszty_dodatkowe / kurs_EUR";
+export const FORMULA_DOMYSLNA = "zakup * (1 + narzut) / kurs_EUR + przesylka_eur + koszty_dodatkowe";
 export const ZMIENNE_FORMULY = ["zakup", "narzut", "przesylka_eur", "przesylka_pln", "koszty_dodatkowe", "kurs_EUR", "waga"] as const;
 export const FORMULA_DOMYSLNA_SKOMPILOWANA: Wyrazenie = parsujFormule(FORMULA_DOMYSLNA);
 
@@ -40,8 +40,8 @@ export type PozycjaDoCeny = {
 
 export type WejscieKalkulatora = {
   pozycja: PozycjaDoCeny;
-  /** Ustawienia kraju partnera (`partner_kraje`): narzut w PROCENTACH (12 = 12 %), koszty dodatkowe w PLN. */
-  kraj: { kraj: string; narzutProc: number; kosztyDodatkowe: number };
+  /** Ustawienia kraju partnera (`partner_kraje`): narzut w PROCENTACH (12 = 12 %), koszty dodatkowe w EUR, opcjonalny stały koszt przesyłki w EUR. */
+  kraj: { kraj: string; narzutProc: number; kosztyDodatkowe: number; przesylkaStalaEur?: number | null };
   /** Reguła zaokrąglania partnera (`partnerzy.zaokraglanie`): grosz | euro | gora5 | gora10. */
   zaokraglanie: string;
   /** Kurs PLN za 1 EUR użyty w tym pliku (z `kursEur`). */
@@ -87,16 +87,20 @@ export function obliczCene(db: Baza, w: WejscieKalkulatora): WynikKalkulatora {
 
   const ostrzezenia: string[] = [];
   let przesylkaEur: number;
-  try {
-    przesylkaEur = kosztPrzesylki(
-      db,
-      kraj.kraj,
-      { waga: p.waga, dlugosc: p.dlugosc, szerokosc: p.szerokoscPaczki, wysokosc: p.wysokosc },
-      w.data,
-    ).koszt;
-  } catch (e) {
-    if (e instanceof BladTransportu) return blad(`Błąd kalkulacji transportu (${kraj.kraj}): ${e.message}`);
-    throw e;
+  if (typeof kraj.przesylkaStalaEur === "number") {
+    przesylkaEur = kraj.przesylkaStalaEur;
+  } else {
+    try {
+      przesylkaEur = kosztPrzesylki(
+        db,
+        kraj.kraj,
+        { waga: p.waga, dlugosc: p.dlugosc, szerokosc: p.szerokoscPaczki, wysokosc: p.wysokosc },
+        w.data,
+      ).koszt;
+    } catch (e) {
+      if (e instanceof BladTransportu) return blad(`Błąd kalkulacji transportu (${kraj.kraj}): ${e.message}`);
+      throw e;
+    }
   }
   if (p.wagaAutoUzupelniona) ostrzezenia.push(`${p.kod}: waga uzupełniona automatycznie (mniej pewna).`);
   if (p.wagaSzacowana) ostrzezenia.push(`${p.kod}: waga szacowana (mniej pewna).`);
@@ -122,7 +126,7 @@ export function obliczCene(db: Baza, w: WejscieKalkulatora): WynikKalkulatora {
   return {
     cenaEur: zaokragliWgReguly(cena, w.zaokraglanie),
     cenaPrzedZaokragleniem: cena,
-    skladniki: { zakup, narzut, przesylkaEur, kosztyDodatkoweEur: kraj.kosztyDodatkowe / kurs, kurs },
+    skladniki: { zakup, narzut, przesylkaEur, kosztyDodatkoweEur: kraj.kosztyDodatkowe, kurs },
     ostrzezenia,
   };
 }

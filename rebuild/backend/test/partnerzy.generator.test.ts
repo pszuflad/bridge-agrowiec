@@ -61,7 +61,7 @@ describe("generator cennika partnera", () => {
     expect(linie).toHaveLength(4); // nagłówek + A + B + pusty po ostatnim LF
     expect(linie[1]).toMatch(/^A;5;\d+\.\d{2};\d+\.\d{2}$/);
     expect(w.pozycjeWybrane).toBe(2); // C ma stan 0 < 2
-    expect(readdirSync(join(wyjscie, "archive"))).toEqual(["20261010_120000_tyreworld.csv"]);
+    expect(readdirSync(join(wyjscie, "archive"))).toEqual(["20261010_tyreworld.csv"]);
     expect(readdirSync(join(wyjscie, "pricelist"))).toEqual(["tyreworld.csv"]); // brak plików tymczasowych
     const kursy = sqlite.prepare("SELECT kraj, kurs, zrodlo, plik FROM partner_kursy ORDER BY kraj").all();
     expect(kursy).toEqual([
@@ -73,22 +73,33 @@ describe("generator cennika partnera", () => {
   it("jedna kolumna ceny → osobny plik na kraj, każdy z ceną swojego kraju", async () => {
     const id = partner("Adtyres", ["AT", "FR"], [["CatNumber", "katalog", "kod"], ["PriceEurNet", "cena", "AT"]]);
     const w = await generujPlikiPartnera(db, NBP, id, { katalog: wyjscie, teraz: () => TERAZ });
-    expect(w.pliki.map((p) => p.nazwa)).toEqual(["adtyres_AT.csv", "adtyres_FR.csv"]);
-    const at = wczytaj("adtyres_AT.csv");
-    const fr = wczytaj("adtyres_FR.csv");
+    expect(w.pliki.map((p) => p.nazwa)).toEqual(["adtyres_at.csv", "adtyres_fr.csv"]);
+    const at = wczytaj("adtyres_at.csv");
+    const fr = wczytaj("adtyres_fr.csv");
     expect(at.split("\n")[0]).toBe("CatNumber;PriceEurNet");
     expect(at).not.toBe(fr); // różne współczynniki gabarytowe/stawki → różne ceny
     expect(sqlite.prepare("SELECT kraj, plik FROM partner_kursy ORDER BY kraj").all()).toEqual([
-      { kraj: "AT", plik: "adtyres_AT.csv" },
-      { kraj: "FR", plik: "adtyres_FR.csv" },
+      { kraj: "AT", plik: "adtyres_at.csv" },
+      { kraj: "FR", plik: "adtyres_fr.csv" },
     ]);
+  });
+
+  it("archiwum: jeden plik na dzień — drugie generowanie tego dnia zastępuje kopię; nazwa pliku z `nazwa_pliku`", async () => {
+    const id = partner("Adtyres", ["AT"], [["CatNumber", "katalog", "kod"], ["PriceEurNet", "cena", "AT"]]);
+    sqlite.prepare("UPDATE partnerzy SET nazwa_pliku = 'adtyres_agrowiec' WHERE id = ?").run(id);
+    await generujPlikiPartnera(db, NBP, id, { katalog: wyjscie, teraz: () => new Date("2026-10-10T08:00:00.000Z") });
+    await generujPlikiPartnera(db, NBP, id, { katalog: wyjscie, teraz: () => new Date("2026-10-10T20:00:00.000Z") });
+    expect(readdirSync(join(wyjscie, "archive"))).toEqual(["20261010_adtyres_agrowiec_at.csv"]);
+    expect(readdirSync(join(wyjscie, "pricelist"))).toEqual(["adtyres_agrowiec_at.csv"]);
+    await generujPlikiPartnera(db, NBP, id, { katalog: wyjscie, teraz: () => new Date("2026-10-11T08:00:00.000Z") });
+    expect(readdirSync(join(wyjscie, "archive")).sort()).toEqual(["20261010_adtyres_agrowiec_at.csv", "20261011_adtyres_agrowiec_at.csv"]);
   });
 
   it("format xml → plik XML na kraj", async () => {
     const id = partner("Ceneo Partner", ["AT"], [["CatNumber", "katalog", "kod"], ["Cena", "cena", "AT"]], "xml");
     const w = await generujPlikiPartnera(db, NBP, id, { katalog: wyjscie, teraz: () => TERAZ });
-    expect(w.pliki[0]).toMatchObject({ nazwa: "ceneo_partner_AT.xml", zapisany: true });
-    expect(wczytaj("ceneo_partner_AT.xml")).toContain('<o id="A" price="');
+    expect(w.pliki[0]).toMatchObject({ nazwa: "ceneo_partner_at.xml", zapisany: true });
+    expect(wczytaj("ceneo_partner_at.xml")).toContain('<o id="A" price="');
   });
 
   it("awaria NBP: używa ostatniego zapisanego kursu i ostrzega; bez żadnego kursu — nic nie zapisuje", async () => {
@@ -96,7 +107,7 @@ describe("generator cennika partnera", () => {
     const bez = await generujPlikiPartnera(db, NBP_AWARIA, id, { katalog: wyjscie, teraz: () => TERAZ });
     expect(bez.pliki[0]!.zapisany).toBe(false);
     expect(bez.bledy.join("\n")).toMatch(/AT: NBP nie odpowiada.*nie ma żadnego zapisanego kursu/);
-    expect(existsSync(join(wyjscie, "pricelist", "p_AT.csv"))).toBe(false);
+    expect(existsSync(join(wyjscie, "pricelist", "p_at.csv"))).toBe(false);
 
     await generujPlikiPartnera(db, NBP, id, { katalog: wyjscie, teraz: () => TERAZ });
     const z = await generujPlikiPartnera(db, NBP_AWARIA, id, { katalog: wyjscie, teraz: () => TERAZ });
@@ -108,13 +119,13 @@ describe("generator cennika partnera", () => {
   it("pusty wynik nie nadpisuje poprzedniego cennika", async () => {
     const id = partner("P", ["AT"], [["CatNumber", "katalog", "kod"], ["Cena", "cena", "AT"]]);
     await generujPlikiPartnera(db, NBP, id, { katalog: wyjscie, teraz: () => TERAZ });
-    const przed = wczytaj("p_AT.csv");
+    const przed = wczytaj("p_at.csv");
     sqlite.prepare("DELETE FROM partner_magazyny").run();
     sqlite.prepare("INSERT INTO partner_magazyny VALUES (?, 'NIEISTNIEJACY')").run(id);
     const w = await generujPlikiPartnera(db, NBP, id, { katalog: wyjscie, teraz: () => TERAZ });
     expect(w.pliki[0]).toMatchObject({ zapisany: false, liczbaWierszy: 0 });
     expect(w.bledy.join("\n")).toMatch(/brak wierszy.*bez zmian/);
-    expect(wczytaj("p_AT.csv")).toBe(przed);
+    expect(wczytaj("p_at.csv")).toBe(przed);
   });
 
   it("błędy kalkulacji trafiają do raportu, a pozycje bez ceny wypadają z pliku", async () => {
@@ -123,7 +134,7 @@ describe("generator cennika partnera", () => {
     const w = await generujPlikiPartnera(db, NBP, id, { katalog: wyjscie, teraz: () => TERAZ });
     expect(w.bledy).toContain("Błąd kalkulacji BEZ_WAGI (AT): Błąd kalkulacji transportu (AT): Brak wagi pozycji.");
     expect(w.pliki[0]).toMatchObject({ liczbaWierszy: 2, pominiete: 1 });
-    expect(wczytaj("p_AT.csv")).not.toContain("BEZ_WAGI");
+    expect(wczytaj("p_at.csv")).not.toContain("BEZ_WAGI");
   });
 
   it("błędy konfiguracji: brak krajów, brak kolumn, zła kolumna", async () => {

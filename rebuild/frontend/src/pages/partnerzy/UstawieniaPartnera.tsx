@@ -38,6 +38,7 @@ export function UstawieniaPartnera({ partner }: { partner: SzczegolyPartnera }) 
   const [ftp, ustawFtp] = useState(partner.kanalFtp);
   const [email, ustawEmail] = useState(partner.kanalEmail);
   const [skrzynka, ustawSkrzynke] = useState(partner.emailSkrzynka ?? "");
+  const [nazwaPliku, ustawNazwePliku] = useState(partner.nazwaPliku ?? "");
 
   const zapis = useMutation<void, Error, void>({
     mutationFn: async () => {
@@ -48,9 +49,11 @@ export function UstawieniaPartnera({ partner }: { partner: SzczegolyPartnera }) 
       if (stan === null || !Number.isInteger(stan) || stan < 0) throw new Error("Stan minimalny musi być liczbą całkowitą ≥ 0.");
       if (harm !== null && (!Number.isInteger(harm) || harm < 1)) throw new Error("Harmonogram musi być liczbą minut ≥ 1 albo puste (bez harmonogramu).");
       if (tol !== null && (Number.isNaN(tol) || tol < 0)) throw new Error("Tolerancja ceny musi być liczbą ≥ 0 albo puste.");
+      const np = nazwaPliku.trim();
+      if (np !== "" && !/^[A-Za-z0-9_-]{1,60}$/.test(np)) throw new Error("Nazwa pliku: litery, cyfry, _ i - (do 60 znaków).");
       await zapiszUstawienia(partner.id, {
         nazwa: nazwa.trim(), stanMin: stan, zaokraglanie, harmonogramMinuty: harm, tolerancjaCenyProc: tol,
-        formatPliku: format, csvSeparator: separator, kanalFtp: ftp, kanalEmail: email, emailSkrzynka: skrzynka.trim() === "" ? null : skrzynka.trim(),
+        formatPliku: format, csvSeparator: separator, kanalFtp: ftp, kanalEmail: email, emailSkrzynka: skrzynka.trim() === "" ? null : skrzynka.trim(), nazwaPliku: np === "" ? null : np,
       });
     },
     onSuccess: async () => {
@@ -85,6 +88,7 @@ export function UstawieniaPartnera({ partner }: { partner: SzczegolyPartnera }) 
               {SEPARATORY.map((s) => <option key={s.wartosc} value={s.wartosc}>{s.etykieta}</option>)}
             </select>
           </Pole>
+          <Pole etykieta="Nazwa pliku cennika (bez rozszerzenia i kraju)"><Input value={nazwaPliku} placeholder="np. adtyres_agrowiec" onChange={(e) => ustawNazwePliku(e.target.value)} data-testid="input-ustawienia-nazwa-pliku" /></Pole>
           <Pole etykieta="Skrzynka e-mail do zamówień"><Input type="email" value={skrzynka} onChange={(e) => ustawSkrzynke(e.target.value)} data-testid="input-ustawienia-skrzynka" /></Pole>
         </div>
         <div className="flex flex-wrap gap-5 text-sm">
