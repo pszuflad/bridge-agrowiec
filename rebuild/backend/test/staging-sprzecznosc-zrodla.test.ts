@@ -82,7 +82,7 @@ describe("POST /api/staging/:id/resolve-source-conflict", () => {
     srodowisko.db.select().from(products).all() as unknown as Record<string, unknown>[];
   const staging = () => srodowisko.db.select().from(stagingItems).all();
 
-  it("merge: jeden produkt w katalogu, dane z późniejszego wiersza, staging pusty", async () => {
+  it("merge: jeden produkt w katalogu, stan to SUMA obu wierszy, kod dostawcy z pierwszego, resztę bierze z późniejszego, staging pusty", async () => {
     const a = zasiej(sprzeczne("MO2_P887228318"));
 
     const odp = await post(a.id, { decision: "merge" });
@@ -91,8 +91,26 @@ describe("POST /api/staging/:id/resolve-source-conflict", () => {
     expect(odp.body).toEqual({ ok: true, kody: ["MO2_P887228318"] });
     const p = katalog();
     expect(p).toHaveLength(1);
-    expect(p[0]).toMatchObject({ kod: "MO2_P887228318", stan: 1, ean: EAN });
+    expect(p[0]).toMatchObject({
+      kod: "MO2_P887228318",
+      stan: 14, // 13 + 1
+      kodDostawcy: "MO2_MIWD150315705L080", // z pierwszego wiersza
+      ean: EAN,
+    });
     expect(staging()).toHaveLength(0);
+  });
+
+  it("merge: stan nieliczbowy w którymś wierszu → bez sumowania (stan z późniejszego), kod dostawcy nadal z pierwszego", async () => {
+    const z = sprzeczne("MO2_P887228318");
+    const snap = JSON.parse(String(z.snapshotJson)) as { _sourceConflict: { earlier: Wiersz } };
+    snap._sourceConflict.earlier.stan = "brak";
+    z.snapshotJson = JSON.stringify(snap);
+    const a = zasiej(z);
+
+    const odp = await post(a.id, { decision: "merge" });
+
+    expect(odp.status).toBe(200);
+    expect(katalog()[0]).toMatchObject({ stan: 1, kodDostawcy: "MO2_MIWD150315705L080" });
   });
 
   it("split: dwa produkty o kodach z pliku, każdy z własnym stanem", async () => {

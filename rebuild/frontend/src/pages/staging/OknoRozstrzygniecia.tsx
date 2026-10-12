@@ -559,7 +559,8 @@ export function OknoRozstrzygniecia({ id, zamknij, onZapisano }: WlasciwosciOkna
                   )}
                   <p className="my-2.5">
                     <strong>Połącz</strong> — to jedna opona: powstanie jeden produkt z danymi z
-                    drugiego wiersza. <strong>Rozdziel</strong> — to dwie opony: każdy wiersz
+                    drugiego wiersza, ze <strong>stanem będącym sumą</strong> obu wierszy i kodem
+                    dostawcy z pierwszego. <strong>Rozdziel</strong> — to dwie opony: każdy wiersz
                     dostanie osobny produkt (kod z pliku). Produkt trafia od razu do katalogu.
                   </p>
                 </>

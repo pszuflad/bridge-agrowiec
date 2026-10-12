@@ -113,7 +113,8 @@ function zgloszenieZWiersza(
  *
  *  • `merge` — to jedna opona: powstaje JEDEN produkt na karcie zgłoszenia. Dane bierze
  *    z późniejszego wiersza (tak samo importer traktuje wiersze, które się nie różnią:
- *    ostatni wygrywa). Klucze źródłowe OBU wierszy zapamiętują się na tę kartę, żeby kolejny
+ *    ostatni wygrywa) — z DWOMA wyjątkami (ticket 235): stan jest SUMĄ obu wierszy, a kod dostawcy
+ *    pochodzi z pierwszego wiersza. Klucze źródłowe OBU wierszy zapamiętują się na tę kartę, żeby kolejny
  *    import nie pytał o to samo.
  *  • `split` — to dwie różne opony: każdy wiersz dostaje własny produkt o kodzie z pliku
  *    dostawcy. Wiersz, którego kod pokrywa się z kartą zgłoszenia (albo, gdy żaden się nie
@@ -148,6 +149,16 @@ export function rozstrzygnijSprzecznoscZrodla(
     if (decyzja === "merge") {
       const s = snapshotWiersza(row.dostawca, snap, later, "link");
       s._sourceKey = snap._sourceKey ?? s._sourceKey;
+      // Decyzja użytkowniczki 2026-10-12 (ticket 235): to jedna opona z dwóch wierszy — stan SUMUJEMY, a kod dostawcy
+      // bierzemy z PIERWSZEGO wiersza. Cena i pozostałe pola zostają z późniejszego (jak dotąd).
+      const stanPierwszego = Number(earlier.stan);
+      const stanDrugiego = Number(later.stan);
+      if (earlier.stan != null && later.stan != null && Number.isFinite(stanPierwszego) && Number.isFinite(stanDrugiego)) {
+        s.stan = stanPierwszego + stanDrugiego;
+      }
+      if (earlier["kod dostawcy"] != null && String(earlier["kod dostawcy"]).trim() !== "") {
+        s.kodDostawcy = earlier["kod dostawcy"];
+      }
       const nowe = zgloszenieZWiersza(row, db, row.kod, s, "połączono wiersze pliku w jeden produkt");
       zaktualizujPozycjeStagingu(db, id, {
         typZmiany: nowe.typZmiany,
