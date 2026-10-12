@@ -5,6 +5,7 @@ import { stworzApp } from "./app.js";
 import { klientNbpHttp } from "./partnerzy/kurs-nbp.js";
 import { stworzHarmonogramOdbioru, type OdbiorEmail } from "./partnerzy/odbior-email.js";
 import { otworzSkrzynkeImap } from "./partnerzy/poczta-imap.js";
+import { parsujKatalogiPublikacji } from "./partnerzy/publikacja.js";
 import { stworzSerwisPartnerow } from "./partnerzy/scheduler.js";
 import { dirname, join } from "node:path";
 import { stworzScheduler } from "./import/scheduler.js";
@@ -115,10 +116,18 @@ if (env.SELLY_TRYB === "wylaczony") {
 }
 
 // Generowanie cenników partnerów (karta PARTNERZY): serwis zawsze (ręczne „generuj teraz”), timer tylko przy PARTNERZY_SCHEDULER.
+// Błędna wartość PARTNERZY_KATALOGI_PUBLIKACJI NIE przewraca backendu: loguje błąd i działa bez publikacji.
+let katalogiPublikacji = new Map<string, string>();
+try {
+  katalogiPublikacji = parsujKatalogiPublikacji(env.PARTNERZY_KATALOGI_PUBLIKACJI);
+} catch (e) {
+  console.error("[partnerzy] publikacja wyłączona:", e instanceof Error ? e.message : e);
+}
 const serwisPartnerow = stworzSerwisPartnerow({
   db,
   klientNbp: klientNbpHttp(),
   katalogBazowy: env.PARTNERZY_KATALOG ?? join(dirname(env.DB_PATH), "partnerzy"),
+  katalogiPublikacji,
 });
 
 // Odbiór zamówień partnerów przez e-mail (tickety 229, 231): timer tylko przy PARTNERZY_ODBIOR_EMAIL, ręczne „Odbierz teraz” zawsze; hasła skrzynek wprost ze środowiska serwera.

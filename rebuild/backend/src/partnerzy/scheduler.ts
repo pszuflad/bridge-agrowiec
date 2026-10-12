@@ -13,6 +13,7 @@ import { join } from "node:path";
 
 import type { Baza } from "../db/index.js";
 import { partnerLogi, partnerzy } from "../db/schema.js";
+import { publikujPliki, type KatalogiPublikacji } from "./publikacja.js";
 import { generujPlikiPartnera, podgladPartnera, type WynikGenerowania, type WynikPodgladu } from "./generator.js";
 import type { KlientNbp } from "./kurs-nbp.js";
 import { zapiszBlad, zapiszOperacje, zapiszWynikGenerowania } from "./logi.js";
@@ -41,6 +42,8 @@ export function stworzSerwisPartnerow(opcje: {
   db: Baza;
   klientNbp: KlientNbp;
   katalogBazowy: string;
+  /** Partner (nazwa małymi literami) → katalog na serwerze plików, do którego kopiujemy wygenerowane pliki. Brak = nie publikujemy. */
+  katalogiPublikacji?: KatalogiPublikacji;
   teraz?: () => Date;
   interwalMs?: number;
 }): SerwisPartnerow {
@@ -53,7 +56,17 @@ export function stworzSerwisPartnerow(opcje: {
     if (trwa.has(partnerId)) throw new GenerowanieTrwaError(partnerId);
     trwa.add(partnerId);
     try {
-      const wynik = await generujPlikiPartnera(db, klientNbp, partnerId, { katalog: join(katalogBazowy, String(partnerId)), teraz });
+      const katalog = join(katalogBazowy, String(partnerId));
+      const wynik = await generujPlikiPartnera(db, klientNbp, partnerId, { katalog, teraz });
+      const docelowy = opcje.katalogiPublikacji?.get(
+        (db.select({ nazwa: partnerzy.nazwa }).from(partnerzy).where(eq(partnerzy.id, partnerId)).get()?.nazwa ?? "").toLowerCase(),
+      );
+      const zapisane = wynik.pliki.filter((p) => p.zapisany).map((p) => p.nazwa);
+      if (docelowy && zapisane.length > 0) {
+        const pub = publikujPliki(join(katalog, "pricelist"), docelowy, zapisane);
+        wynik.bledy.push(...pub.bledy);
+        if (pub.opublikowane.length > 0) wynik.ostrzezenia.push(`Opublikowano ${pub.opublikowane.length} plików w katalogu partnera.`);
+      }
       zapiszWynikGenerowania(db, partnerId, wynik, teraz());
       return wynik;
     } catch (e) {

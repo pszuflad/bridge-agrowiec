@@ -132,6 +132,8 @@ const schemaEnvBazowe = z.object({
   PARTNERZY_SCHEDULER: flagaBoolDomyslnieWylaczona,
   /** Katalog bazowy plików partnerów (`<katalog>/<id partnera>/{pricelist,archive}`). Domyślnie `partnerzy/` obok pliku bazy. */
   PARTNERZY_KATALOG: z.string().min(1).optional(),
+  /** Publikacja cenników do katalogów partnerów na serwerze plików: `Nazwa=/ścieżka;Nazwa2=/ścieżka2` (ticket 238). Tylko w `.env` produkcji; brak = bez publikacji. */
+  PARTNERZY_KATALOGI_PUBLIKACJI: z.string().min(1).optional(),
   /**
    * Odbiór zamówień partnerów przez e-mail (karta PARTNERZY, ticket 229) — DOMYŚLNIE WYŁĄCZONY. Host/port IMAP wspólne; hasło skrzynki każdego
    * partnera w `PARTNERZY_IMAP_HASLO_<id partnera>` (czytane wprost ze środowiska, nie tutaj). Brak hosta lub hasła = kanał pomijany z wpisem w logu.
