@@ -288,4 +288,18 @@ describe("zamówienia partnera", () => {
     expect(await screen.findByText("Nie udało się sprawdzić zamówienia")).toBeInTheDocument();
     await waitFor(() => expect(zapytaniaSzczegolow.length).toBeGreaterThan(przed));
   });
+
+  it("adres dostawy z formatu TyreWorld (niemieckie klucze) ma polskie etykiety; uwaga klienta widoczna, puste pola pomijane", async () => {
+    const uzytkownik = userEvent.setup();
+    zamowienia = [naLiscie(1, "2026-100000001")];
+    szczegolyNadpisanie = {
+      dostawa: { name: "Max Mustermann", strasse: "Musterweg 1", plz: "12345", ort: "Musterstadt", lkz: "DE", land: "", telefon: "+49 000", neutralversand: "true", bemerkung: "Bitte anrufen" },
+    };
+    await otworz();
+    await uzytkownik.click(await screen.findByTestId("button-zamowienie-1"));
+    const dostawa = await screen.findByTestId("dostawa-1");
+    for (const etykieta of ["Odbiorca", "Ulica", "Kod pocztowy", "Miejscowość", "Kraj (kod)", "Telefon", "Wysyłka neutralna", "Uwaga klienta"]) expect(dostawa).toHaveTextContent(etykieta);
+    expect(dostawa).not.toHaveTextContent("strasse");
+    expect(within(dostawa).queryByText(/^Kraj$/)).not.toBeInTheDocument(); // puste `land` nie tworzy wiersza „Kraj” (jest tylko „Kraj (kod)”)
+  });
 });
