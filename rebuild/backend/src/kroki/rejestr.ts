@@ -7,6 +7,7 @@ import {
 } from "../import/podmien-zrodla.js";
 import { dirname, join } from "node:path";
 import { usunWszystkieKartyAuto } from "../import/migracje/scal-karty-auto.js";
+import { ustawKonfiguracjeStartowa } from "../partnerzy/konfiguracja-startowa.js";
 import { dodajPartnera } from "../repos/partnerzy.js";
 import { ustawWEnvPliku } from "./env-plik.js";
 import type { Krok } from "./runner.js";
@@ -98,6 +99,13 @@ export const KROKI_WDROZENIA: Krok[] = [
       // Idempotentne: partner o tej nazwie już istnieje (np. dodany ręcznie w panelu) → bez zmian. Niczego nie aktywuje i nie uruchamia generowania.
       const wyniki = ["TyreWorld", "Adtyres"].map((nazwa) => `${nazwa}: ${dodajPartnera(db, { nazwa }) === null ? "już istnieje" : "założony (nieaktywny)"}`);
       return wyniki.join("; ");
+    },
+  },
+  {
+    id: "2026-10-12-partnerzy-konfiguracja-startowa",
+    opis: "moduł partnerów B2B: uzupełnienie konfiguracji TyreWorld i Adtyres (nazwy plików, magazyny bez MO6/MO7/MO8, kraje z narzutem 0 % i przesyłką 15 EUR, kolumny jak w obecnych plikach) i aktywacja; ceny nie są publikowane, dopóki narzuty nie zostaną ustawione w panelu",
+    async uruchom({ db }) {
+      return ustawKonfiguracjeStartowa(db);
     },
   },
 ];
