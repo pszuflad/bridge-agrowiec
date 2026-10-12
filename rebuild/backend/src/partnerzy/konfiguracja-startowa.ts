@@ -71,7 +71,7 @@ export function ustawKonfiguracjeStartowa(db: Baza): string | { odloz: string } 
     }
     const istniejace = new Set(db.select().from(partnerKraje).where(eq(partnerKraje.partnerId, p.id)).all().map((k) => k.kraj));
     const nowe = s.kraje.filter((k) => !istniejace.has(k));
-    for (const k of nowe) ustawKraj(db, p.id, k, { narzutProc: 0, kursZrodlo: "nbp", kursReczny: null, kosztyDodatkowe: 0, przesylkaStalaEur: PRZESYLKA_STALA_EUR });
+    for (const k of nowe) ustawKraj(db, p.id, k, { narzutProc: 0, kursZrodlo: "nbp", kursReczny: null, kosztyDodatkowe: 0, przesylkaStalaEur: PRZESYLKA_STALA_EUR, mytoEur: 0, pakowanieEur: 0 });
     if (nowe.length) opis.push(`${nowe.length} krajów (narzut 0 % do ustawienia)`);
     if (db.select().from(partnerKolumny).where(eq(partnerKolumny.partnerId, p.id)).all().length === 0) {
       zapiszKolumny(db, p.id, s.kolumny);

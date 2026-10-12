@@ -4,6 +4,7 @@ import { and, asc, eq, sql } from "drizzle-orm";
 
 import type { Baza } from "../db/index.js";
 import { ostatniUzytyKurs } from "../partnerzy/kurs-nbp.js";
+import { paliwoNaDzien } from "../partnerzy/transport.js";
 import {
   partnerKolumny,
   partnerKraje,
@@ -49,7 +50,12 @@ export type UstawieniaKraju = {
   kosztyDodatkowe: number;
   /** Stały koszt przesyłki w EUR; `null` = tabele GEIS. */
   przesylkaStalaEur: number | null;
+  /** Opłata drogowa i koszt pakowania w EUR (dodawane do kosztu przesyłki ze stałej bazy kraju). */
+  mytoEur: number;
+  pakowanieEur: number;
 };
+/** Wynik walidacji kraju z opcjonalną opłatą paliwową [%] (osobna tabela historii — nie jest kolumną kraju); `null` = bez zmiany. */
+export type UstawieniaKrajuZPaliwem = UstawieniaKraju & { paliwoProc: number | null };
 
 const jestObiektem = (v: unknown): v is Record<string, unknown> =>
   typeof v === "object" && v !== null && !Array.isArray(v);
@@ -143,7 +149,7 @@ export function walidujUstawieniaPartnera(
 }
 
 /** Waliduje ustawienia kraju partnera (pełny komplet pól; brakujące dostają wartości domyślne). */
-export function walidujUstawieniaKraju(cialo: unknown): UstawieniaKraju | BladWalidacji {
+export function walidujUstawieniaKraju(cialo: unknown): UstawieniaKrajuZPaliwem | BladWalidacji {
   if (!jestObiektem(cialo)) return { blad: "Ciało żądania musi być obiektem JSON." };
   const narzutProc = cialo.narzutProc ?? 0;
   if (!liczbaSkonczona(narzutProc) || narzutProc < 0) return { blad: "Pole `narzutProc` musi być liczbą ≥ 0." };
@@ -158,9 +164,18 @@ export function walidujUstawieniaKraju(cialo: unknown): UstawieniaKraju | BladWa
   const przesylkaStalaEur = cialo.przesylkaStalaEur ?? null;
   if (przesylkaStalaEur !== null && (!liczbaSkonczona(przesylkaStalaEur) || przesylkaStalaEur < 0))
     return { blad: "Pole `przesylkaStalaEur` musi być liczbą ≥ 0 albo null." };
+  const mytoEur = cialo.mytoEur ?? 0;
+  if (!liczbaSkonczona(mytoEur) || mytoEur < 0) return { blad: "Pole `mytoEur` musi być liczbą ≥ 0." };
+  const pakowanieEur = cialo.pakowanieEur ?? 0;
+  if (!liczbaSkonczona(pakowanieEur) || pakowanieEur < 0) return { blad: "Pole `pakowanieEur` musi być liczbą ≥ 0." };
+  const paliwoProc = cialo.paliwoProc ?? null;
+  if (paliwoProc !== null && (!liczbaSkonczona(paliwoProc) || paliwoProc < 0 || paliwoProc > 1000)) return { blad: "Pole `paliwoProc` musi być liczbą od 0 do 1000 albo null." };
   return {
     narzutProc,
     przesylkaStalaEur,
+    mytoEur,
+    pakowanieEur,
+    paliwoProc,
     kursZrodlo,
     kursReczny: kursZrodlo === "reczny" ? (kursReczny as number) : null,
     kosztyDodatkowe,
@@ -224,7 +239,7 @@ export function szczegolyPartnera(db: Baza, id: number) {
       .map((k) => {
         // Kurs faktycznie użyty w ostatnio wygenerowanym pliku (panel pokazuje, jaki kurs jest stosowany); `null` = jeszcze nie generowano.
         const u = ostatniUzytyKurs(db, id, k.kraj);
-        return { ...k, ostatniKurs: u ? { kurs: u.kurs, zrodlo: u.zrodlo, zapisano: u.zapisano } : null };
+        return { ...k, paliwoProc: paliwoNaDzien(db, k.kraj, new Date().toISOString().slice(0, 10)), ostatniKurs: u ? { kurs: u.kurs, zrodlo: u.zrodlo, zapisano: u.zapisano } : null };
       }),
     kolumny: db.select().from(partnerKolumny).where(eq(partnerKolumny.partnerId, id)).orderBy(asc(partnerKolumny.pozycja)).all(),
     polaObliczeniowe: db.select().from(partnerPolaObliczeniowe).where(eq(partnerPolaObliczeniowe.partnerId, id)).orderBy(asc(partnerPolaObliczeniowe.nazwa)).all(),

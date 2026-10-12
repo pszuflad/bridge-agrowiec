@@ -199,7 +199,7 @@ describe("kraje", () => {
     await uzytkownik.type(screen.getByTestId("input-kraj-kurs-nowy"), "4,3");
     await uzytkownik.click(screen.getByTestId("button-kraj-zapisz-nowy"));
     await waitFor(() => expect(zadania).toHaveLength(1));
-    expect(zadania[0]).toEqual({ metoda: "PUT", sciezka: "/kraje/DE", cialo: { narzutProc: 10.5, kursZrodlo: "reczny", kursReczny: 4.3, kosztyDodatkowe: 0, przesylkaStalaEur: null } });
+    expect(zadania[0]).toEqual({ metoda: "PUT", sciezka: "/kraje/DE", cialo: { narzutProc: 10.5, kursZrodlo: "reczny", kursReczny: 4.3, kosztyDodatkowe: 0, przesylkaStalaEur: null, mytoEur: 0, pakowanieEur: 0, paliwoProc: null } });
     expect(await screen.findByTestId("row-kraj-DE")).toBeInTheDocument();
   });
 
@@ -211,7 +211,7 @@ describe("kraje", () => {
     await uzytkownik.clear(narzut);
     await uzytkownik.type(narzut, "15");
     await uzytkownik.click(screen.getByTestId("button-kraj-zapisz-FR"));
-    await waitFor(() => expect(zadania).toEqual([{ metoda: "PUT", sciezka: "/kraje/FR", cialo: { narzutProc: 15, kursZrodlo: "nbp", kursReczny: null, kosztyDodatkowe: 43, przesylkaStalaEur: null } }]));
+    await waitFor(() => expect(zadania).toEqual([{ metoda: "PUT", sciezka: "/kraje/FR", cialo: { narzutProc: 15, kursZrodlo: "nbp", kursReczny: null, kosztyDodatkowe: 43, przesylkaStalaEur: null, mytoEur: 0, pakowanieEur: 0, paliwoProc: null } }]));
   });
 
   it("stały koszt przesyłki trafia w PUT, a panel pokazuje używany kurs", async () => {
@@ -232,6 +232,20 @@ describe("kraje", () => {
     await uzytkownik.type(screen.getByTestId("input-ustawienia-faktura-kraj"), "ad");
     await uzytkownik.click(screen.getByTestId("button-ustawienia-zapisz"));
     await waitFor(() => expect(zadania[0]?.cialo).toMatchObject({ fakturaNazwa: "Firma Test", fakturaKraj: "AD", fakturaNip: null }));
+  });
+
+  it("paliwo, myto i pakowanie kraju trafiają w PUT; nowy kraj ma domyślne zera", async () => {
+    const uzytkownik = userEvent.setup();
+    await otworz();
+    const paliwo = await screen.findByTestId("input-kraj-paliwo-FR");
+    await uzytkownik.type(paliwo, "44");
+    const myto = screen.getByTestId("input-kraj-myto-FR");
+    await uzytkownik.clear(myto);
+    await uzytkownik.type(myto, "9.92");
+    await uzytkownik.type(screen.getByTestId("input-kraj-pakowanie-FR"), "{selectall}15");
+    await uzytkownik.click(screen.getByTestId("button-kraj-zapisz-FR"));
+    await waitFor(() => expect(zadania[0]?.cialo).toMatchObject({ paliwoProc: 44, mytoEur: 9.92, pakowanieEur: 15 }));
+    expect(screen.getByTestId("input-kraj-pakowanie-nowy")).toHaveValue("0");
   });
 
   it("walidacja: zły kod kraju i kurs ręczny bez wartości nie wysyłają żądania", async () => {
