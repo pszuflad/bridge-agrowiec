@@ -8,7 +8,8 @@ import { otworzBaze, type BazaSqlite } from "../src/db/index.js";
 import { zastosujMigracje } from "../src/db/migrate.js";
 import { wyczyscArchiwum } from "../src/partnerzy/generator.js";
 import { zapiszUzytyKurs } from "../src/partnerzy/kurs-nbp.js";
-import { czyBlad, szczegolyPartnera, walidujUstawieniaKraju, walidujUstawieniaPartnera } from "../src/repos/partnerzy.js";
+import { ustawPaliwo } from "../src/partnerzy/transport.js";
+import { czyBlad, szczegolyPartnera, ustawKraj, walidujUstawieniaKraju, walidujUstawieniaPartnera } from "../src/repos/partnerzy.js";
 import { KATALOG_SCHEMATU } from "./gate/repo.js";
 
 describe("ticket 235 — walidacja i szczegóły", () => {
@@ -23,6 +24,12 @@ describe("ticket 235 — walidacja i szczegóły", () => {
     expect(walidujUstawieniaPartnera({ fakturaNazwa: " Firma ", fakturaKraj: "pl", fakturaNip: null }, true)).toEqual({ fakturaNazwa: "Firma", fakturaKraj: "PL", fakturaNip: null });
     for (const zle of [{ fakturaNazwa: "" }, { fakturaNip: 5 }, { fakturaKraj: "POL" }, { fakturaMiasto: "x".repeat(121) }])
       expect(czyBlad(walidujUstawieniaPartnera(zle, true))).toBe(true);
+  });
+
+  it("kraj: myto i pakowanie (≥ 0, domyślnie 0) oraz opcjonalne paliwo 0–1000 %", () => {
+    expect(walidujUstawieniaKraju({})).toMatchObject({ mytoEur: 0, pakowanieEur: 0, paliwoProc: null });
+    expect(walidujUstawieniaKraju({ mytoEur: 9.92, pakowanieEur: 15, paliwoProc: 44 })).toMatchObject({ mytoEur: 9.92, pakowanieEur: 15, paliwoProc: 44 });
+    for (const zle of [{ mytoEur: -1 }, { pakowanieEur: "5" }, { paliwoProc: -1 }, { paliwoProc: 1001 }]) expect(czyBlad(walidujUstawieniaKraju(zle))).toBe(true);
   });
 
   it("przesylkaStalaEur: liczba ≥ 0 albo null (domyślnie null)", () => {
@@ -54,6 +61,14 @@ describe("ticket 235 — walidacja i szczegóły", () => {
       const k = szczegolyPartnera(db, id)!.kraje;
       expect(k.find((x) => x.kraj === "FR")!.ostatniKurs).toMatchObject({ kurs: 4.3, zrodlo: "nbp" });
       expect(k.find((x) => x.kraj === "DE")!.ostatniKurs).toBeNull();
+    });
+
+    it("PUT kraju zapisuje paliwo w historii, a szczegóły partnera oddają bieżące paliwo kraju", () => {
+      const id = Number(sqlite.prepare("INSERT INTO partnerzy (nazwa, utworzono, zmieniono) VALUES ('P2', 'x', 'x')").run().lastInsertRowid);
+      ustawKraj(db, id, "FR", { narzutProc: 12, kursZrodlo: "nbp", kursReczny: null, kosztyDodatkowe: 0, przesylkaStalaEur: 50, mytoEur: 9.92, pakowanieEur: 15 });
+      ustawPaliwo(db, "FR", 44, "2026-01-01");
+      const fr = szczegolyPartnera(db, id)!.kraje.find((k) => k.kraj === "FR")!;
+      expect(fr).toMatchObject({ paliwoProc: 44, mytoEur: 9.92, pakowanieEur: 15 });
     });
 
     it("czyszczenie archiwum: stare kopie z godziną i nowe z samą datą wygasają po 30 dniach od daty", () => {

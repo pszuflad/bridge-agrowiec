@@ -164,7 +164,7 @@ export function wycenPozycje(
         if (kurs === undefined) throw new BladKalkulacji(pozycja.kod, `Brak kursu EUR dla kraju ${k.kraj}.`);
         const w = obliczCene(db, {
           pozycja,
-          kraj: { kraj: k.kraj, narzutProc: k.narzutProc, kosztyDodatkowe: k.kosztyDodatkowe, przesylkaStalaEur: k.przesylkaStalaEur },
+          kraj: { kraj: k.kraj, narzutProc: k.narzutProc, kosztyDodatkowe: k.kosztyDodatkowe, przesylkaStalaEur: k.przesylkaStalaEur, mytoEur: k.mytoEur, pakowanieEur: k.pakowanieEur },
           zaokraglanie: partner.zaokraglanie,
           kurs,
           data,

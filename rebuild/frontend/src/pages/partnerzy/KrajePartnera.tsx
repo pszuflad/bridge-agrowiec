@@ -28,6 +28,9 @@ function WierszKraju({ partnerId, kraj, nowy }: { partnerId: number; kraj: KrajP
   const [kurs, ustawKurs] = useState(kraj?.kursReczny === null || kraj?.kursReczny === undefined ? "" : String(kraj.kursReczny));
   const [koszty, ustawKoszty] = useState(String(kraj?.kosztyDodatkowe ?? 0));
   const [przesylka, ustawPrzesylke] = useState(kraj?.przesylkaStalaEur == null ? "" : String(kraj.przesylkaStalaEur));
+  const [paliwo, ustawPaliwo] = useState(kraj?.paliwoProc === undefined ? "" : String(kraj.paliwoProc));
+  const [myto, ustawMyto] = useState(String(kraj?.mytoEur ?? 0));
+  const [pakowanie, ustawPakowanie] = useState(String(kraj?.pakowanieEur ?? 0));
   const [doUsuniecia, ustawDoUsuniecia] = useState(false);
   const testId = nowy ? "nowy" : (kraj?.kraj ?? "");
 
@@ -40,10 +43,16 @@ function WierszKraju({ partnerId, kraj, nowy }: { partnerId: number; kraj: KrajP
       if (!/^[A-Z]{2}$/.test(kodKraju)) throw new Error("Kraj to dwuliterowy kod, np. FR.");
       if (Number.isNaN(n) || n < 0) throw new Error("Narzut musi być liczbą ≥ 0 (w procentach).");
       const p = liczbaZPola(przesylka);
+      const pal = liczbaZPola(paliwo);
+      const my = liczbaZPola(myto) ?? 0;
+      const pak = liczbaZPola(pakowanie) ?? 0;
+      if (pal !== null && (Number.isNaN(pal) || pal < 0 || pal > 1000)) throw new Error("Opłata paliwowa to liczba od 0 do 1000 (%).");
+      if (Number.isNaN(my) || my < 0) throw new Error("Myto musi być liczbą ≥ 0 (EUR).");
+      if (Number.isNaN(pak) || pak < 0) throw new Error("Pakowanie musi być liczbą ≥ 0 (EUR).");
       if (Number.isNaN(c) || c < 0) throw new Error("Koszty dodatkowe muszą być liczbą ≥ 0 (EUR).");
       if (p !== null && (Number.isNaN(p) || p < 0)) throw new Error("Koszt przesyłki musi być liczbą ≥ 0 (EUR) albo pusty (wtedy tabele GEIS).");
       if (zrodlo === "reczny" && (k === null || Number.isNaN(k) || k <= 0)) throw new Error("Kurs ręczny wymaga wartości większej od zera.");
-      await zapiszKraj(partnerId, kodKraju, { narzutProc: n, kursZrodlo: zrodlo, kursReczny: zrodlo === "reczny" ? k : null, kosztyDodatkowe: c, przesylkaStalaEur: p });
+      await zapiszKraj(partnerId, kodKraju, { narzutProc: n, kursZrodlo: zrodlo, kursReczny: zrodlo === "reczny" ? k : null, kosztyDodatkowe: c, przesylkaStalaEur: p, mytoEur: my, pakowanieEur: pak, paliwoProc: pal });
     },
     onSuccess: async () => {
       toast({ title: nowy ? "Dodano kraj" : "Zapisano kraj", description: kod.trim().toUpperCase() });
@@ -53,6 +62,9 @@ function WierszKraju({ partnerId, kraj, nowy }: { partnerId: number; kraj: KrajP
         ustawKurs("");
         ustawKoszty("0");
         ustawPrzesylke("");
+        ustawPaliwo("");
+        ustawMyto("0");
+        ustawPakowanie("0");
         ustawZrodlo("nbp");
       }
       await klient.invalidateQueries({ queryKey: [KLUCZ_PARTNERZY] });
@@ -84,9 +96,12 @@ function WierszKraju({ partnerId, kraj, nowy }: { partnerId: number; kraj: KrajP
       <td className="px-2 py-2"><Input className="w-24" inputMode="decimal" disabled={zrodlo !== "reczny"} aria-label={`Kurs ręczny ${testId}`} value={kurs} onChange={(e) => ustawKurs(e.target.value)} data-testid={`input-kraj-kurs-${testId}`} /></td>
       <td className="px-2 py-2"><Input className="w-28" inputMode="decimal" aria-label={`Koszty dodatkowe EUR ${testId}`} value={koszty} onChange={(e) => ustawKoszty(e.target.value)} data-testid={`input-kraj-koszty-${testId}`} /></td>
       <td className="px-2 py-2"><Input className="w-28" inputMode="decimal" placeholder="GEIS" aria-label={`Przesyłka stała EUR ${testId}`} value={przesylka} onChange={(e) => ustawPrzesylke(e.target.value)} data-testid={`input-kraj-przesylka-${testId}`} /></td>
+      <td className="px-2 py-2"><Input className="w-20" inputMode="decimal" aria-label={`Paliwo % ${testId}`} value={paliwo} onChange={(e) => ustawPaliwo(e.target.value)} data-testid={`input-kraj-paliwo-${testId}`} /></td>
+      <td className="px-2 py-2"><Input className="w-24" inputMode="decimal" aria-label={`Myto EUR ${testId}`} value={myto} onChange={(e) => ustawMyto(e.target.value)} data-testid={`input-kraj-myto-${testId}`} /></td>
+      <td className="px-2 py-2"><Input className="w-24" inputMode="decimal" aria-label={`Pakowanie EUR ${testId}`} value={pakowanie} onChange={(e) => ustawPakowanie(e.target.value)} data-testid={`input-kraj-pakowanie-${testId}`} /></td>
       <td className="px-2 py-2 text-xs text-muted-foreground" data-testid={`kurs-uzywany-${testId}`}>{opisKursu(kraj, zrodlo, kurs)}</td>
       <td className="whitespace-nowrap px-2 py-2 text-right">
-        <Button size="sm" variant="outline" disabled={zapis.isPending} onClick={() => zapis.mutate()} data-testid={`button-kraj-zapisz-${testId}`}>{nowy ? "Dodaj kraj" : "Zapisz"}</Button>
+        <Button size="sm" variant={nowy ? "default" : "outline"} disabled={zapis.isPending} onClick={() => zapis.mutate()} data-testid={`button-kraj-zapisz-${testId}`}>{nowy ? "Dodaj kraj" : "Zapisz"}</Button>
         {!nowy ? (
           <>
             <Button size="icon" variant="ghost" aria-label={`Usuń kraj ${kraj!.kraj}`} onClick={() => ustawDoUsuniecia(true)} data-testid={`button-kraj-usun-${testId}`}><Trash2 className="h-4 w-4" aria-hidden /></Button>
@@ -113,7 +128,7 @@ export function KrajePartnera({ partner }: { partner: SzczegolyPartnera }) {
       <CardContent className="space-y-3 p-4">
         <h2 className="text-sm font-semibold">Kraje, narzuty i kursy</h2>
         <p className="text-xs text-muted-foreground">
-          Narzut w procentach od ceny zakupu (zakup × (1 + narzut)), nie marża. Koszty dodatkowe w EUR, doliczane do każdej opony. Przesyłka: stały koszt w EUR dla kraju (np. paliwo, myto i pakowanie razem); puste = stawki z tabel GEIS. Narzut 0 % = ceny dla kraju nie są publikowane. Kurs EUR z NBP albo ręczny.
+          Narzut w procentach od ceny zakupu (zakup × (1 + narzut)), nie marża. Koszty dodatkowe w EUR, doliczane do każdej opony. Przesyłka = baza kraju (EUR) × (1 + paliwo %) + myto + pakowanie; puste = stawki z tabel GEIS. Zmiana paliwa obowiązuje od dziś i nie przelicza wstecz. Narzut 0 % = ceny dla kraju nie są publikowane. Kurs EUR z NBP albo ręczny.
         </p>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -124,7 +139,10 @@ export function KrajePartnera({ partner }: { partner: SzczegolyPartnera }) {
                 <th className="px-2 py-2 font-medium">Kurs EUR</th>
                 <th className="px-2 py-2 font-medium">Kurs ręczny</th>
                 <th className="px-2 py-2 font-medium">Koszty dod. EUR</th>
-                <th className="px-2 py-2 font-medium">Przesyłka EUR</th>
+                <th className="px-2 py-2 font-medium">Przesyłka bazowa EUR</th>
+                <th className="px-2 py-2 font-medium">Paliwo %</th>
+                <th className="px-2 py-2 font-medium">Myto EUR</th>
+                <th className="px-2 py-2 font-medium">Pakowanie EUR</th>
                 <th className="px-2 py-2 font-medium">Używany kurs</th>
                 <th className="px-2 py-2" aria-label="Akcje" />
               </tr>

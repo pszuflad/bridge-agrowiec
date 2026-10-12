@@ -32,6 +32,7 @@ danych dla odbudowy backendu.
 | `029_partner_zamowienia_walidacja.sql` | **Ticket 232** (`232-FEATURE-partnerzy-walidacja-zamowien`, PRT-7.4a): kolumny `partner_zamowienia.blad_importu` i `partner_zamowienia_pozycje.blad` (wynik walidacji zamówienia względem katalogu) przez `@dodaj-kolumne-jesli-brak`. ⚠ **NOWE kolumny w nowych tabelach, nie odtworzenie produkcji**. |
 | `030_partner_pliki_koszty_eur.sql` | **Ticket 235** (`235-FEATURE-partnerzy-nazwy-plikow-koszty-eur`): kolumny `partnerzy.nazwa_pliku` (baza nazwy pliku cennika) i `partner_kraje.przesylka_stala_eur` (stały koszt przesyłki w EUR zamiast tabel GEIS) przez `@dodaj-kolumne-jesli-brak`. ⚠ **NOWE kolumny w nowych tabelach, nie odtworzenie produkcji**. |
 | `031_partner_dane_faktury.sql` | **Ticket 242**: sześć kolumn `partnerzy.faktura_*` (nazwa, NIP, ulica, kod, miasto, kraj) — dane do faktury partnera jako zamawiającego w zamówieniu Selly, przez `@dodaj-kolumne-jesli-brak`. ⚠ **NOWE kolumny, nie odtworzenie produkcji**; wartości wpisuje użytkowniczka w panelu. |
+| `032_partner_kraje_myto_pakowanie.sql` | **Ticket 243**: `partner_kraje.myto_eur` i `partner_kraje.pakowanie_eur` (domyślnie 0) — składniki kosztu przesyłki edytowane w panelu, przez `@dodaj-kolumne-jesli-brak`. ⚠ **NOWE kolumny, nie odtworzenie produkcji**. |
 
 ### Dyrektywy runnera (od ticketu 107)
 
