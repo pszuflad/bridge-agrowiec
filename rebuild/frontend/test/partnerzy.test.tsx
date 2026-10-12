@@ -26,10 +26,12 @@ const wpisLogu = (nad: Partial<WpisLogu> = {}): WpisLogu => ({
 let partnerzy: PartnerNaLiscie[] = [];
 let logi: Record<number, WpisLogu[]> = {};
 let zadania: { metoda: string; sciezka: string; cialo: Record<string, unknown> }[] = [];
+let geis: unknown[] = [];
 
 function zamockujApi({ dodawanie = "ok" as "ok" | "duplikat" } = {}) {
   server.use(
     http.get("*/api/partnerzy", () => HttpResponse.json({ partnerzy })),
+    http.get("*/api/partnerzy/geis", () => HttpResponse.json({ kraje: geis })),
     http.get("*/api/partnerzy/:id/logi", ({ params }) => HttpResponse.json({ logi: logi[Number(params.id)] ?? [] })),
     http.post("*/api/partnerzy", async ({ request }) => {
       const cialo = (await request.json()) as { nazwa: string };
@@ -57,6 +59,7 @@ beforeEach(() => {
   partnerzy = [];
   logi = {};
   zadania = [];
+  geis = [];
   queryClient.clear();
   sessionStorage.clear();
   localStorage.clear();
@@ -195,5 +198,39 @@ describe("słowniki zamówień Selly", () => {
     await otworz();
     await userEvent.setup().click(await screen.findByTestId("button-slowniki-selly"));
     expect(await screen.findByTestId("text-slowniki-selly-blad")).toHaveTextContent("Integracja wyłączona");
+  });
+});
+
+describe("tabele GEIS", () => {
+  it("pokazuje kraje z podsumowaniem, edycja wysyła PUT z parametrami i stawkami; błędny wiersz stawek blokuje zapis", async () => {
+    geis = [{ kraj: "AT", wspGabarytowy: 200, kosztPakowania: 0, maks: [240, 240, 220], stawki: [[50, 57], [100, 61]] }];
+    zamockujApi();
+    server.use(
+      http.put("*/api/partnerzy/geis/AT", async ({ request }) => {
+        zadania.push({ metoda: "PUT", sciezka: "/geis/AT", cialo: (await request.json()) as Record<string, unknown> });
+        return HttpResponse.json({ kraje: geis });
+      }),
+    );
+    await otworz();
+    const uzytkownik = userEvent.setup();
+    expect(await screen.findByTestId("geis-AT")).toHaveTextContent("współczynnik 200");
+    await uzytkownik.click(screen.getByTestId("button-geis-edytuj-AT"));
+    const pole = screen.getByTestId("textarea-geis-stawki-AT");
+    expect(pole).toHaveValue("50;57\n100;61");
+    await uzytkownik.clear(pole);
+    await uzytkownik.type(pole, "50;60,5{enter}100;70");
+    await uzytkownik.click(screen.getByTestId("button-geis-zapisz-AT"));
+    await waitFor(() => expect(zadania.at(-1)).toEqual({ metoda: "PUT", sciezka: "/geis/AT", cialo: { wspGabarytowy: 200, kosztPakowania: 0, maks: [240, 240, 220], stawki: [[50, 60.5], [100, 70]] } }));
+    await uzytkownik.clear(pole);
+    await uzytkownik.type(pole, "abc");
+    await uzytkownik.click(screen.getByTestId("button-geis-zapisz-AT"));
+    expect(await screen.findByText(/Wiersz 1: oczekiwane/)).toBeInTheDocument();
+    expect(zadania.filter((z) => z.sciezka === "/geis/AT")).toHaveLength(1);
+  });
+
+  it("pusty stan zaprasza do importu", async () => {
+    zamockujApi();
+    await otworz();
+    expect(await screen.findByTestId("text-geis-pusto")).toBeInTheDocument();
   });
 });
