@@ -3,6 +3,7 @@
 import { and, asc, eq, sql } from "drizzle-orm";
 
 import type { Baza } from "../db/index.js";
+import { ostatniUzytyKurs } from "../partnerzy/kurs-nbp.js";
 import {
   partnerKolumny,
   partnerKraje,
@@ -30,12 +31,17 @@ export type UstawieniaPartnera = {
   kanalFtp: boolean;
   kanalEmail: boolean;
   emailSkrzynka: string | null;
+  /** Baza nazwy pliku cennika (bez rozszerzenia i kraju); `null` = slug nazwy partnera. */
+  nazwaPliku: string | null;
 };
 export type UstawieniaKraju = {
   narzutProc: number;
   kursZrodlo: (typeof ZRODLA_KURSU)[number];
   kursReczny: number | null;
+  /** Koszty dodatkowe w EUR (od ticketu 235; wcześniej PLN). */
   kosztyDodatkowe: number;
+  /** Stały koszt przesyłki w EUR; `null` = tabele GEIS. */
+  przesylkaStalaEur: number | null;
 };
 
 const jestObiektem = (v: unknown): v is Record<string, unknown> =>
@@ -107,6 +113,12 @@ export function walidujUstawieniaPartnera(
       return { blad: "Pole `emailSkrzynka` musi być niepustym tekstem albo null." };
     w.emailSkrzynka = e === null ? null : (e as string).trim();
   }
+  if ("nazwaPliku" in cialo) {
+    const n = cialo.nazwaPliku;
+    if (n !== null && !(typeof n === "string" && /^[A-Za-z0-9_-]{1,60}$/.test(n)))
+      return { blad: "Pole `nazwaPliku` musi być tekstem (litery, cyfry, _ i -, do 60 znaków) albo null." };
+    w.nazwaPliku = n as string | null;
+  }
   return w;
 }
 
@@ -123,8 +135,12 @@ export function walidujUstawieniaKraju(cialo: unknown): UstawieniaKraju | BladWa
   if (kursReczny !== null && !liczbaSkonczona(kursReczny)) return { blad: "Pole `kursReczny` musi być liczbą albo null." };
   const kosztyDodatkowe = cialo.kosztyDodatkowe ?? 0;
   if (!liczbaSkonczona(kosztyDodatkowe) || kosztyDodatkowe < 0) return { blad: "Pole `kosztyDodatkowe` musi być liczbą ≥ 0." };
+  const przesylkaStalaEur = cialo.przesylkaStalaEur ?? null;
+  if (przesylkaStalaEur !== null && (!liczbaSkonczona(przesylkaStalaEur) || przesylkaStalaEur < 0))
+    return { blad: "Pole `przesylkaStalaEur` musi być liczbą ≥ 0 albo null." };
   return {
     narzutProc,
+    przesylkaStalaEur,
     kursZrodlo,
     kursReczny: kursZrodlo === "reczny" ? (kursReczny as number) : null,
     kosztyDodatkowe,
@@ -179,7 +195,17 @@ export function szczegolyPartnera(db: Baza, id: number) {
     ...partner,
     magazyny: db.select().from(partnerMagazyny).where(eq(partnerMagazyny.partnerId, id)).orderBy(asc(partnerMagazyny.magazyn)).all().map((m) => m.magazyn),
     wykluczenia: db.select().from(partnerWykluczenia).where(eq(partnerWykluczenia.partnerId, id)).orderBy(asc(partnerWykluczenia.produktKod)).all().map((w) => w.produktKod),
-    kraje: db.select().from(partnerKraje).where(eq(partnerKraje.partnerId, id)).orderBy(asc(partnerKraje.kraj)).all(),
+    kraje: db
+      .select()
+      .from(partnerKraje)
+      .where(eq(partnerKraje.partnerId, id))
+      .orderBy(asc(partnerKraje.kraj))
+      .all()
+      .map((k) => {
+        // Kurs faktycznie użyty w ostatnio wygenerowanym pliku (panel pokazuje, jaki kurs jest stosowany); `null` = jeszcze nie generowano.
+        const u = ostatniUzytyKurs(db, id, k.kraj);
+        return { ...k, ostatniKurs: u ? { kurs: u.kurs, zrodlo: u.zrodlo, zapisano: u.zapisano } : null };
+      }),
     kolumny: db.select().from(partnerKolumny).where(eq(partnerKolumny.partnerId, id)).orderBy(asc(partnerKolumny.pozycja)).all(),
     polaObliczeniowe: db.select().from(partnerPolaObliczeniowe).where(eq(partnerPolaObliczeniowe.partnerId, id)).orderBy(asc(partnerPolaObliczeniowe.nazwa)).all(),
   };

@@ -136,15 +136,25 @@ export function wycenPozycje(
   const kraje = db.select().from(partnerKraje).where(eq(partnerKraje.partnerId, partnerId)).orderBy(asc(partnerKraje.kraj)).all();
   const wynik: WynikWyceny = { wiersze: [], bledy: [], ostrzezenia: [] };
   const ostrzezeniaWidziane = new Set<string>();
+  const narzutBrakWidziany = new Set<string>();
   for (const pozycja of pozycje) {
     const ceny: Record<string, number | null> = {};
     for (const k of kraje) {
+      if (!(k.narzutProc > 0)) {
+        // Bez narzutu cena = cena zakupu: nie publikujemy, dopóki użytkownik nie ustawi narzutu kraju.
+        ceny[k.kraj] = null;
+        if (!narzutBrakWidziany.has(k.kraj)) {
+          narzutBrakWidziany.add(k.kraj);
+          wynik.bledy.push({ kod: "*", kraj: k.kraj, powod: "Narzut kraju nie jest ustawiony (0 %) — ceny nie są publikowane." });
+        }
+        continue;
+      }
       try {
         const kurs = kursy[k.kraj];
         if (kurs === undefined) throw new BladKalkulacji(pozycja.kod, `Brak kursu EUR dla kraju ${k.kraj}.`);
         const w = obliczCene(db, {
           pozycja,
-          kraj: { kraj: k.kraj, narzutProc: k.narzutProc, kosztyDodatkowe: k.kosztyDodatkowe },
+          kraj: { kraj: k.kraj, narzutProc: k.narzutProc, kosztyDodatkowe: k.kosztyDodatkowe, przesylkaStalaEur: k.przesylkaStalaEur },
           zaokraglanie: partner.zaokraglanie,
           kurs,
           data,

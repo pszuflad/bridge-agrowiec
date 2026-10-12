@@ -15,7 +15,7 @@ import { TOKEN_TESTOWY, uzytkownikZFixtura } from "./msw/kontrakt";
 const startowy = (): SzczegolyPartnera => ({
   id: 1, nazwa: "TyreWorld", aktywny: false, stanMin: 2, zaokraglanie: "grosz", harmonogramMinuty: null, tolerancjaCenyProc: null, formatPliku: "csv", csvSeparator: ";",
   kanalFtp: false, kanalEmail: false, emailSkrzynka: null, zmieniono: "2026-10-10T10:00:00.000Z", magazyny: [], wykluczenia: [],
-  kraje: [{ id: 1, partnerId: 1, kraj: "FR", narzutProc: 12, kursZrodlo: "nbp", kursReczny: null, kosztyDodatkowe: 0 }, { id: 2, partnerId: 1, kraj: "DE", narzutProc: 10, kursZrodlo: "nbp", kursReczny: null, kosztyDodatkowe: 0 }],
+  kraje: [{ id: 1, partnerId: 1, kraj: "FR", narzutProc: 12, kursZrodlo: "nbp", kursReczny: null, kosztyDodatkowe: 0, przesylkaStalaEur: null, ostatniKurs: null }, { id: 2, partnerId: 1, kraj: "DE", narzutProc: 10, kursZrodlo: "nbp", kursReczny: null, kosztyDodatkowe: 0, przesylkaStalaEur: null, ostatniKurs: null }],
   kolumny: [{ id: 1, partnerId: 1, pozycja: 1, nazwaWPliku: "CatNumber", zrodloTyp: "katalog", zrodlo: "kod" }, { id: 2, partnerId: 1, pozycja: 2, nazwaWPliku: "FR euro nett", zrodloTyp: "cena", zrodlo: "FR" }],
   polaObliczeniowe: [{ id: 1, partnerId: 1, nazwa: "DAP", formula: "cena_FR + 10" }],
 });

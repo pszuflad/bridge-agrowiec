@@ -32,14 +32,24 @@ describe("kalkulator ceny partnera", () => {
     rmSync(katalog, { recursive: true, force: true });
   });
 
-  it("liczy: zakup×(1+narzut)/kurs + przesyłka GEIS z paliwem + koszty dodatkowe/kurs", () => {
+  it("liczy: zakup×(1+narzut)/kurs + przesyłka GEIS z paliwem + koszty dodatkowe (EUR)", () => {
     const w = obliczCene(db, { ...BAZA, pozycja: POZYCJA });
-    const oczekiwana = (1000 * 1.12) / 4.3 + 163 * 1.11 + 43 / 4.3;
+    const oczekiwana = (1000 * 1.12) / 4.3 + 163 * 1.11 + 43;
     expect(w.cenaPrzedZaokragleniem).toBeCloseTo(oczekiwana, 9);
     expect(w.cenaEur).toBe(Math.round(oczekiwana * 100) / 100);
     expect(w.skladniki).toMatchObject({ zakup: 1000, narzut: 0.12, kurs: 4.3 });
     expect(w.skladniki.przesylkaEur).toBeCloseTo(180.93, 2);
     expect(w.ostrzezenia).toEqual([]);
+  });
+
+  it("stały koszt przesyłki kraju (EUR) zastępuje tabele GEIS — także dla kraju bez tabeli i bez wagi", () => {
+    const w = obliczCene(db, {
+      ...BAZA,
+      kraj: { ...BAZA.kraj, kraj: "ZZ", przesylkaStalaEur: 15 },
+      pozycja: { ...POZYCJA, waga: null, dlugosc: null },
+    });
+    expect(w.skladniki.przesylkaEur).toBe(15);
+    expect(w.cenaPrzedZaokragleniem).toBeCloseTo((1000 * 1.12) / 4.3 + 15 + 43, 9);
   });
 
   it("zgadza się z wzorem z karty, gdy przesyłkę traktować jako PLN (przesylka_pln)", () => {

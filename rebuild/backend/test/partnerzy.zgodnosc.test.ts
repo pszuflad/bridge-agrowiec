@@ -114,7 +114,7 @@ describe("zgodność cenników partnerów z układem plików wzorcowych", () => 
 
   it("układ Adtyres: plik na kraj, kolumny Warehouse i PriceEurNet, ta sama pozycja w dwóch magazynach = dwa wiersze", async () => {
     await generujPlikiPartnera(db, NBP, adtyres(), { katalog: wyjscie, teraz: () => TERAZ });
-    const [naglowek, ...wiersze] = czytaj("adtyres_AT.csv");
+    const [naglowek, ...wiersze] = czytaj("adtyres_at.csv");
     expect(naglowek).toEqual(["CatNumber", "EAN", "ProductName", "ProductBrand", "ProductModel", "ProductSize", "PriceEurNet", "StockQty", "DOT", "Warehouse"]);
     const dup = wiersze.filter((r) => r[1] === "5909999999999");
     expect(dup.map((r) => r[9]).sort()).toEqual(["MO1", "MO2"]);
@@ -125,7 +125,7 @@ describe("zgodność cenników partnerów z układem plików wzorcowych", () => 
     await generujPlikiPartnera(db, NBP, tyreworld(), { katalog: wyjscie, teraz: () => TERAZ });
     await generujPlikiPartnera(db, NBP, adtyres(), { katalog: wyjscie, teraz: () => TERAZ });
     const tw = new Map(czytaj("tyreworld.csv").slice(1).map((r) => [r[0]!, { at: r[8 + KRAJE.indexOf("AT")]!, stan: r[6]! }]));
-    const ad = czytaj("adtyres_AT.csv").slice(1);
+    const ad = czytaj("adtyres_at.csv").slice(1);
     expect(ad.length).toBe(tw.size);
     for (const r of ad) expect(tw.get(r[0]!), r[0]).toEqual({ at: r[6], stan: r[7] });
   });
