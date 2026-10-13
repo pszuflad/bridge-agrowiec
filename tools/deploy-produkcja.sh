@@ -23,6 +23,13 @@
 # ============================================================================
 set -euo pipefail
 
+# Osobna, jawna operacja konfiguracyjna przez ten sam klucz z forced command.
+# Nie uruchamia buildu, migracji ani jednorazowych kroków wdrożenia.
+if [ "${SSH_ORIGINAL_COMMAND:-}" = "bridge-konfiguruj-agrorami" ]; then
+  APP_ROOT="$HOME/domains/agroopony.eu/public_html/bridgeone/_app"
+  exec "$APP_ROOT/node/bin/node" "$(dirname "$0")/agrorami-konfiguracja.cjs" "$APP_ROOT"
+fi
+
 # --- konfiguracja ---
 DOCROOT="$HOME/domains/agroopony.eu/public_html/bridgeone" # docroot bridgeone.agroopony.eu
 PROD_ROOT="$DOCROOT/_app"                                 # repo/, releases/, current, data/, node/, bin/, lib/
