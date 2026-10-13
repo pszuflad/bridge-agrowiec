@@ -44,6 +44,12 @@ function zamockujApi() {
       partner = { ...partner, wykluczenia: cialo.kody }; zmien();
       return HttpResponse.json(partner);
     }),
+    http.put("*/api/partnerzy/:id/kraje/:kraj/faktura", async ({ request, params }) => {
+      const cialo = await request.json();
+      zapisz("PUT", `/kraje/${String(params.kraj)}/faktura`, cialo);
+      partner = { ...partner, kraje: partner.kraje.map((k) => (k.kraj === params.kraj ? { ...k, ...(cialo as object) } : k)) }; zmien();
+      return HttpResponse.json(partner);
+    }),
     http.put("*/api/partnerzy/:id/kraje/:kraj", async ({ request, params }) => {
       const cialo = (await request.json()) as Omit<KrajPartnera, "id" | "partnerId" | "kraj">;
       zapisz("PUT", `/kraje/${String(params.kraj)}`, cialo);
@@ -260,6 +266,22 @@ describe("kraje", () => {
     await uzytkownik.type(screen.getByTestId("input-ustawienia-faktura-kraj"), "ad");
     await uzytkownik.click(screen.getByTestId("button-ustawienia-zapisz"));
     await waitFor(() => expect(zadania[0]?.cialo).toMatchObject({ fakturaNazwa: "Firma Test", fakturaKraj: "AD", fakturaNip: null }));
+  });
+
+  it("dane do faktury wg kraju: osobny zapis dla kraju (PUT …/kraje/FR/faktura), kraj małymi → wielkimi, sama nazwa nie jest wymagana, ale pola bez nazwy blokują", async () => {
+    const uzytkownik = userEvent.setup();
+    zamockujApi();
+    await otworz();
+    await uzytkownik.type(await screen.findByTestId("input-faktura-fakturaNip-FR"), "FR123");
+    await uzytkownik.click(screen.getByTestId("button-faktura-zapisz-FR"));
+    expect(await screen.findByText("Podaj nazwę firmy albo wyczyść wszystkie pola (puste = dane domyślne partnera).")).toBeInTheDocument();
+    expect(zadania.some((z) => z.sciezka.includes("faktura"))).toBe(false);
+    await uzytkownik.type(screen.getByTestId("input-faktura-fakturaNazwa-FR"), "Adtyres France");
+    await uzytkownik.type(screen.getByTestId("input-faktura-fakturaKraj-FR"), "fr");
+    await uzytkownik.click(screen.getByTestId("button-faktura-zapisz-FR"));
+    await waitFor(() => expect(zadania.find((z) => z.sciezka.includes("/faktura"))?.cialo).toEqual({
+      fakturaNazwa: "Adtyres France", fakturaNip: "FR123", fakturaUlica: null, fakturaKod: null, fakturaMiasto: null, fakturaKraj: "FR",
+    }));
   });
 
   it("identyfikatory Selly trafiają w PUT jako liczby (puste → null); nieliczbowa wartość blokuje zapis", async () => {

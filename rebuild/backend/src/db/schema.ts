@@ -674,6 +674,13 @@ export const partnerKraje = sqliteTable("partner_kraje", {
 	przesylkaStalaEur: real("przesylka_stala_eur"),
 	mytoEur: real("myto_eur").default(0).notNull(),
 	pakowanieEur: real("pakowanie_eur").default(0).notNull(),
+	// Ticket 252 (migracja 035): dane do faktury dla zamówień z tym krajem dostawy; NULL w `fakturaNazwa` = dane domyślne partnera.
+	fakturaNazwa: text("faktura_nazwa"),
+	fakturaNip: text("faktura_nip"),
+	fakturaUlica: text("faktura_ulica"),
+	fakturaKod: text("faktura_kod"),
+	fakturaMiasto: text("faktura_miasto"),
+	fakturaKraj: text("faktura_kraj"),
 }, (table) => [unique().on(table.partnerId, table.kraj)]);
 
 // Ticket 247 (migracja 033) — reguły narzutów partnera (osobne od `markups` sklepu).

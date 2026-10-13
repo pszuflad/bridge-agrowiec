@@ -335,6 +335,39 @@ export function ustawKraj(db: Baza, id: number, kraj: string, u: UstawieniaKraju
   });
 }
 
+export type FakturaKraju = {
+  fakturaNazwa: string | null;
+  fakturaNip: string | null;
+  fakturaUlica: string | null;
+  fakturaKod: string | null;
+  fakturaMiasto: string | null;
+  fakturaKraj: string | null;
+};
+
+/** Waliduje dane do faktury kraju (ticket 252): pełny komplet pól (brakujące = null), teksty ≤ 120 znaków, kraj faktury 2-literowy. */
+export function walidujFakturaKraju(cialo: unknown): FakturaKraju | BladWalidacji {
+  if (!jestObiektem(cialo)) return { blad: "Ciało żądania musi być obiektem JSON." };
+  const w: FakturaKraju = { fakturaNazwa: null, fakturaNip: null, fakturaUlica: null, fakturaKod: null, fakturaMiasto: null, fakturaKraj: null };
+  for (const pole of ["fakturaNazwa", "fakturaNip", "fakturaUlica", "fakturaKod", "fakturaMiasto"] as const) {
+    const v = cialo[pole] ?? null;
+    if (v !== null && (typeof v !== "string" || v.length > 120)) return { blad: `Pole \`${pole}\` musi być tekstem (do 120 znaków) albo null.` };
+    w[pole] = v === null || (v as string).trim() === "" ? null : (v as string).trim();
+  }
+  const k = cialo.fakturaKraj ?? null;
+  const kraj = k === null || k === "" ? null : normalizujKraj(k);
+  if (k !== null && k !== "" && kraj === null) return { blad: "Pole `fakturaKraj` musi być dwuliterowym kodem kraju (np. PL) albo null." };
+  w.fakturaKraj = kraj;
+  if (w.fakturaNazwa === null && Object.values(w).some((x) => x !== null)) return { blad: "Podaj nazwę firmy albo wyczyść wszystkie pola (puste = dane domyślne partnera)." };
+  return w;
+}
+
+/** Zapisuje dane do faktury istniejącego kraju partnera; `false`, gdy partner nie ma takiego kraju. */
+export function ustawFakturaKraju(db: Baza, id: number, kraj: string, f: FakturaKraju): boolean {
+  const r = db.update(partnerKraje).set(f).where(and(eq(partnerKraje.partnerId, id), eq(partnerKraje.kraj, kraj))).run();
+  if (r.changes > 0) db.update(partnerzy).set({ zmieniono: teraz() }).where(eq(partnerzy.id, id)).run();
+  return r.changes > 0;
+}
+
 export function usunKraj(db: Baza, id: number, kraj: string): boolean {
   const r = db.delete(partnerKraje).where(and(eq(partnerKraje.partnerId, id), eq(partnerKraje.kraj, kraj))).run();
   if (r.changes > 0) db.update(partnerzy).set({ zmieniono: teraz() }).where(eq(partnerzy.id, id)).run();
