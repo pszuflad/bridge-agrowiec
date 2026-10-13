@@ -2,7 +2,9 @@
 import request from "supertest";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { products } from "../src/db/schema.js";
+import { eq } from "drizzle-orm";
+
+import { partnerZamowienia, products } from "../src/db/schema.js";
 import { zwaliduj } from "../src/partnerzy/walidacja-zamowienia.js";
 import { zapiszZamowienie } from "../src/repos/partnerzy-zamowienia.js";
 import { stworzSrodowiskoTestowe, type SrodowiskoTestowe } from "./gate/index.js";
@@ -30,6 +32,28 @@ describe("trasy /api/partnerzy/:id/zamowienia", () => {
   it("wymaga logowania", async () => {
     expect((await request(s.app).get(`/api/partnerzy/${a}/zamowienia`)).status).toBe(401);
     expect((await request(s.app).get(`/api/partnerzy/${a}/zamowienia/1`)).status).toBe(401);
+  });
+
+  it("licznik zamówień w GET /api/partnerzy (ticket 251): podział wg statusu osobno dla każdego partnera", async () => {
+    const wstaw = (partnerId: number, numer: string, status: string) => {
+      const id = zapiszZamowienie(s.db, partnerId, zamowienie(numer)).id;
+      s.db.update(partnerZamowienia).set({ status }).where(eq(partnerZamowienia.id, id)).run();
+    };
+    wstaw(a, "N1", "nowe");
+    wstaw(a, "P1", "przyjete");
+    wstaw(a, "P2", "przyjete");
+    wstaw(a, "B1", "blad_importu");
+    wstaw(a, "W1", "wysylanie");
+    wstaw(a, "S1", "wyslane");
+    wstaw(b, "X1", "przyjete");
+    const lista = (await get("/api/partnerzy")).body as { partnerzy: { id: number; zamowienia: unknown }[] };
+    expect(lista.partnerzy.find((p) => p.id === a)!.zamowienia).toEqual({ lacznie: 6, nowe: 1, doSelly: 2, bledy: 1, wBlokadzie: 1, wyslane: 1 });
+    expect(lista.partnerzy.find((p) => p.id === b)!.zamowienia).toEqual({ lacznie: 1, nowe: 0, doSelly: 1, bledy: 0, wBlokadzie: 0, wyslane: 0 });
+  });
+
+  it("licznik zamówień: partner bez zamówień ma zera", async () => {
+    const lista = (await get("/api/partnerzy")).body as { partnerzy: { id: number; zamowienia: unknown }[] };
+    expect(lista.partnerzy.find((p) => p.id === a)!.zamowienia).toEqual({ lacznie: 0, nowe: 0, doSelly: 0, bledy: 0, wBlokadzie: 0, wyslane: 0 });
   });
 
   it("lista: pusta dla nowego partnera, 404 dla nieistniejącego", async () => {

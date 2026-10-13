@@ -25,9 +25,24 @@ import {
   opisHarmonogramu,
   ustawAktywnosc,
   type ListaLogow,
+  type LicznikZamowien,
   type ListaPartnerow,
   type PartnerNaLiscie,
 } from "./partnerzy/api";
+
+/** Licznik zamówień partnera wg statusu; wymagające uwagi (błąd importu, zablokowane w wysyłaniu) na czerwono. */
+function LicznikZamowienKomorka({ id, z }: { id: number; z: LicznikZamowien | undefined }) {
+  if (!z || z.lacznie === 0) return <span className="text-muted-foreground" data-testid={`zamowienia-licznik-${id}`}>brak</span>;
+  return (
+    <span className="flex flex-wrap items-center gap-1.5" data-testid={`zamowienia-licznik-${id}`}>
+      <span>{z.lacznie} łącznie</span>
+      {z.bledy > 0 ? <Badge variant="destructive" data-testid={`zamowienia-bledy-${id}`}>{z.bledy} z błędem</Badge> : null}
+      {z.wBlokadzie > 0 ? <Badge variant="destructive" data-testid={`zamowienia-blokada-${id}`}>{z.wBlokadzie} zablokowane</Badge> : null}
+      {z.doSelly > 0 ? <Badge variant="secondary" data-testid={`zamowienia-do-selly-${id}`}>{z.doSelly} do Selly</Badge> : null}
+      {z.nowe > 0 ? <Badge variant="secondary">{z.nowe} nowe</Badge> : null}
+    </span>
+  );
+}
 
 function OstatnieGenerowanie({ id }: { id: number }) {
   const { data, isError } = useQuery<ListaLogow | null>({
@@ -107,6 +122,16 @@ export function Partnerzy() {
         </CardContent>
       </Card>
 
+      {partnerzy.some((p) => p.zamowienia) ? (
+        <p className="text-sm text-muted-foreground" data-testid="zamowienia-podsumowanie">
+          Zamówienia partnerów: {partnerzy.reduce((a, p) => a + (p.zamowienia?.lacznie ?? 0), 0)} łącznie ·{" "}
+          <span className={partnerzy.some((p) => (p.zamowienia?.bledy ?? 0) + (p.zamowienia?.wBlokadzie ?? 0) > 0) ? "font-medium text-destructive" : ""}>
+            {partnerzy.reduce((a, p) => a + (p.zamowienia?.bledy ?? 0) + (p.zamowienia?.wBlokadzie ?? 0), 0)} wymaga uwagi
+          </span>{" "}
+          · {partnerzy.reduce((a, p) => a + (p.zamowienia?.doSelly ?? 0), 0)} do utworzenia w Selly
+        </p>
+      ) : null}
+
       {lista.isError ? (
         <p className="rounded-md bg-destructive/10 px-3.5 py-3 text-sm text-destructive" role="alert" data-testid="text-partnerzy-blad">
           {komunikatBledu(lista.error)}
@@ -130,6 +155,7 @@ export function Partnerzy() {
                     <th className="px-4 py-3 font-medium">Status</th>
                     <th className="px-4 py-3 font-medium">Harmonogram</th>
                     <th className="px-4 py-3 font-medium">Magazyny / kraje</th>
+                    <th className="px-4 py-3 font-medium">Zamówienia</th>
                     <th className="px-4 py-3 font-medium">Ostatnie generowanie</th>
                     <th className="px-4 py-3 font-medium" aria-label="Akcje" />
                   </tr>
@@ -148,6 +174,7 @@ export function Partnerzy() {
                         {p.liczbaMagazynow} mag. · {p.liczbaKrajow} {p.liczbaKrajow === 1 ? "kraj" : "krajów"}
                         {p.liczbaWykluczen > 0 ? ` · ${p.liczbaWykluczen} wykl.` : ""}
                       </td>
+                      <td className="px-4 py-3"><LicznikZamowienKomorka id={p.id} z={p.zamowienia} /></td>
                       <td className="px-4 py-3">
                         <OstatnieGenerowanie id={p.id} />
                       </td>
