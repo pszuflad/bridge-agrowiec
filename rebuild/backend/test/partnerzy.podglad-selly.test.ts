@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { kursyNbp, partnerZamowienia, partnerzy, products, sellyProducts } from "../src/db/schema.js";
 import { podgladDlaSelly } from "../src/partnerzy/podglad-selly.js";
 import { zapiszZamowienie } from "../src/repos/partnerzy-zamowienia.js";
-import type { KlientSelly } from "../src/selly/klient.js";
+import { BladSelly, type KlientSelly } from "../src/selly/klient.js";
 import { stworzSrodowiskoTestowe, type SrodowiskoTestowe } from "./gate/index.js";
 import { stworzAtrapeSelly } from "./gate/selly-atrapa.js";
 import { XML_PRZYKLAD } from "./partnerzy.zamowienie-przyklad.js";
@@ -57,7 +57,7 @@ describe("zamówienie partnera → Selly", () => {
       expect(p.zamawiajacy).toMatchObject({ nazwa: "Adtyres SL", nip: "ATU1", kraj: "AD" });
       expect(p.dostawa.CUSTOMERNAME).toBe("Jan Kowalski");
       expect(p.pozycje[0]!.dopasowanie).toMatchObject({ kod: "011200284", dostawca: "MO1", sellyProductId: 501, sellyVariantId: 601 });
-      expect(p.ostrzezenia).toEqual([expect.stringMatching(/pełnego adresu dostawy.*ulica, kod pocztowy, miasto/)]);
+      expect(p.ostrzezenia).toEqual([expect.stringMatching(/e-mail klienta/), expect.stringMatching(/pełnego adresu dostawy.*ulica, kod pocztowy, miasto/)]);
       expect(p.zadanie).toMatchObject({
         status_id: 3, payment_id: 71, delivery_id: 201, currency: "EUR", exchange_rate: 4.25,
         invoice_company: "Adtyres SL", invoice_nip: "ATU1", invoice_postcode: "AD500", ship_company: "Jan Kowalski", delivery_country_iso2: "AT",
@@ -81,6 +81,28 @@ describe("zamówienie partnera → Selly", () => {
       expect(tekst).toMatch(/Brak zapisanego kursu EUR/);
       expect(tekst).toMatch(/status „nowe”/);
       expect(p.zadanie).toBeNull();
+    });
+
+    it("niejednoznaczne powiązanie z Selly i kraj dostawy niedwuliterowy blokują", () => {
+      const partnerId = dodajPartnera();
+      katalogZSelly();
+      s.db.insert(sellyProducts).values({ kodImportu: "A2", dostawca: "MO2", bridgeKod: "011200284", sellyProductId: 777, sellyVariantId: 888 }).run(); // drugie, RÓŻNE powiązanie tego samego kodu
+      kursEur();
+      const id = przyjete(partnerId);
+      s.db.update(partnerZamowienia).set({ dostawaJson: JSON.stringify({ CUSTOMERNAME: "Jan", COUNTRY: "Austria" }) }).where(eq(partnerZamowienia.id, id)).run();
+      const p = podgladDlaSelly(s.db, partnerId, id)!;
+      expect(p.blokady.join(" | ")).toMatch(/Niejednoznaczne powiązanie z Selly.*011200284/);
+      expect(p.blokady.join(" | ")).toMatch(/dwuliterowego kodu kraju dostawy \(jest: „Austria”\)/);
+      expect(p.zadanie).toBeNull();
+    });
+
+    it("kurs w podglądzie: wartość i data tabeli; stary kurs daje ostrzeżenie", () => {
+      const partnerId = dodajPartnera();
+      katalogZSelly();
+      s.db.insert(kursyNbp).values({ data: "2020-01-02", kurs: 4.5, pobrano: "x" }).run();
+      const p = podgladDlaSelly(s.db, partnerId, przyjete(partnerId))!;
+      expect(p.kurs).toEqual({ kurs: 4.5, data: "2020-01-02" });
+      expect(p.ostrzezenia.join(" ")).toMatch(/starszy niż 5 dni/);
     });
 
     it("brak danych do faktury partnera blokuje i wymienia brakujące pola", () => {
@@ -142,9 +164,9 @@ describe("zamówienie partnera → Selly", () => {
       expect(atrapa.wywolania.filter((w) => w.metoda === "createOrder")).toHaveLength(1);
     });
 
-    it("odmowa Selly: 502 z komunikatem, zamówienie wraca do „przyjete” (można ponowić)", async () => {
+    it("jednoznaczna odmowa Selly (4xx): 502 z komunikatem, zamówienie wraca do „przyjete” (można ponowić)", async () => {
       const atrapa = stworzAtrapeSelly();
-      const klient: KlientSelly = { ...atrapa.klient, createOrder: () => Promise.reject(new Error("[Selly] 422 niepoprawne pole")) };
+      const klient: KlientSelly = { ...atrapa.klient, createOrder: () => Promise.reject(new BladSelly("[Selly] 422 niepoprawne pole", 422, null)) };
       s = await stworzSrodowiskoTestowe(undefined, { klientSelly: klient, sellyZamowienia: true });
       const partnerId = dodajPartnera();
       katalogZSelly();
@@ -154,6 +176,27 @@ describe("zamówienie partnera → Selly", () => {
       expect(odp.status).toBe(502);
       expect(odp.body.error).toMatch(/Selly odrzuciło.*niepoprawne pole/);
       expect(stan(id)).toEqual({ status: "przyjete", numer: null });
+    });
+
+    it("błąd niejednoznaczny (timeout / 5xx): zamówienie ZOSTAJE zablokowane w „wysylanie”, drugie kliknięcie nie tworzy duplikatu; „Zwolnij” odblokowuje", async () => {
+      const atrapa = stworzAtrapeSelly();
+      let proby = 0;
+      const klient: KlientSelly = { ...atrapa.klient, createOrder: () => (proby++, Promise.reject(new BladSelly("[Selly] 504 timeout", 504, null))) };
+      s = await stworzSrodowiskoTestowe(undefined, { klientSelly: klient, sellyZamowienia: true });
+      const partnerId = dodajPartnera();
+      katalogZSelly();
+      kursEur();
+      const id = przyjete(partnerId);
+      const auth = await zaloguj();
+      const pierwszy = await request(s.app).post(url(partnerId, id)).set(auth);
+      expect(pierwszy.status).toBe(502);
+      expect(pierwszy.body.error).toMatch(/Nie wiadomo, czy Selly utworzyło/);
+      expect(stan(id)).toEqual({ status: "wysylanie", numer: null });
+      expect((await request(s.app).post(url(partnerId, id)).set(auth)).status).toBe(409);
+      expect(proby).toBe(1);
+      expect((await request(s.app).post(`/api/partnerzy/${partnerId}/zamowienia/${id}/zwolnij-wysylanie`).set(auth)).status).toBe(200);
+      expect(stan(id)).toEqual({ status: "przyjete", numer: null });
+      expect((await request(s.app).post(`/api/partnerzy/${partnerId}/zamowienia/${id}/zwolnij-wysylanie`).set(auth)).status).toBe(409); // już zwolnione
     });
 
     it("blokady podglądu zatrzymują utworzenie (409) i nie wołają Selly", async () => {

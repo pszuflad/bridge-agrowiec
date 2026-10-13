@@ -9,7 +9,7 @@ import { and, desc, eq, isNull } from "drizzle-orm";
 import type { Baza } from "../db/index.js";
 import { kursyNbp, partnerZamowienia, partnerzy, products, sellyProducts } from "../db/schema.js";
 import { szczegolyZamowieniaDlaPartnera } from "../repos/partnerzy-zamowienia.js";
-import type { KlientSelly } from "../selly/klient.js";
+import { BladSelly, type KlientSelly } from "../selly/klient.js";
 import { znajdzPozycjeKatalogu } from "./walidacja-zamowienia.js";
 
 export const STATUS_WYSYLANIE = "wysylanie";
@@ -41,6 +41,8 @@ export type PodgladSelly = {
   zadanie: Record<string, unknown> | null;
   /** Flaga serwera `PARTNERZY_SELLY_ZAMOWIENIA` — bez niej przycisk „Utwórz w Selly” jest nieaktywny. */
   tworzenieWlaczone: boolean;
+  /** Kurs użyty w ciele zamówienia (`exchange_rate`, PLN za 1 EUR) i data tabeli NBP — widoczne w podglądzie, bo kierunek kursu trzeba sprawdzić przy pierwszej próbie. */
+  kurs: { kurs: number; data: string } | null;
 };
 
 const BRAKUJE: Array<[keyof PodgladSelly["zamawiajacy"], string]> = [
@@ -61,7 +63,7 @@ export function adresDostawy(d: Record<string, string>) {
   };
 }
 
-const ostatniKursEur = (db: Baza): number | null => db.select({ kurs: kursyNbp.kurs }).from(kursyNbp).orderBy(desc(kursyNbp.data)).limit(1).get()?.kurs ?? null;
+const ostatniKursEur = (db: Baza): { kurs: number; data: string } | null => db.select({ kurs: kursyNbp.kurs, data: kursyNbp.data }).from(kursyNbp).orderBy(desc(kursyNbp.data)).limit(1).get() ?? null;
 
 export function podgladDlaSelly(db: Baza, partnerId: number, zamowienieId: number, tworzenieWlaczone = false): PodgladSelly | null {
   const z = szczegolyZamowieniaDlaPartnera(db, partnerId, zamowienieId);
@@ -71,12 +73,17 @@ export function podgladDlaSelly(db: Baza, partnerId: number, zamowienieId: numbe
     nazwa: p?.fakturaNazwa ?? null, nip: p?.fakturaNip ?? null, ulica: p?.fakturaUlica ?? null,
     kod: p?.fakturaKod ?? null, miasto: p?.fakturaMiasto ?? null, kraj: p?.fakturaKraj ?? null,
   };
+  const niejednoznaczne = new Set<string>();
   const pozycje: PozycjaPodgladu[] = z.pozycje.map((poz) => {
     const znaleziona = znajdzPozycjeKatalogu(db, poz.kod);
     const produkt = znaleziona ? db.select({ nazwa: products.nazwa, ean: products.ean, dostawca: products.dostawca }).from(products).where(eq(products.kod, znaleziona.kod)).get() : undefined;
-    const selly = znaleziona
-      ? db.select({ pid: sellyProducts.sellyProductId, vid: sellyProducts.sellyVariantId }).from(sellyProducts).where(eq(sellyProducts.bridgeKod, znaleziona.kod)).all().find((r) => r.vid !== null)
-      : undefined;
+    // Powiązań z Selly bywa kilka dla jednego `bridge_kod` (unikat jest na (kod_importu, dostawca)) — zgadywać nie wolno: różne pary = niejednoznaczne.
+    const powiazania = znaleziona
+      ? db.select({ pid: sellyProducts.sellyProductId, vid: sellyProducts.sellyVariantId }).from(sellyProducts).where(eq(sellyProducts.bridgeKod, znaleziona.kod)).all().filter((r) => r.vid !== null)
+      : [];
+    const rozne = new Set(powiazania.map((r) => `${r.pid}/${r.vid}`));
+    if (rozne.size > 1) niejednoznaczne.add(znaleziona!.kod);
+    const selly = rozne.size === 1 ? powiazania[0] : undefined;
     return {
       lp: poz.lp, kodPartnera: poz.kod, nazwaPartnera: poz.nazwa, ilosc: poz.ilosc, cena: poz.cenaSprzedazy,
       dopasowanie: znaleziona
@@ -100,16 +107,22 @@ export function podgladDlaSelly(db: Baza, partnerId: number, zamowienieId: numbe
   if (nieznane) blokady.push(`Pozycje bez dopasowania w katalogu: ${nieznane} — do ręcznej weryfikacji.`);
   const bezSelly = pozycje.filter((x) => x.dopasowanie && x.dopasowanie.sellyVariantId === null).length;
   if (bezSelly) blokady.push(`Pozycje, których nie ma jeszcze w Selly (brak powiązania produkt/wariant): ${bezSelly}.`);
-  const bezCeny = pozycje.filter((x) => x.cena === null || !(x.cena >= 0)).length;
+  if (niejednoznaczne.size) blokady.push(`Niejednoznaczne powiązanie z Selly (kilka różnych produktów/wariantów dla jednego kodu): ${[...niejednoznaczne].join(", ")}.`);
+  const bezCeny = pozycje.filter((x) => x.cena === null || !(x.cena > 0)).length;
   if (bezCeny) blokady.push(`Pozycje bez ceny w zamówieniu: ${bezCeny}.`);
   const waluta = (z.waluta ?? "EUR").trim().toUpperCase();
   if (waluta !== "EUR") blokady.push(`Waluta zamówienia to ${waluta}, a Bridge tworzy zamówienia partnerów tylko w EUR.`);
-  const kurs = ostatniKursEur(db);
+  const kursWpis = ostatniKursEur(db);
+  const kurs = kursWpis?.kurs ?? null;
   if (kurs === null) blokady.push("Brak zapisanego kursu EUR (pojawia się po pierwszym wygenerowaniu cennika z kursem NBP).");
   if (z.status !== "przyjete") blokady.push(`Zamówienie ma status „${z.status}” — do Selly trafia tylko zamówienie „przyjęte”.`);
   if (z.numerWlasny) blokady.push(`Zamówienie ma już numer własny (${z.numerWlasny}).`);
+  if (z.status === STATUS_WYSYLANIE) blokady.push("Zamówienie jest w trakcie wysyłania do Selly albo poprzednia próba nie dała jednoznacznej odpowiedzi — sprawdź w Selly, a potem „Zwolnij”.");
 
+  if (kursWpis && Date.now() - Date.parse(kursWpis.data) > 5 * 86_400_000) ostrzezenia.push(`Kurs EUR w ciele zamówienia pochodzi z tabeli NBP z ${kursWpis.data} (starszy niż 5 dni).`);
   const adres = adresDostawy(z.dostawa);
+  if (adres.email === "") ostrzezenia.push("Zamówienie nie zawiera adresu e-mail klienta.");
+  if (!/^[A-Za-z]{2}$/.test(adres.kraj)) blokady.push(`Zamówienie nie ma dwuliterowego kodu kraju dostawy (jest: „${adres.kraj || "brak"}”).`);
   const bezAdresu = (["ulica", "kod", "miasto"] as const).filter((k) => adres[k] === "");
   if (bezAdresu.length) ostrzezenia.push(`Zamówienie nie zawiera pełnego adresu dostawy (brak: ${bezAdresu.map((k) => ({ ulica: "ulica", kod: "kod pocztowy", miasto: "miasto" })[k]).join(", ")}) — uzupełnij w Selly.`);
 
@@ -150,7 +163,7 @@ export function podgladDlaSelly(db: Baza, partnerId: number, zamowienieId: numbe
       })),
     };
   }
-  return { zamawiajacy, dostawa: z.dostawa, waluta: z.waluta, kosztDostawy: z.kosztDostawy, pozycje, blokady, ostrzezenia, zadanie, tworzenieWlaczone };
+  return { zamawiajacy, dostawa: z.dostawa, waluta: z.waluta, kosztDostawy: z.kosztDostawy, pozycje, blokady, ostrzezenia, zadanie, tworzenieWlaczone, kurs: kursWpis };
 }
 
 export class BladTworzenia extends Error {
@@ -181,8 +194,14 @@ export async function utworzWSelly(db: Baza, klient: KlientSelly, partnerId: num
   try {
     odp = await klient.createOrder(podglad.zadanie);
   } catch (e) {
-    db.update(partnerZamowienia).set({ status: "przyjete" }).where(eq(partnerZamowienia.id, zamowienieId)).run();
-    throw new BladTworzenia(502, `Selly odrzuciło zamówienie: ${e instanceof Error ? e.message : String(e)}`);
+    const opis = e instanceof Error ? e.message : String(e);
+    // Wracamy do `przyjete` TYLKO przy jednoznacznej odmowie (4xx — sklep odpowiedział i nie utworzył). Timeout, zerwane połączenie i 5xx są
+    // niejednoznaczne: sklep mógł zamówienie przyjąć. Wtedy zostaje `wysylanie` (zamówienie zablokowane) i człowiek sprawdza w Selly.
+    if (e instanceof BladSelly && e.status >= 400 && e.status < 500 && e.status !== 408 && e.status !== 429) {
+      db.update(partnerZamowienia).set({ status: "przyjete" }).where(eq(partnerZamowienia.id, zamowienieId)).run();
+      throw new BladTworzenia(502, `Selly odrzuciło zamówienie: ${opis}`);
+    }
+    throw new BladTworzenia(502, `Nie wiadomo, czy Selly utworzyło zamówienie (${opis}). Zamówienie zostało zablokowane — sprawdź je w Selly i dopiero wtedy użyj „Zwolnij”.`);
   }
   const dane = (odp ?? {}) as { data?: { order_id?: unknown; order_number?: unknown }; order_id?: unknown; order_number?: unknown };
   const idSurowe = dane.data?.order_id ?? dane.order_id;
@@ -191,4 +210,14 @@ export async function utworzWSelly(db: Baza, klient: KlientSelly, partnerId: num
   const numerWlasny = typeof numerSurowy === "string" && numerSurowy !== "" ? numerSurowy : idSelly !== null ? String(idSelly) : "wysłano (Selly nie zwróciło numeru)";
   db.update(partnerZamowienia).set({ status: STATUS_WYSLANE, numerWlasny }).where(eq(partnerZamowienia.id, zamowienieId)).run();
   return { numerWlasny, idSelly };
+}
+
+/** Zwalnia zamówienie zablokowane w `wysylanie` (po sprawdzeniu w Selly, że NIE powstało) — wraca do `przyjete`. Atomowo; inny status → 409. */
+export function zwolnijWysylanie(db: Baza, partnerId: number, zamowienieId: number): void {
+  const r = db
+    .update(partnerZamowienia)
+    .set({ status: "przyjete" })
+    .where(and(eq(partnerZamowienia.id, zamowienieId), eq(partnerZamowienia.partnerId, partnerId), eq(partnerZamowienia.status, STATUS_WYSYLANIE), isNull(partnerZamowienia.numerWlasny)))
+    .run();
+  if (r.changes !== 1) throw new BladTworzenia(409, "Zamówienie nie jest w stanie „wysyłanie”.");
 }

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/toast";
 import {
-  KLUCZ_PARTNERZY, LIMIT_ZAMOWIEN, komunikatBledu, kluczPodgladuSelly, kluczZamowien, kluczZamowienia, odbierzZamowienia, utworzWSelly, zwalidujZamowienie,
+  KLUCZ_PARTNERZY, LIMIT_ZAMOWIEN, komunikatBledu, kluczPodgladuSelly, kluczZamowien, kluczZamowienia, odbierzZamowienia, utworzWSelly, zwalidujZamowienie, zwolnijWysylanie,
   type ListaZamowien, type PodgladSelly, type SzczegolyPartnera, type SzczegolyZamowienia, type WynikOdbioru,
 } from "./api";
 
@@ -202,6 +202,12 @@ function PodgladDoSelly({ partnerId, zamowienieId }: { partnerId: number; zamowi
     // Po sukcesie i po błędzie: zamówienie i podgląd od nowa (status mógł się zmienić albo wrócić do „przyjęte”).
     onSettled: () => void klient.invalidateQueries({ queryKey: [KLUCZ_PARTNERZY, String(partnerId)], predicate: ({ queryKey }) => /^zamowienia/.test(String(queryKey[2])) }),
   });
+  const zwolnienie = useMutation<void, Error, void>({
+    mutationFn: () => zwolnijWysylanie(partnerId, zamowienieId),
+    onSuccess: () => toast({ title: "Zamówienie zwolnione", description: "Wróciło do statusu „przyjęte”." }),
+    onError: (e) => toast({ title: "Nie udało się zwolnić zamówienia", description: komunikatBledu(e), variant: "destructive" }),
+    onSettled: () => void klient.invalidateQueries({ queryKey: [KLUCZ_PARTNERZY, String(partnerId)], predicate: ({ queryKey }) => /^zamowienia/.test(String(queryKey[2])) }),
+  });
   const mozna = !!p && p.blokady.length === 0 && p.tworzenieWlaczone;
   return (
     <div className="space-y-2 border-t pt-2" data-testid={`podglad-selly-${zamowienieId}`}>
@@ -235,6 +241,9 @@ function PodgladDoSelly({ partnerId, zamowienieId }: { partnerId: number; zamowi
           ) : (
             <p className="text-muted-foreground" data-testid={`podglad-gotowe-${zamowienieId}`}>Wszystkie pozycje dopasowane i powiązane z Selly, dane do faktury kompletne.</p>
           )}
+          {p.kurs ? (
+            <p className="text-muted-foreground" data-testid={`podglad-kurs-${zamowienieId}`}>Kurs EUR w zamówieniu (exchange_rate): {p.kurs.kurs} PLN za 1 EUR, tabela NBP z {p.kurs.data} — sprawdź, czy kierunek zgadza się z Selly.</p>
+          ) : null}
           {p.zadanie ? (
             <details>
               <summary className="cursor-pointer text-muted-foreground">Ciało zamówienia wysyłane do Selly</summary>
@@ -253,7 +262,12 @@ function PodgladDoSelly({ partnerId, zamowienieId }: { partnerId: number; zamowi
             ) : (
               <Button size="sm" disabled={!mozna} onClick={() => ustawPotwierdzenie(true)} data-testid={`button-selly-utworz-${zamowienieId}`}>Utwórz w Selly</Button>
             )}
-            {!p.tworzenieWlaczone ? <span className="text-muted-foreground" data-testid={`podglad-wylaczone-${zamowienieId}`}>Tworzenie zamówień w Selly jest wyłączone na serwerze (PARTNERZY_SELLY_ZAMOWIENIA).</span> : null}
+            {p.blokady.some((b) => b.includes("Zwolnij")) ? (
+              <Button size="sm" variant="outline" disabled={zwolnienie.isPending} onClick={() => zwolnienie.mutate()} data-testid={`button-selly-zwolnij-${zamowienieId}`}>
+                Sprawdziłem w Selly — zamówienie nie powstało, zwolnij
+              </Button>
+            ) : null}
+            {!p.tworzenieWlaczone ? <span className="text-muted-foreground" data-testid={`podglad-wylaczone-${zamowienieId}`}>Tworzenie zamówień w Selly jest wyłączone na serwerze (PARTNERZY_SELLY_ZAMOWIENIA i tryb Selly „pelny”).</span> : null}
           </div>
         </div>
       ) : null}

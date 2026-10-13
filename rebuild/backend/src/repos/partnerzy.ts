@@ -153,7 +153,7 @@ export function walidujUstawieniaPartnera(
   for (const pole of ["sellyStatusId", "sellyPaymentId", "sellyDeliveryId", "sellyVatId"] as const) {
     if (pole in cialo) {
       const v = cialo[pole];
-      if (v !== null && !(typeof v === "number" && Number.isInteger(v) && v >= 0)) return { blad: `Pole \`${pole}\` musi być nieujemną liczbą całkowitą (ID z Selly) albo null.` };
+      if (v !== null && !(typeof v === "number" && Number.isSafeInteger(v) && v >= 0)) return { blad: `Pole \`${pole}\` musi być nieujemną liczbą całkowitą (ID z Selly) albo null.` };
       w[pole] = v as number | null;
     }
   }

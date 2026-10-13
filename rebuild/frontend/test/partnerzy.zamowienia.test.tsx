@@ -266,7 +266,7 @@ describe("zamówienia partnera", () => {
             { lp: 2, kodPartnera: "X", nazwaPartnera: null, ilosc: 1, cena: null, dopasowanie: null },
           ],
           blokady: ["Brak danych do faktury partnera: ulica (uzupełnij w ustawieniach partnera).", "Pozycje bez dopasowania w katalogu: 1 — do ręcznej weryfikacji."],
-          ostrzezenia: [], zadanie: null, tworzenieWlaczone: true,
+          ostrzezenia: [], zadanie: null, tworzenieWlaczone: true, kurs: null,
         });
       }),
     );
@@ -288,7 +288,7 @@ describe("zamówienia partnera", () => {
     zamawiajacy: { nazwa: "Adtyres SL", nip: "ATU1", ulica: "Calle 1", kod: "AD500", miasto: "Andorra", kraj: "AD" },
     dostawa: {}, waluta: "EUR", kosztDostawy: null,
     pozycje: [{ lp: 1, kodPartnera: "A", nazwaPartnera: null, ilosc: 1, cena: 10, dopasowanie: { kod: "K1", nazwa: "OPONA", ean: "1", dostawca: "MO1", stan: 5, status: "aktywny", sellyProductId: 1, sellyVariantId: 2 } }],
-    blokady: [], ostrzezenia: ["Zamówienie nie zawiera pełnego adresu dostawy (brak: ulica)."], zadanie: { status_id: 3, products: [] }, tworzenieWlaczone,
+    blokady: [], ostrzezenia: ["Zamówienie nie zawiera pełnego adresu dostawy (brak: ulica)."], zadanie: { status_id: 3, products: [] }, tworzenieWlaczone, kurs: { kurs: 4.25, data: "2026-10-12" },
   });
 
   it("„Utwórz w Selly”: dwa kliknięcia (przycisk + potwierdzenie), jedno żądanie POST, ciało i ostrzeżenia widoczne", async () => {
@@ -310,6 +310,24 @@ describe("zamówienia partnera", () => {
     await uzytkownik.click(await screen.findByTestId("button-selly-potwierdz-1"));
     expect(await screen.findByText("Zamówienie utworzone w Selly")).toBeInTheDocument();
     expect(wyslane).toBe(1);
+  });
+
+  it("zamówienie zablokowane w „wysylanie”: podgląd pokazuje kurs i przycisk „zwolnij”, który woła serwer", async () => {
+    const uzytkownik = userEvent.setup();
+    let zwolniono = 0;
+    server.use(
+      http.get("*/api/partnerzy/1/zamowienia/1/podglad-selly", () => HttpResponse.json({ ...podgladGotowy(true), zadanie: null, blokady: ["Zamówienie jest w trakcie wysyłania do Selly albo poprzednia próba nie dała jednoznacznej odpowiedzi — sprawdź w Selly, a potem „Zwolnij”."] })),
+      http.post("*/api/partnerzy/1/zamowienia/1/zwolnij-wysylanie", () => (zwolniono++, HttpResponse.json({ ok: true }))),
+    );
+    zamowienia = [naLiscie(1, "A01")];
+    await otworz();
+    await uzytkownik.click(await screen.findByTestId("button-zamowienie-1"));
+    await uzytkownik.click(await screen.findByTestId("button-podglad-selly-1"));
+    expect(await screen.findByTestId("podglad-kurs-1")).toHaveTextContent("4.25 PLN za 1 EUR, tabela NBP z 2026-10-12");
+    expect(screen.getByTestId("button-selly-utworz-1")).toBeDisabled();
+    await uzytkownik.click(screen.getByTestId("button-selly-zwolnij-1"));
+    expect(await screen.findByText("Zamówienie zwolnione")).toBeInTheDocument();
+    expect(zwolniono).toBe(1);
   });
 
   it("„Utwórz w Selly” jest nieaktywne, gdy serwer ma wyłączoną flagę, i mówi dlaczego", async () => {

@@ -124,9 +124,10 @@ try {
 } catch (e) {
   console.error("[partnerzy] publikacja wyłączona:", e instanceof Error ? e.message : e);
 }
+const klientNbp = klientNbpHttp();
 const serwisPartnerow = stworzSerwisPartnerow({
   db,
-  klientNbp: klientNbpHttp(),
+  klientNbp,
   katalogBazowy: env.PARTNERZY_KATALOG ?? join(dirname(env.DB_PATH), "partnerzy"),
   katalogiPublikacji,
 });
@@ -157,7 +158,9 @@ const app = stworzApp({
   discoverySelly,
   serwisPartnerow,
   odbiorEmail,
-  sellyZamowienia: env.PARTNERZY_SELLY_ZAMOWIENIA,
+  // Tworzenie zamówień wymaga i flagi, i trybu `pelny` (w `tylko-odczyt` klient i tak odrzuci zapis — nie obiecujemy przycisku, który nie zadziała).
+  sellyZamowienia: env.PARTNERZY_SELLY_ZAMOWIENIA && env.SELLY_TRYB === "pelny",
+  klientNbp,
 });
 
 const server = app.listen(env.PORT, env.HOST, () => {

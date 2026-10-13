@@ -225,6 +225,33 @@ describe("kraje", () => {
     await waitFor(() => expect(zadania[0]?.cialo).toMatchObject({ przesylkaStalaEur: 15, kosztyDodatkowe: 43 }));
   });
 
+  it("tabela krajów pokazuje aktualny kurs NBP (wartość i data tabeli), także przy kraju, który jeszcze go nie użył; „Odśwież kurs” pobiera na nowo", async () => {
+    const uzytkownik = userEvent.setup();
+    let zapytan = 0;
+    await otworz();
+    server.use(http.get("*/api/partnerzy/kurs-nbp", () => (zapytan++, HttpResponse.json({ kurs: 4.2431, zrodlo: "nbp", dataTabeli: "2026-10-13", ostrzezenie: null }))));
+    expect(await screen.findByTestId("kurs-nbp-wartosc")).toHaveTextContent("1 EUR = 4.2431 PLN");
+    expect(screen.getByTestId("kurs-nbp-teraz")).toHaveTextContent("tabela z 2026-10-13");
+    expect(screen.getByTestId("kurs-uzywany-FR")).toHaveTextContent("NBP teraz: 4.2431 (tabela z 2026-10-13) · jeszcze nie użyto w pliku");
+    const dotad = zapytan;
+    await uzytkownik.click(screen.getByTestId("button-kurs-nbp-odswiez"));
+    await waitFor(() => expect(zapytan).toBe(dotad + 1));
+  });
+
+  it("kurs NBP z ostrzeżeniem (NBP nie odpowiada) pokazuje je i oznacza kurs jako zapisany; błąd pobrania ma komunikat", async () => {
+    await otworz();
+    server.use(http.get("*/api/partnerzy/kurs-nbp", () => HttpResponse.json({ kurs: 4.3, zrodlo: "nbp-zapisany", dataTabeli: "2026-10-10", ostrzezenie: "NBP nie odpowiada (timeout) — użyto ostatniego zapisanego kursu 4.3." })));
+    expect(await screen.findByTestId("kurs-nbp-ostrzezenie")).toHaveTextContent("NBP nie odpowiada");
+    expect(screen.getByTestId("kurs-uzywany-FR")).toHaveTextContent("zapisany — NBP nie odpowiada");
+  });
+
+  it("błąd pobrania kursu NBP: komunikat zamiast kursu, tabela nadal działa", async () => {
+    await otworz();
+    server.use(http.get("*/api/partnerzy/kurs-nbp", () => HttpResponse.json({ error: "NBP nie odpowiada (timeout) i nie ma żadnego zapisanego kursu." }, { status: 502 })));
+    expect(await screen.findByTestId("kurs-nbp-blad")).toHaveTextContent("nie ma żadnego zapisanego kursu");
+    expect(screen.getByTestId("input-kraj-narzut-FR")).toBeInTheDocument();
+  });
+
   it("dane do faktury partnera trafiają w PUT (kraj wielkimi literami, puste → null)", async () => {
     const uzytkownik = userEvent.setup();
     zamockujApi();

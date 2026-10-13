@@ -267,6 +267,8 @@ export type PodgladSelly = {
   zadanie: Record<string, unknown> | null;
   /** Flaga serwera PARTNERZY_SELLY_ZAMOWIENIA. */
   tworzenieWlaczone: boolean;
+  /** Kurs w ciele zamówienia (`exchange_rate`, PLN za 1 EUR) i data tabeli NBP. */
+  kurs: { kurs: number; data: string } | null;
 };
 export const kluczPodgladuSelly = (id: number, zamowienieId: number): string[] => [KLUCZ_PARTNERZY, String(id), "zamowienia", String(zamowienieId), "podglad-selly"];
 
@@ -274,3 +276,12 @@ export const kluczPodgladuSelly = (id: number, zamowienieId: number): string[] =
 export async function utworzWSelly(partnerId: number, zamowienieId: number): Promise<{ numerWlasny: string; idSelly: number | null }> {
   return (await (await zadanie("POST", `${KLUCZ_PARTNERZY}/${partnerId}/zamowienia/${zamowienieId}/utworz-w-selly`, {})).json()) as { numerWlasny: string; idSelly: number | null };
 }
+
+/** Zwolnienie zamówienia zablokowanego w „wysylanie” — po sprawdzeniu w Selly, że NIE powstało (ticket 249). */
+export async function zwolnijWysylanie(partnerId: number, zamowienieId: number): Promise<void> {
+  await zadanie("POST", `${KLUCZ_PARTNERZY}/${partnerId}/zamowienia/${zamowienieId}/zwolnij-wysylanie`, {});
+}
+
+/** Aktualny kurs EUR z NBP (ticket 250) — do podglądu w tabeli krajów; ten sam kurs trafia do generowanych cenników. */
+export type KursNbpPodglad = { kurs: number; zrodlo: "nbp" | "nbp-zapisany"; dataTabeli: string | null; ostrzezenie: string | null };
+export const kluczKursuNbp = [KLUCZ_PARTNERZY, "kurs-nbp"];

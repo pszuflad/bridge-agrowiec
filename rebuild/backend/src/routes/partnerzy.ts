@@ -18,7 +18,8 @@ import { requireAuth } from "../middleware/auth.js";
 import { zapiszAudyt } from "../repos/audit.js";
 import { pobierzBledy, pobierzLogi } from "../partnerzy/logi.js";
 import { OdbiorTrwaError, odbierzZamowieniaEmail, type OdbiorEmail } from "../partnerzy/odbior-email.js";
-import { BladTworzenia, podgladDlaSelly, utworzWSelly } from "../partnerzy/podglad-selly.js";
+import { BrakKursuError, kursEur, type KlientNbp } from "../partnerzy/kurs-nbp.js";
+import { BladTworzenia, podgladDlaSelly, utworzWSelly, zwolnijWysylanie } from "../partnerzy/podglad-selly.js";
 import { zwaliduj } from "../partnerzy/walidacja-zamowienia.js";
 import { listaZamowien, szczegolyZamowieniaDlaPartnera } from "../repos/partnerzy-zamowienia.js";
 import { walidujKolumny, walidujPola, zapiszKolumny, zapiszPola } from "../repos/partnerzy-kolumny.js";
@@ -41,9 +42,9 @@ import {
   walidujUstawieniaPartnera,
 } from "../repos/partnerzy.js";
 
-export type ZaleznosciPartnerzy = { db: Baza; serwis?: SerwisPartnerow; odbiorEmail?: OdbiorEmail; klientSelly?: KlientSelly; sellyZamowienia?: boolean };
+export type ZaleznosciPartnerzy = { db: Baza; serwis?: SerwisPartnerow; odbiorEmail?: OdbiorEmail; klientSelly?: KlientSelly; sellyZamowienia?: boolean; klientNbp?: KlientNbp };
 
-export function trasyPartnerzy({ db, serwis, odbiorEmail, klientSelly, sellyZamowienia = false }: ZaleznosciPartnerzy): Router {
+export function trasyPartnerzy({ db, serwis, odbiorEmail, klientSelly, sellyZamowienia = false, klientNbp }: ZaleznosciPartnerzy): Router {
   const router = Router();
   const wgrywanieGeis = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5_000_000 } });
 
@@ -71,6 +72,21 @@ export function trasyPartnerzy({ db, serwis, odbiorEmail, klientSelly, sellyZamo
   /** Magazyny katalogu do wyboru w panelu. MUSI stać przed `/api/partnerzy/:id`, inaczej „magazyny” zostałoby wzięte za id. */
   router.get("/api/partnerzy/magazyny", requireAuth, (_req, res) => {
     res.json({ magazyny: dostepneMagazyny(db) });
+  });
+
+  /**
+   * Aktualny kurs EUR z NBP do podglądu w panelu (ticket 250) — ten sam mechanizm co przy generowaniu cennika (`kursEur`: ostatnio opublikowana tabela A,
+   * przy awarii NBP ostatni zapisany kurs + ostrzeżenie). Zapisuje kurs w `kursy_nbp`, nic poza tym. MUSI stać przed `/api/partnerzy/:id`.
+   */
+  router.get("/api/partnerzy/kurs-nbp", requireAuth, async (_req, res) => {
+    if (!klientNbp) return void res.status(503).json({ error: "Klient NBP nie jest dostępny w tej instancji." });
+    try {
+      const k = await kursEur(db, klientNbp, { kursZrodlo: "nbp", kursReczny: null });
+      res.json({ kurs: k.kurs, zrodlo: k.zrodlo, dataTabeli: k.dataTabeli, ostrzezenie: k.ostrzezenie });
+    } catch (e) {
+      if (e instanceof BrakKursuError) return void res.status(502).json({ error: e.message });
+      throw e;
+    }
   });
 
   /**
@@ -281,9 +297,28 @@ export function trasyPartnerzy({ db, serwis, odbiorEmail, klientSelly, sellyZamo
       audytuj(req, "partner_zamowienie_utworz_w_selly", id, { zamowienieId, numerWlasny: wynik.numerWlasny });
       res.json(wynik);
     } catch (e) {
+      if (e instanceof BladTworzenia) {
+        audytuj(req, "partner_zamowienie_utworz_w_selly_blad", id, { zamowienieId, status: e.status }); // bez treści błędu (może zawierać dane sklepu)
+        return void res.status(e.status).json({ error: e.message });
+      }
+      throw e;
+    }
+  });
+
+  /** Zwolnienie zamówienia zablokowanego w `wysylanie` — po RĘCZNYM sprawdzeniu w Selly, że zamówienie nie powstało (ticket 249). */
+  router.post("/api/partnerzy/:id/zamowienia/:zamowienieId/zwolnij-wysylanie", requireAuth, (req, res) => {
+    const id = idZParametru(req, res);
+    if (id === null) return;
+    const zamowienieId = Number(req.params.zamowienieId);
+    if (!Number.isInteger(zamowienieId) || zamowienieId < 1) return void res.status(404).json({ error: "Nie ma takiego zamówienia tego partnera." });
+    try {
+      zwolnijWysylanie(db, id, zamowienieId);
+    } catch (e) {
       if (e instanceof BladTworzenia) return void res.status(e.status).json({ error: e.message });
       throw e;
     }
+    audytuj(req, "partner_zamowienie_zwolnij_wysylanie", id, { zamowienieId });
+    res.json({ ok: true });
   });
 
   /**

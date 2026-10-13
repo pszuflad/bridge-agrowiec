@@ -1,3 +1,4 @@
+import type { KlientNbp } from "../../src/partnerzy/kurs-nbp.js";
 import type { SerwisPartnerow } from "../../src/partnerzy/scheduler.js";
 import type { OdbiorEmail } from "../../src/partnerzy/odbior-email.js";
 import { dirname, join } from "node:path";
@@ -51,6 +52,8 @@ export type OpcjeSrodowiska = {
   odbiorEmail?: OdbiorEmail;
   /** Ticket 249: flaga `PARTNERZY_SELLY_ZAMOWIENIA` (domyślnie wyłączona, jak na produkcji). */
   sellyZamowienia?: boolean;
+  /** Ticket 250: atrapa klienta NBP dla `GET /api/partnerzy/kurs-nbp` (testy NIGDY nie wołają prawdziwego NBP). */
+  klientNbp?: KlientNbp;
 };
 
 /**
@@ -89,6 +92,7 @@ export async function stworzSrodowiskoTestowe(
     serwisPartnerow: opcje.serwisPartnerow,
     odbiorEmail: opcje.odbiorEmail,
     sellyZamowienia: opcje.sellyZamowienia,
+    klientNbp: opcje.klientNbp,
   });
   return { ...baza, app, env, uzytkownik, dane, katalogArchiwum, katalogCsvSelly };
 }
