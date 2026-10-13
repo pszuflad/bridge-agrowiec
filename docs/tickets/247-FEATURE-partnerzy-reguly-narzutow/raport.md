@@ -1,2 +1,2 @@
 # 247 — raport
-Dowiezione wg planu. Testy: backend test/partnerzy.reguly-narzutow.test.ts (silnik, API, wpływ na cenę), frontend test/partnerzy.konfiguracja.test.tsx. Bramki w CI PR.
+Dowiezione wg planu. Review (`review.md`, 0 BLOCKER): poprawione — reguły sortowane i parsowane raz na wycenę (`przygotujReguly`), dotychczasowy komunikat o braku narzutu gdy brak reguł, odrzucanie reguły dla kraju spoza partnera (400), walidacja id reguły, ostrzeżenie w UI o regule globalnej; testy: bez reguł = narzut kraju, pola konstrukcja/średnica w warunkach, kraj spoza partnera. Lokalnie: backend partnerzy 252 testy zielone, frontend partnerzy 78 zielone; pełne bramki w CI PR. Poza kontraktem openapi (jak reszta tras partnerów).

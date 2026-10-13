@@ -60,6 +60,12 @@ describe("API reguł narzutów i wycena", () => {
     for (const zle of [{}, { nazwa: "X", wartosc: 0 }, { nazwa: "X", wartosc: 5, kraj: "POL" }, { nazwa: "X", wartosc: 5, warunki: [{ typ: "cokolwiek", wartosc: "a" }] }, { nazwa: "X", wartosc: 5, priorytet: 1.5 }])
       expect((await request(s.app).post(`/api/partnerzy/${id}/narzuty`).set(auth).send(zle)).status).toBe(400);
 
+    // reguła zawężona do kraju, którego partner nie ma, jest odrzucana (nigdy by nie zadziałała)
+    const bezKraju = await request(s.app).post(`/api/partnerzy/${id}/narzuty`).set(auth).send({ nazwa: "Mitas w DE", wartosc: 25, kraj: "de" });
+    expect(bezKraju.status).toBe(400);
+    expect(bezKraju.body.error).toMatch(/nie ma kraju DE/);
+    for (const k of ["DE", "FR"]) await request(s.app).put(`/api/partnerzy/${id}/kraje/${k}`).set(auth).send({ narzutProc: 10, kursZrodlo: "reczny", kursReczny: 4 });
+    expect((await request(s.app).patch(`/api/partnerzy/${id}/narzuty/abc`).set(auth).send({ nazwa: "x" })).status).toBe(404);
     const nowa = await request(s.app).post(`/api/partnerzy/${id}/narzuty`).set(auth).send({ nazwa: "Mitas w DE", wartosc: 25, kraj: "de", warunki: [{ typ: "marka", wartosc: "MITAS" }] });
     expect(nowa.status).toBe(201);
     expect(nowa.body).toMatchObject({ nazwa: "Mitas w DE", kraj: "DE", priorytet: 50, status: "aktywny", warunki: [{ typ: "marka", wartosc: "MITAS" }] });
@@ -73,12 +79,12 @@ describe("API reguł narzutów i wycena", () => {
     importujTabeleGeis(db, { DE: { wspGabarytowy: 250, stawki: [[200, 50]] }, FR: { wspGabarytowy: 250, stawki: [[200, 50]] } });
     ustawPaliwo(db, "DE", 0, "2026-01-01");
     ustawPaliwo(db, "FR", 0, "2026-01-01");
-    for (const k of ["DE", "FR"]) await request(s.app).put(`/api/partnerzy/${id}/kraje/${k}`).set(auth).send({ narzutProc: 10, kursZrodlo: "reczny", kursReczny: 4 });
     await request(s.app).put(`/api/partnerzy/${id}/magazyny`).set(auth).send({ magazyny: ["MO1"] });
     const wyc = wycenPozycje(db, id, wybierzPozycje(db, id).pozycje, { DE: 4, FR: 4 }, "2026-10-12");
     // zakup 1000 PLN, kurs 4: DE 1000×1,25/4 + 50 = 362,5; FR 1000×1,10/4 + 50 = 325
     expect(wyc.wiersze[0]!.ceny).toEqual({ DE: 362.5, FR: 325 });
 
+    // bez reguł te same liczby co przed zmianą: usunięcie wszystkich reguł nie zmienia ceny FR (narzut kraju 10 %)
     // PATCH (wyłączenie) → DE wraca do narzutu kraju; usunięcie → 404 przy ponownej próbie
     const patch = await request(s.app).patch(`/api/partnerzy/${id}/narzuty/${nowa.body.id}`).set(auth).send({ status: "nieaktywny" });
     expect(patch.body.status).toBe("nieaktywny");
@@ -103,5 +109,28 @@ describe("API reguł narzutów i wycena", () => {
     const wyc = wycenPozycje(db, id, wybierzPozycje(db, id).pozycje, { DE: 4 }, "2026-10-12");
     expect(wyc.wiersze.map((x) => x.ceny.DE)).toEqual([350, null]); // 1000×1,2/4 + 50; Alliance bez reguły i bez narzutu kraju → pominięta
     expect(wyc.bledy).toHaveLength(1);
+  });
+
+  it("bez reguł cena = narzut kraju, a komunikat o braku narzutu zostaje dotychczasowy; nowe pola warunków (konstrukcja, średnica) trafiają do pozycji", async () => {
+    s = await stworzSrodowiskoTestowe();
+    const auth = { Authorization: `Bearer ${await token()}` };
+    const id = Number((await request(s.app).post("/api/partnerzy").set(auth).send({ nazwa: "P3" })).body.id);
+    const { db } = s;
+    db.insert(products).values({
+      kod: "X", nazwa: "X", marka: "M", kategoria: "Rolnicze", dostawca: "MO1", magazyn: "MO1", stan: 5, cenaZakupu: 1000, cenaSprzedazy: 1500, marzaPct: 50,
+      dataAktualizacji: "2026-10-10T00:00:00.000Z", kodImportu: "IX", waga: 56, dlugosc: 80, szerokoscPaczki: 60, wysokosc: 85, konstrukcja: "Radial", srednica: 38,
+    }).run();
+    importujTabeleGeis(db, { DE: { wspGabarytowy: 250, stawki: [[200, 50]] } });
+    ustawPaliwo(db, "DE", 0, "2026-01-01");
+    await request(s.app).put(`/api/partnerzy/${id}/kraje/DE`).set(auth).send({ narzutProc: 0 });
+    await request(s.app).put(`/api/partnerzy/${id}/magazyny`).set(auth).send({ magazyny: ["MO1"] });
+    const pozycje = wybierzPozycje(db, id).pozycje;
+    expect(pozycje[0]).toMatchObject({ konstrukcja: "Radial", srednica: 38 });
+    const bez = wycenPozycje(db, id, pozycje, { DE: 4 }, "2026-10-12");
+    expect(bez.bledy[0]!.powod).toBe("Narzut kraju nie jest ustawiony (0 %) — ceny nie są publikowane.");
+    await request(s.app).put(`/api/partnerzy/${id}/kraje/DE`).set(auth).send({ narzutProc: 10 });
+    expect(wycenPozycje(db, id, pozycje, { DE: 4 }, "2026-10-12").wiersze[0]!.ceny.DE).toBe(325); // 1000×1,10/4 + 50
+    await request(s.app).post(`/api/partnerzy/${id}/narzuty`).set(auth).send({ nazwa: "radial 38", wartosc: 20, warunki: [{ typ: "konstrukcja", wartosc: "radi" }, { typ: "srednica", wartosc: "38" }] });
+    expect(wycenPozycje(db, id, pozycje, { DE: 4 }, "2026-10-12").wiersze[0]!.ceny.DE).toBe(350); // reguła: 1000×1,20/4 + 50
   });
 });

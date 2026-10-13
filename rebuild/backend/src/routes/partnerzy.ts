@@ -151,6 +151,10 @@ export function trasyPartnerzy({ db, serwis, odbiorEmail, klientSelly }: Zalezno
     });
   });
 
+  /** Reguła zawężona do kraju, którego partner nie ma, nigdy by nie zadziałała — odrzucamy ją zamiast cicho ignorować. */
+  const krajSpozaPartnera = (partnerId: number, kraj: string | null | undefined): boolean =>
+    typeof kraj === "string" && !szczegolyPartnera(db, partnerId)!.kraje.some((k) => k.kraj === kraj);
+
   // Reguły narzutów partnera (ticket 247). Zasada jak w „narzutach i promocjach” sklepu, osobne dane; brak pasującej reguły = narzut kraju.
   router.get("/api/partnerzy/:id/narzuty", requireAuth, (req, res) => {
     const id = idZParametru(req, res);
@@ -162,6 +166,7 @@ export function trasyPartnerzy({ db, serwis, odbiorEmail, klientSelly }: Zalezno
     if (id === null) return;
     const d = walidujRegule(req.body, false);
     if ("blad" in d) return void res.status(400).json({ error: d.blad });
+    if (krajSpozaPartnera(id, d.kraj)) return void res.status(400).json({ error: `Partner nie ma kraju ${d.kraj} — dodaj go najpierw w tabeli krajów.` });
     const regula = dodajRegule(db, id, d as DaneReguly);
     audytuj(req, "partner_narzut_dodany", id, { regulaId: regula.id, nazwa: regula.nazwa, wartosc: regula.wartosc });
     res.status(201).json(regula);
@@ -172,7 +177,10 @@ export function trasyPartnerzy({ db, serwis, odbiorEmail, klientSelly }: Zalezno
     if (id === null) return;
     const d = walidujRegule(req.body, true);
     if ("blad" in d) return void res.status(400).json({ error: d.blad });
-    const regula = edytujRegule(db, id, Number(req.params.regulaId), d);
+    const regulaId = Number(req.params.regulaId);
+    if (!Number.isInteger(regulaId)) return void res.status(404).json({ error: "Partner nie ma takiej reguły." });
+    if (krajSpozaPartnera(id, d.kraj)) return void res.status(400).json({ error: `Partner nie ma kraju ${d.kraj} — dodaj go najpierw w tabeli krajów.` });
+    const regula = edytujRegule(db, id, regulaId, d);
     if (!regula) return void res.status(404).json({ error: "Partner nie ma takiej reguły." });
     audytuj(req, "partner_narzut_zmieniony", id, { regulaId: regula.id, ...d });
     res.json(regula);
@@ -181,7 +189,7 @@ export function trasyPartnerzy({ db, serwis, odbiorEmail, klientSelly }: Zalezno
   router.delete("/api/partnerzy/:id/narzuty/:regulaId", requireAuth, (req, res) => {
     const id = idZParametru(req, res);
     if (id === null) return;
-    if (!usunRegule(db, id, Number(req.params.regulaId))) return void res.status(404).json({ error: "Partner nie ma takiej reguły." });
+    if (!Number.isInteger(Number(req.params.regulaId)) || !usunRegule(db, id, Number(req.params.regulaId))) return void res.status(404).json({ error: "Partner nie ma takiej reguły." });
     audytuj(req, "partner_narzut_usuniety", id, { regulaId: Number(req.params.regulaId) });
     res.json({ ok: true });
   });

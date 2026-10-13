@@ -26,28 +26,35 @@ export function warunkiReguly(surowe: string | null): WarunekReguly[] {
   if (!surowe) return [];
   try {
     const w: unknown = JSON.parse(surowe);
-    return Array.isArray(w) ? (w as WarunekReguly[]) : [];
+    return Array.isArray(w) ? (w as unknown[]).filter((x): x is WarunekReguly => typeof x === "object" && x !== null) : [];
   } catch {
     return [];
   }
 }
 
-const pasuje = (r: RegulaNarzutu, kraj: string, pozycja: RekordCenowy): boolean => {
-  if (r.status !== "aktywny") return false;
-  if (r.kraj !== null && r.kraj !== kraj) return false;
-  return warunkiReguly(r.warunki).every((w) => dopasujWarunek(pozycja, w));
-};
+export type PrzygotowanaRegula = { regula: RegulaNarzutu; warunki: WarunekReguly[] };
 
-/** Narzut [%] z reguły dla pozycji i kraju albo `null` (wtedy obowiązuje narzut kraju). */
-export function wybierzRegule(reguly: readonly RegulaNarzutu[], kraj: string, pozycja: RekordCenowy): RegulaNarzutu | null {
-  const posortowane = [...reguly].sort(
-    (a, b) => b.priorytet - a.priorytet || Number(b.kraj !== null) - Number(a.kraj !== null) || a.id - b.id,
-  );
+/** Sortuje reguły (priorytet malejąco; remis: kraj zawężony przed ogólnym, potem niższe id) i parsuje warunki RAZ — do wołania w pętli po pozycjach. */
+export function przygotujReguly(reguly: readonly RegulaNarzutu[]): PrzygotowanaRegula[] {
+  return [...reguly]
+    .sort((a, b) => b.priorytet - a.priorytet || Number(b.kraj !== null) - Number(a.kraj !== null) || a.id - b.id)
+    .map((regula) => ({ regula, warunki: warunkiReguly(regula.warunki) }));
+}
+
+/** Wybór z przygotowanych reguł: pierwsza pasująca z warunkami wygrywa, w przeciwnym razie pierwsza pasująca globalna, inaczej `null` (narzut kraju). */
+export function wybierzZPrzygotowanych(przygotowane: readonly PrzygotowanaRegula[], kraj: string, pozycja: RekordCenowy): RegulaNarzutu | null {
   let globalna: RegulaNarzutu | null = null;
-  for (const r of posortowane) {
-    if (!pasuje(r, kraj, pozycja)) continue;
-    if (warunkiReguly(r.warunki).length > 0) return r;
-    if (!globalna) globalna = r;
+  for (const { regula, warunki } of przygotowane) {
+    if (regula.status !== "aktywny") continue;
+    if (regula.kraj !== null && regula.kraj !== kraj) continue;
+    if (!warunki.every((w) => dopasujWarunek(pozycja, w))) continue;
+    if (warunki.length > 0) return regula;
+    if (!globalna) globalna = regula;
   }
   return globalna;
+}
+
+/** Wygodny wariant jednorazowy (testy); w pętli używaj `przygotujReguly` + `wybierzZPrzygotowanych`. */
+export function wybierzRegule(reguly: readonly RegulaNarzutu[], kraj: string, pozycja: RekordCenowy): RegulaNarzutu | null {
+  return wybierzZPrzygotowanych(przygotujReguly(reguly), kraj, pozycja);
 }

@@ -85,7 +85,7 @@ export function NarzutyPartnera({ partner }: { partner: SzczegolyPartnera }) {
         </div>
         <p className="text-xs text-muted-foreground">
           Narzut w % od ceny zakupu, osobny dla tego partnera. Reguła z warunkami (np. marka) bije regułę globalną niezależnie od priorytetu; między regułami z warunkami wygrywa wyższy priorytet
-          (remis: reguła dla jednego kraju, potem starsza). Brak pasującej reguły = narzut kraju z tabeli krajów powyżej.
+          (remis: reguła dla jednego kraju, potem starsza). Brak pasującej reguły = narzut kraju z tabeli krajów powyżej. Uwaga: reguła globalna (bez warunków) obejmuje wszystkie opony i przesłania narzut kraju.
         </p>
         {q.isError ? <p className="text-sm text-destructive" role="alert">{komunikatBledu(q.error)}</p> : null}
         {q.isSuccess && reguly.length === 0 ? <p className="text-sm text-muted-foreground" data-testid="text-reguly-pusto">Brak reguł — obowiązuje narzut kraju.</p> : null}

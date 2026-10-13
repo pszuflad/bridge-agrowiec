@@ -12,7 +12,7 @@ import { and, asc, eq, inArray } from "drizzle-orm";
 
 import type { Baza } from "../db/index.js";
 import { partnerKraje, partnerMagazyny, partnerNarzuty, partnerWykluczenia, partnerzy, products } from "../db/schema.js";
-import { wybierzRegule } from "./reguly-narzutow.js";
+import { przygotujReguly, wybierzZPrzygotowanych } from "./reguly-narzutow.js";
 import type { Wyrazenie } from "./formula.js";
 import { BladKalkulacji, obliczCene } from "./kalkulator.js";
 
@@ -159,18 +159,18 @@ export function wycenPozycje(
   const ostrzezeniaWidziane = new Set<string>();
   const narzutBrakWidziany = new Set<string>();
   // Reguły narzutów partnera (ticket 247): pasująca reguła zastępuje narzut kraju; brak reguły = narzut kraju.
-  const reguly = db.select().from(partnerNarzuty).where(eq(partnerNarzuty.partnerId, partnerId)).all();
+  const reguly = przygotujReguly(db.select().from(partnerNarzuty).where(eq(partnerNarzuty.partnerId, partnerId)).all());
   for (const pozycja of pozycje) {
     const ceny: Record<string, number | null> = {};
     for (const k of kraje) {
-      const regula = reguly.length ? wybierzRegule(reguly, k.kraj, pozycja as unknown as Record<string, unknown>) : null;
+      const regula = reguly.length ? wybierzZPrzygotowanych(reguly, k.kraj, pozycja as unknown as Record<string, unknown>) : null;
       const narzutProc = regula ? regula.wartosc : k.narzutProc;
       if (!(narzutProc > 0)) {
         // Bez narzutu cena = cena zakupu: nie publikujemy, dopóki użytkownik nie ustawi narzutu kraju albo reguły.
         ceny[k.kraj] = null;
         if (!narzutBrakWidziany.has(k.kraj)) {
           narzutBrakWidziany.add(k.kraj);
-          wynik.bledy.push({ kod: "*", kraj: k.kraj, powod: "Narzut kraju nie jest ustawiony (0 %) i żadna reguła nie pasuje do części pozycji — ich ceny nie są publikowane (ustaw narzut kraju albo regułę)." });
+          wynik.bledy.push({ kod: "*", kraj: k.kraj, powod: reguly.length === 0 ? "Narzut kraju nie jest ustawiony (0 %) — ceny nie są publikowane." : "Narzut kraju nie jest ustawiony (0 %) i żadna reguła nie pasuje do części pozycji — ich ceny nie są publikowane (ustaw narzut kraju albo regułę)." });
         }
         continue;
       }
