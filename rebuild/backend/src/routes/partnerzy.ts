@@ -19,6 +19,7 @@ import { zapiszAudyt } from "../repos/audit.js";
 import { pobierzBledy, pobierzLogi } from "../partnerzy/logi.js";
 import { OdbiorTrwaError, odbierzZamowieniaEmail, type OdbiorEmail } from "../partnerzy/odbior-email.js";
 import { BrakKursuError, kursEur, type KlientNbp } from "../partnerzy/kurs-nbp.js";
+import { BladTrackingu, dodajPrzesylke, katalogTrackinguPartnera, listaPrzesylek, zapiszPlikTrackingu, zbudujPlikTrackingu } from "../partnerzy/tracking.js";
 import { BladTworzenia, podgladDlaSelly, utworzWSelly, zwolnijWysylanie } from "../partnerzy/podglad-selly.js";
 import { zwaliduj } from "../partnerzy/walidacja-zamowienia.js";
 import { listaZamowien, szczegolyZamowieniaDlaPartnera } from "../repos/partnerzy-zamowienia.js";
@@ -44,9 +45,9 @@ import {
   walidujUstawieniaPartnera,
 } from "../repos/partnerzy.js";
 
-export type ZaleznosciPartnerzy = { db: Baza; serwis?: SerwisPartnerow; odbiorEmail?: OdbiorEmail; klientSelly?: KlientSelly; sellyZamowienia?: boolean; klientNbp?: KlientNbp };
+export type ZaleznosciPartnerzy = { db: Baza; serwis?: SerwisPartnerow; odbiorEmail?: OdbiorEmail; klientSelly?: KlientSelly; sellyZamowienia?: boolean; klientNbp?: KlientNbp; katalogiTrackingu?: ReadonlyMap<string, string> };
 
-export function trasyPartnerzy({ db, serwis, odbiorEmail, klientSelly, sellyZamowienia = false, klientNbp }: ZaleznosciPartnerzy): Router {
+export function trasyPartnerzy({ db, serwis, odbiorEmail, klientSelly, sellyZamowienia = false, klientNbp, katalogiTrackingu = new Map() }: ZaleznosciPartnerzy): Router {
   const router = Router();
   const wgrywanieGeis = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5_000_000 } });
 
@@ -282,6 +283,74 @@ export function trasyPartnerzy({ db, serwis, odbiorEmail, klientSelly, sellyZamo
     const podglad = Number.isInteger(zamowienieId) && zamowienieId > 0 ? podgladDlaSelly(db, id, zamowienieId, sellyZamowienia) : null;
     if (podglad === null) return void res.status(404).json({ error: "Nie ma takiego zamówienia tego partnera." });
     res.json(podglad);
+  });
+
+  /**
+   * Tracking (ticket 256): przesyłki zamówienia partnera. Wpisanie numeru listu przewozowego tworzy plik trackingu (CSV, format wg założenia użytkowniczki — `partnerzy/tracking.ts`)
+   * i od razu zapisuje go w katalogu partnera z `PARTNERZY_KATALOGI_TRACKINGU`; bez katalogu plik zostaje do pobrania w panelu. Błąd zapisu pliku NIE cofa przesyłki — widać go przy przesyłce i można ponowić.
+   */
+  const przesylkaParam = (req: Request, res: Response): { id: number; zamowienieId: number } | null => {
+    const id = idZParametru(req, res);
+    if (id === null) return null;
+    const zamowienieId = Number(req.params.zamowienieId);
+    if (!Number.isInteger(zamowienieId) || zamowienieId < 1) {
+      res.status(404).json({ error: "Nie ma takiego zamówienia tego partnera." });
+      return null;
+    }
+    return { id, zamowienieId };
+  };
+  const bladTrackingu = (e: unknown, res: Response): void => {
+    if (e instanceof BladTrackingu) return void res.status(e.status).json({ error: e.message });
+    throw e;
+  };
+
+  router.get("/api/partnerzy/:id/zamowienia/:zamowienieId/przesylki", requireAuth, (req, res) => {
+    const p = przesylkaParam(req, res);
+    if (!p) return;
+    const lista = listaPrzesylek(db, p.id, p.zamowienieId);
+    if (lista === null) return void res.status(404).json({ error: "Nie ma takiego zamówienia tego partnera." });
+    res.json({ przesylki: lista, katalogSkonfigurowany: katalogTrackinguPartnera(db, p.id, katalogiTrackingu) !== undefined });
+  });
+
+  router.post("/api/partnerzy/:id/zamowienia/:zamowienieId/przesylki", requireAuth, (req, res) => {
+    const p = przesylkaParam(req, res);
+    if (!p) return;
+    try {
+      const wysylkaId = dodajPrzesylke(db, p.id, p.zamowienieId, (req.body ?? {}) as never);
+      const status = zapiszPlikTrackingu(db, wysylkaId, katalogTrackinguPartnera(db, p.id, katalogiTrackingu));
+      audytuj(req, "partner_przesylka", p.id, { zamowienieId: p.zamowienieId, wysylkaId, plik: status });
+      res.json({ przesylki: listaPrzesylek(db, p.id, p.zamowienieId), plik: status });
+    } catch (e) {
+      bladTrackingu(e, res);
+    }
+  });
+
+  router.get("/api/partnerzy/:id/zamowienia/:zamowienieId/przesylki/:wysylkaId/plik", requireAuth, (req, res) => {
+    const p = przesylkaParam(req, res);
+    if (!p) return;
+    const wysylkaId = Number(req.params.wysylkaId);
+    try {
+      const lista = listaPrzesylek(db, p.id, p.zamowienieId);
+      if (lista === null || !Number.isInteger(wysylkaId) || !lista.some((w) => w.id === wysylkaId)) return void res.status(404).json({ error: "Nie ma takiej przesyłki tego zamówienia." });
+      res.json(zbudujPlikTrackingu(db, wysylkaId));
+    } catch (e) {
+      bladTrackingu(e, res);
+    }
+  });
+
+  router.post("/api/partnerzy/:id/zamowienia/:zamowienieId/przesylki/:wysylkaId/ponow", requireAuth, (req, res) => {
+    const p = przesylkaParam(req, res);
+    if (!p) return;
+    const wysylkaId = Number(req.params.wysylkaId);
+    try {
+      const lista = listaPrzesylek(db, p.id, p.zamowienieId);
+      if (lista === null || !Number.isInteger(wysylkaId) || !lista.some((w) => w.id === wysylkaId)) return void res.status(404).json({ error: "Nie ma takiej przesyłki tego zamówienia." });
+      const status = zapiszPlikTrackingu(db, wysylkaId, katalogTrackinguPartnera(db, p.id, katalogiTrackingu));
+      audytuj(req, "partner_przesylka_ponow", p.id, { zamowienieId: p.zamowienieId, wysylkaId, plik: status });
+      res.json({ przesylki: listaPrzesylek(db, p.id, p.zamowienieId), plik: status });
+    } catch (e) {
+      bladTrackingu(e, res);
+    }
   });
 
   /**

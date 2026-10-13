@@ -794,6 +794,21 @@ export const partnerZamowienia = sqliteTable("partner_zamowienia", {
 	pobrano: text().notNull(),
 }, (table) => [unique().on(table.partnerId, table.numerPartnera)]);
 
+// Ticket 256 (migracja 037) — wysyłki zamówień partnerów (numer listu przewozowego → plik trackingu).
+export const partnerWysylki = sqliteTable("partner_wysylki", {
+	id: integer().primaryKey({ autoIncrement: true }),
+	zamowienieId: integer("zamowienie_id").notNull().references(() => partnerZamowienia.id, { onDelete: "cascade" }),
+	przewoznik: text().notNull(),
+	numerPrzesylki: text("numer_przesylki").notNull(),
+	typ: text().default("delivery").notNull(),
+	wyslano: text().notNull(),
+	pozycje: text().notNull(),
+	plikNazwa: text("plik_nazwa"),
+	plikStatus: text("plik_status").default("brak_katalogu").notNull(),
+	plikBlad: text("plik_blad"),
+	utworzono: text().notNull(),
+}, (table) => [unique().on(table.zamowienieId, table.numerPrzesylki), index("idx_partner_wysylki_zamowienie").on(table.zamowienieId)]);
+
 export const partnerZamowieniaPozycje = sqliteTable("partner_zamowienia_pozycje", {
 	id: integer().primaryKey({ autoIncrement: true }),
 	zamowienieId: integer("zamowienie_id").notNull().references(() => partnerZamowienia.id, { onDelete: "cascade" }),

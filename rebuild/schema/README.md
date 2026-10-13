@@ -37,6 +37,7 @@ danych dla odbudowy backendu.
 | `034_partner_selly_zamowienia.sql` | **Ticket 249**: `partnerzy.selly_status_id/selly_payment_id/selly_delivery_id/selly_vat_id` (identyfikatory Selly do tworzenia zamówień partnera). ⚠ **NOWE kolumny, nie odtworzenie produkcji**; domyślnie NULL. |
 | `035_partner_kraje_faktura.sql` | **Ticket 252**: `partner_kraje.faktura_nazwa/nip/ulica/kod/miasto/kraj` (dane do faktury per kraj dostawy; NULL = dane domyślne partnera). ⚠ **NOWE kolumny, nie odtworzenie produkcji**. |
 | `036_partner_kontakt.sql` | **Ticket 253**: `partnerzy.kontakt_email/kontakt_telefon` (kontakt zamawiającego do zamówienia Selly). ⚠ **NOWE kolumny, nie odtworzenie produkcji**; domyślnie NULL. |
+| `037_partner_wysylki.sql` | **Ticket 256**: tabela `partner_wysylki` (przesyłki zamówień partnerów: przewoźnik, numer listu, data, pozycje JSON, status pliku trackingu) + indeks `idx_partner_wysylki_zamowienie`. ⚠ **NOWA tabela, nie odtworzenie produkcji**. |
 
 ### Dyrektywy runnera (od ticketu 107)
 

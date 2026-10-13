@@ -124,6 +124,13 @@ try {
 } catch (e) {
   console.error("[partnerzy] publikacja wyłączona:", e instanceof Error ? e.message : e);
 }
+// Katalogi trackingu (ticket 256): błędna wartość nie przewraca backendu — loguje błąd i działa bez zapisu plików (pliki do pobrania w panelu).
+let katalogiTrackingu = new Map<string, string>();
+try {
+  katalogiTrackingu = parsujKatalogiPublikacji(env.PARTNERZY_KATALOGI_TRACKINGU, "PARTNERZY_KATALOGI_TRACKINGU");
+} catch (e) {
+  console.error("[partnerzy] zapis trackingu do katalogów wyłączony:", e instanceof Error ? e.message : e);
+}
 const klientNbp = klientNbpHttp();
 const serwisPartnerow = stworzSerwisPartnerow({
   db,
@@ -160,6 +167,7 @@ const app = stworzApp({
   odbiorEmail,
   // Tworzenie zamówień wymaga i flagi, i trybu `pelny` (w `tylko-odczyt` klient i tak odrzuci zapis — nie obiecujemy przycisku, który nie zadziała).
   sellyZamowienia: env.PARTNERZY_SELLY_ZAMOWIENIA && env.SELLY_TRYB === "pelny",
+  katalogiTrackingu,
   klientNbp,
 });
 

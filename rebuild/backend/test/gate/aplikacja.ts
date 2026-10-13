@@ -54,6 +54,8 @@ export type OpcjeSrodowiska = {
   sellyZamowienia?: boolean;
   /** Ticket 250: atrapa klienta NBP dla `GET /api/partnerzy/kurs-nbp` (testy NIGDY nie wołają prawdziwego NBP). */
   klientNbp?: KlientNbp;
+  /** Ticket 256: katalogi trackingu partnerów (nazwa małymi literami → katalog) — w testach zawsze katalog tymczasowy. */
+  katalogiTrackingu?: ReadonlyMap<string, string>;
 };
 
 /**
@@ -93,6 +95,7 @@ export async function stworzSrodowiskoTestowe(
     odbiorEmail: opcje.odbiorEmail,
     sellyZamowienia: opcje.sellyZamowienia,
     klientNbp: opcje.klientNbp,
+    katalogiTrackingu: opcje.katalogiTrackingu,
   });
   return { ...baza, app, env, uzytkownik, dane, katalogArchiwum, katalogCsvSelly };
 }
