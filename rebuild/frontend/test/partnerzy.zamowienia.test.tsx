@@ -40,6 +40,7 @@ function zamockujApi() {
     http.get("*/api/partnerzy/magazyny", () => HttpResponse.json({ magazyny: [] })),
     http.get("*/api/partnerzy/:id/logi", () => HttpResponse.json({ logi: [] })),
     http.get("*/api/partnerzy/:id/error-log", () => HttpResponse.json({ bledy: [] })),
+    http.get("*/api/partnerzy/:id/zamowienia/:zid/przesylki", () => HttpResponse.json({ przesylki: [], katalogSkonfigurowany: false })),
     http.get("*/api/partnerzy/:id/zamowienia/:zid", ({ params }) => {
       zapytaniaSzczegolow.push(Number(params.zid));
       const z = zamowienia.find((x) => x.id === Number(params.zid));
@@ -407,5 +408,92 @@ describe("zamówienia partnera", () => {
     for (const etykieta of ["Odbiorca", "Ulica", "Kod pocztowy", "Miejscowość", "Kraj (kod)", "Telefon", "Wysyłka neutralna", "Uwaga klienta"]) expect(dostawa).toHaveTextContent(etykieta);
     expect(dostawa).not.toHaveTextContent("strasse");
     expect(within(dostawa).queryByText(/^Kraj$/)).not.toBeInTheDocument(); // puste `land` nie tworzy wiersza „Kraj” (jest tylko „Kraj (kod)”)
+  });
+
+  describe("tracking: numer listu przewozowego (ticket 256)", () => {
+    const przesylka = (nad: Record<string, unknown> = {}) => ({
+      id: 7, zamowienieId: 1, przewoznik: "GEIS", numerPrzesylki: "PL123", typ: "delivery", wyslano: "2026-10-13T13:30:00+02:00",
+      pozycje: [{ pozycjaId: 1, ilosc: 2 }], plikNazwa: "tracking_A01_20261013-133000_7.csv", plikStatus: "zapisany", plikBlad: null, ...nad,
+    });
+
+    it("wpisanie numeru listu: ilości domyślnie = wszystko niewysłane; POST zawiera przewoźnika, numer, typ i ilości; sukces pokazuje komunikat i listę przesyłek", async () => {
+      const uzytkownik = userEvent.setup();
+      let lista: object[] = [];
+      let wyslane: Record<string, unknown> | null = null;
+      server.use(
+        http.get("*/api/partnerzy/1/zamowienia/1/przesylki", () => HttpResponse.json({ przesylki: lista, katalogSkonfigurowany: true })),
+        http.post("*/api/partnerzy/1/zamowienia/1/przesylki", async ({ request }) => {
+          wyslane = (await request.json()) as Record<string, unknown>;
+          lista = [przesylka()];
+          return HttpResponse.json({ przesylki: lista, plik: "zapisany" });
+        }),
+      );
+      zamowienia = [naLiscie(1, "A01")];
+      await otworz();
+      await uzytkownik.click(await screen.findByTestId("button-zamowienie-1"));
+      expect(await screen.findByTestId("input-ilosc-1-1")).toHaveValue("2");
+      expect(screen.getByTestId("input-ilosc-1-2")).toHaveValue("1");
+      expect(screen.getByTestId("button-dodaj-przesylke-1")).toBeDisabled(); // bez przewoźnika i numeru
+      await uzytkownik.type(screen.getByTestId("input-przewoznik-1"), "GEIS");
+      await uzytkownik.type(screen.getByTestId("input-numer-listu-1"), "PL123");
+      await uzytkownik.clear(screen.getByTestId("input-ilosc-1-2"));
+      await uzytkownik.type(screen.getByTestId("input-ilosc-1-2"), "0"); // druga pozycja nie jedzie w tej paczce
+      await uzytkownik.click(screen.getByTestId("button-dodaj-przesylke-1"));
+      expect(await screen.findByText("Numer listu zapisany")).toBeInTheDocument();
+      expect(wyslane).toEqual({ przewoznik: "GEIS", numerPrzesylki: "PL123", typ: "delivery", pozycje: [{ pozycjaId: 1, ilosc: 2 }] });
+      expect(await screen.findByTestId("przesylka-7")).toHaveTextContent("PL123");
+      expect(screen.getByTestId("status-pliku-7")).toHaveTextContent("plik zapisany u partnera");
+    });
+
+    it("błąd serwera przy zapisie (np. za dużo sztuk) pokazuje komunikat; ilość nienumeryczna blokuje żądanie", async () => {
+      const uzytkownik = userEvent.setup();
+      let posty = 0;
+      server.use(http.post("*/api/partnerzy/1/zamowienia/1/przesylki", () => (posty++, HttpResponse.json({ error: "Pozycja 1: zamówiono 2, wysłano już 2" }, { status: 409 }))));
+      zamowienia = [naLiscie(1, "A01")];
+      await otworz();
+      await uzytkownik.click(await screen.findByTestId("button-zamowienie-1"));
+      await uzytkownik.type(await screen.findByTestId("input-przewoznik-1"), "GEIS");
+      await uzytkownik.type(screen.getByTestId("input-numer-listu-1"), "PL1");
+      await uzytkownik.clear(screen.getByTestId("input-ilosc-1-1"));
+      await uzytkownik.type(screen.getByTestId("input-ilosc-1-1"), "abc");
+      await uzytkownik.click(screen.getByTestId("button-dodaj-przesylke-1"));
+      expect(await screen.findByText(/Ilości w przesyłce muszą być liczbami całkowitymi/)).toBeInTheDocument();
+      expect(posty).toBe(0);
+      await uzytkownik.clear(screen.getByTestId("input-ilosc-1-1"));
+      await uzytkownik.type(screen.getByTestId("input-ilosc-1-1"), "2");
+      await uzytkownik.click(screen.getByTestId("button-dodaj-przesylke-1"));
+      expect(await screen.findByText(/wysłano już 2/)).toBeInTheDocument();
+      expect(posty).toBe(1);
+    });
+
+    it("przesyłka z błędem zapisu pliku: czerwony status, powód i „Ponów zapis pliku”; „Pokaż plik” pokazuje treść CSV", async () => {
+      const uzytkownik = userEvent.setup();
+      let ponowione = 0;
+      server.use(
+        http.get("*/api/partnerzy/1/zamowienia/1/przesylki", () => HttpResponse.json({ przesylki: [przesylka({ plikStatus: "blad", plikBlad: "Zapis pliku trackingu do /x nie powiódł się: ENOENT" })], katalogSkonfigurowany: true })),
+        http.get("*/api/partnerzy/1/zamowienia/1/przesylki/7/plik", () => HttpResponse.json({ nazwa: "tracking_A01.csv", tresc: "order_id;platform_order_id\nZAM-1;A01\n" })),
+        http.post("*/api/partnerzy/1/zamowienia/1/przesylki/7/ponow", () => (ponowione++, HttpResponse.json({ przesylki: [przesylka()], plik: "zapisany" }))),
+      );
+      zamowienia = [naLiscie(1, "A01")];
+      await otworz();
+      await uzytkownik.click(await screen.findByTestId("button-zamowienie-1"));
+      expect(await screen.findByTestId("status-pliku-7")).toHaveTextContent("błąd zapisu pliku");
+      expect(screen.getByTestId("blad-pliku-7")).toHaveTextContent("ENOENT");
+      await uzytkownik.click(screen.getByTestId("button-plik-7"));
+      expect(await screen.findByTestId("plik-przesylki-7")).toHaveTextContent("ZAM-1;A01");
+      await uzytkownik.click(screen.getByTestId("button-ponow-7"));
+      expect(await screen.findByText("Plik trackingu zapisany ponownie")).toBeInTheDocument();
+      expect(ponowione).toBe(1);
+    });
+
+    it("zamówienie niezatwierdzone (status „nowe”): formularz niedostępny, jest wyjaśnienie", async () => {
+      const uzytkownik = userEvent.setup();
+      szczegolyNadpisanie = { status: "nowe" };
+      zamowienia = [naLiscie(1, "A01")];
+      await otworz();
+      await uzytkownik.click(await screen.findByTestId("button-zamowienie-1"));
+      expect(await screen.findByTestId("przesylki-niedostepne-1")).toHaveTextContent("dopiero do zamówienia przyjętego");
+      expect(screen.queryByTestId("button-dodaj-przesylke-1")).not.toBeInTheDocument();
+    });
   });
 });

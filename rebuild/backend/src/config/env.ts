@@ -134,6 +134,8 @@ const schemaEnvBazowe = z.object({
   PARTNERZY_KATALOG: z.string().min(1).optional(),
   /** Publikacja cenników do katalogów partnerów na serwerze plików: `Nazwa=/ścieżka;Nazwa2=/ścieżka2` (ticket 238). Tylko w `.env` produkcji; brak = bez publikacji. */
   PARTNERZY_KATALOGI_PUBLIKACJI: z.string().min(1).optional(),
+  /** Ticket 256: katalogi trackingu partnerów (`Nazwa=/ścieżka;…`) — tylko w `.env` produkcji; bez wpisu plik trackingu zostaje do pobrania w panelu. */
+  PARTNERZY_KATALOGI_TRACKINGU: z.string().min(1).optional(),
   /**
    * Odbiór zamówień partnerów z plików XML na serwerze plików (ticket 239) — DOMYŚLNIE WYŁĄCZONY. `PARTNERZY_KATALOGI_ZAMOWIEN` =
    * `Nazwa=/…/customer/orders;…` (tylko w `.env` produkcji); przetworzone pliki trafiają do podkatalogu `done/`.
