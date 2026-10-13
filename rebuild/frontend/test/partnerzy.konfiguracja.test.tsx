@@ -283,3 +283,71 @@ describe("liczbaZPola", () => {
     expect(Number.isNaN(liczbaZPola("abc"))).toBe(true);
   });
 });
+
+describe("reguły narzutów partnera", () => {
+  type R = { id: number; kraj: string | null; nazwa: string; warunki: { typ: string; wartosc: string }[]; wartosc: number; priorytet: number; status: string };
+  let reguly: R[] = [];
+  let wyslane: { metoda: string; sciezka: string; cialo: unknown }[] = [];
+
+  beforeEach(() => {
+    reguly = [{ id: 1, kraj: null, nazwa: "Domyślna", warunki: [], wartosc: 8, priorytet: 50, status: "aktywny" }];
+    wyslane = [];
+    zamockujApi();
+    server.use(
+      http.get("*/api/partnerzy/1/narzuty", () => HttpResponse.json({ reguly })),
+      http.post("*/api/partnerzy/1/narzuty", async ({ request }) => {
+        const cialo = (await request.json()) as Omit<R, "id">;
+        wyslane.push({ metoda: "POST", sciezka: "/narzuty", cialo });
+        reguly = [...reguly, { id: 2, ...cialo }];
+        return HttpResponse.json(reguly.at(-1), { status: 201 });
+      }),
+      http.patch("*/api/partnerzy/1/narzuty/:rid", async ({ request, params }) => {
+        const cialo = (await request.json()) as Partial<R>;
+        wyslane.push({ metoda: "PATCH", sciezka: `/narzuty/${String(params.rid)}`, cialo });
+        reguly = reguly.map((r) => (r.id === Number(params.rid) ? { ...r, ...cialo } : r));
+        return HttpResponse.json(reguly[0]);
+      }),
+      http.delete("*/api/partnerzy/1/narzuty/:rid", ({ params }) => {
+        wyslane.push({ metoda: "DELETE", sciezka: `/narzuty/${String(params.rid)}`, cialo: null });
+        reguly = reguly.filter((r) => r.id !== Number(params.rid));
+        return HttpResponse.json({ ok: true });
+      }),
+    );
+  });
+
+  it("pokazuje reguły z opisem warunków i krajem; dodanie reguły z warunkiem wysyła POST; walidacja blokuje puste pola", async () => {
+    const u = userEvent.setup();
+    await otworz();
+    expect(await screen.findByTestId("row-regula-1")).toHaveTextContent("wszystkie opony (globalna)");
+    await u.click(screen.getByTestId("button-regula-dodaj"));
+    await u.click(screen.getByTestId("button-regula-zapisz"));
+    expect(await screen.findByText("Nazwa reguły jest wymagana.")).toBeInTheDocument();
+    expect(wyslane).toHaveLength(0);
+    await u.type(screen.getByTestId("input-regula-nazwa"), "Mitas w DE");
+    await u.type(screen.getByTestId("input-regula-wartosc"), "12,5");
+    await u.selectOptions(screen.getByTestId("select-regula-kraj"), "FR");
+    await u.click(screen.getByTestId("button-warunek-dodaj"));
+    await u.click(screen.getByTestId("button-regula-zapisz"));
+    expect(await screen.findByText("Każdy warunek musi mieć wartość (albo go usuń).")).toBeInTheDocument();
+    await u.type(screen.getByTestId("input-warunek-wartosc-0"), "mitas");
+    await u.click(screen.getByTestId("button-regula-zapisz"));
+    await waitFor(() => expect(wyslane).toEqual([{ metoda: "POST", sciezka: "/narzuty", cialo: { nazwa: "Mitas w DE", wartosc: 12.5, kraj: "FR", priorytet: 50, status: "aktywny", warunki: [{ typ: "marka", wartosc: "mitas" }] } }]));
+    expect(await screen.findByTestId("row-regula-2")).toHaveTextContent("Marka: mitas");
+  });
+
+  it("edycja wysyła PATCH ze zmienionym priorytetem; usunięcie wymaga potwierdzenia", async () => {
+    const u = userEvent.setup();
+    await otworz();
+    await u.click(await screen.findByTestId("button-regula-edytuj-1"));
+    const priorytet = screen.getByTestId("input-regula-priorytet");
+    await u.clear(priorytet);
+    await u.type(priorytet, "90");
+    await u.click(screen.getByTestId("button-regula-zapisz"));
+    await waitFor(() => expect(wyslane[0]).toMatchObject({ metoda: "PATCH", sciezka: "/narzuty/1", cialo: { priorytet: 90, wartosc: 8, kraj: null } }));
+    await u.click(await screen.findByTestId("button-regula-usun-1"));
+    expect(wyslane).toHaveLength(1);
+    await u.click(await screen.findByRole("button", { name: "Usuń" }));
+    await waitFor(() => expect(wyslane.at(-1)).toMatchObject({ metoda: "DELETE", sciezka: "/narzuty/1" }));
+    expect(await screen.findByTestId("text-reguly-pusto")).toBeInTheDocument();
+  });
+});

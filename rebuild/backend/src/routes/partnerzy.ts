@@ -13,6 +13,7 @@ import { parsujGeisXlsx } from "../partnerzy/geis-xlsx.js";
 import { podgladKosztuPrzesylki } from "../partnerzy/podglad-przesylki.js";
 import { BladTransportu, importujTabeleGeis, ustawPaliwo, type TabeleGeisJson } from "../partnerzy/transport.js";
 import { listaGeis } from "../repos/partnerzy-geis.js";
+import { dodajRegule, edytujRegule, listaRegul, usunRegule, walidujRegule, type DaneReguly } from "../repos/partnerzy-narzuty.js";
 import { requireAuth } from "../middleware/auth.js";
 import { zapiszAudyt } from "../repos/audit.js";
 import { pobierzBledy, pobierzLogi } from "../partnerzy/logi.js";
@@ -148,6 +149,49 @@ export function trasyPartnerzy({ db, serwis, odbiorEmail, klientSelly }: Zalezno
         next(err);
       }
     });
+  });
+
+  /** Reguła zawężona do kraju, którego partner nie ma, nigdy by nie zadziałała — odrzucamy ją zamiast cicho ignorować. */
+  const krajSpozaPartnera = (partnerId: number, kraj: string | null | undefined): boolean =>
+    typeof kraj === "string" && !szczegolyPartnera(db, partnerId)!.kraje.some((k) => k.kraj === kraj);
+
+  // Reguły narzutów partnera (ticket 247). Zasada jak w „narzutach i promocjach” sklepu, osobne dane; brak pasującej reguły = narzut kraju.
+  router.get("/api/partnerzy/:id/narzuty", requireAuth, (req, res) => {
+    const id = idZParametru(req, res);
+    if (id !== null) res.json({ reguly: listaRegul(db, id) });
+  });
+
+  router.post("/api/partnerzy/:id/narzuty", requireAuth, (req, res) => {
+    const id = idZParametru(req, res);
+    if (id === null) return;
+    const d = walidujRegule(req.body, false);
+    if ("blad" in d) return void res.status(400).json({ error: d.blad });
+    if (krajSpozaPartnera(id, d.kraj)) return void res.status(400).json({ error: `Partner nie ma kraju ${d.kraj} — dodaj go najpierw w tabeli krajów.` });
+    const regula = dodajRegule(db, id, d as DaneReguly);
+    audytuj(req, "partner_narzut_dodany", id, { regulaId: regula.id, nazwa: regula.nazwa, wartosc: regula.wartosc });
+    res.status(201).json(regula);
+  });
+
+  router.patch("/api/partnerzy/:id/narzuty/:regulaId", requireAuth, (req, res) => {
+    const id = idZParametru(req, res);
+    if (id === null) return;
+    const d = walidujRegule(req.body, true);
+    if ("blad" in d) return void res.status(400).json({ error: d.blad });
+    const regulaId = Number(req.params.regulaId);
+    if (!Number.isInteger(regulaId)) return void res.status(404).json({ error: "Partner nie ma takiej reguły." });
+    if (krajSpozaPartnera(id, d.kraj)) return void res.status(400).json({ error: `Partner nie ma kraju ${d.kraj} — dodaj go najpierw w tabeli krajów.` });
+    const regula = edytujRegule(db, id, regulaId, d);
+    if (!regula) return void res.status(404).json({ error: "Partner nie ma takiej reguły." });
+    audytuj(req, "partner_narzut_zmieniony", id, { regulaId: regula.id, ...d });
+    res.json(regula);
+  });
+
+  router.delete("/api/partnerzy/:id/narzuty/:regulaId", requireAuth, (req, res) => {
+    const id = idZParametru(req, res);
+    if (id === null) return;
+    if (!Number.isInteger(Number(req.params.regulaId)) || !usunRegule(db, id, Number(req.params.regulaId))) return void res.status(404).json({ error: "Partner nie ma takiej reguły." });
+    audytuj(req, "partner_narzut_usuniety", id, { regulaId: Number(req.params.regulaId) });
+    res.json({ ok: true });
   });
 
   router.get("/api/partnerzy/:id", requireAuth, (req, res) => {

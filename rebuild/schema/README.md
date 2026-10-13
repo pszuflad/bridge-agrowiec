@@ -33,6 +33,7 @@ danych dla odbudowy backendu.
 | `030_partner_pliki_koszty_eur.sql` | **Ticket 235** (`235-FEATURE-partnerzy-nazwy-plikow-koszty-eur`): kolumny `partnerzy.nazwa_pliku` (baza nazwy pliku cennika) i `partner_kraje.przesylka_stala_eur` (stały koszt przesyłki w EUR zamiast tabel GEIS) przez `@dodaj-kolumne-jesli-brak`. ⚠ **NOWE kolumny w nowych tabelach, nie odtworzenie produkcji**. |
 | `031_partner_dane_faktury.sql` | **Ticket 242**: sześć kolumn `partnerzy.faktura_*` (nazwa, NIP, ulica, kod, miasto, kraj) — dane do faktury partnera jako zamawiającego w zamówieniu Selly, przez `@dodaj-kolumne-jesli-brak`. ⚠ **NOWE kolumny, nie odtworzenie produkcji**; wartości wpisuje użytkowniczka w panelu. |
 | `032_partner_kraje_myto_pakowanie.sql` | **Ticket 243**: `partner_kraje.myto_eur` i `partner_kraje.pakowanie_eur` (domyślnie 0) — składniki kosztu przesyłki edytowane w panelu, przez `@dodaj-kolumne-jesli-brak`. ⚠ **NOWE kolumny, nie odtworzenie produkcji**. |
+| `033_partner_narzuty.sql` | **Ticket 247**: tabela `partner_narzuty` (reguły narzutów partnera: kraj lub wszystkie, warunki JSON, wartość %, priorytet, status) + indeks `idx_partner_narzuty_partner`. ⚠ **NOWA tabela, nie odtworzenie produkcji**; powstaje pusta. |
 
 ### Dyrektywy runnera (od ticketu 107)
 
