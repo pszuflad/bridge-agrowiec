@@ -57,6 +57,9 @@ jobs:
           # Raport JSON obok zwykłego wyjścia — karmi budżety czasu z następnego kroku (ticket 132).
           npx vitest run --reporter=default --reporter=json --outputFile.json="$RUNNER_TEMP/wyniki-testow.json"
           npm run build --if-present
+      - name: Test bezpiecznej konfiguracji Agrorami
+        if: steps.det.outputs.exists == 'true'
+        run: node --test tools/agrorami-konfiguracja.test.cjs
       - name: Budżety czasu testów
         if: steps.det.outputs.exists == 'true' && always()
         run: node tools/czas-testow.cjs "$RUNNER_TEMP/wyniki-testow.json"

@@ -1,0 +1,52 @@
+name: Agrorami - konfiguracja produkcji
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-produkcja
+  cancel-in-progress: false
+
+jobs:
+  konfiguruj:
+    runs-on: ubuntu-latest
+    environment: produkcja
+    steps:
+      - name: Sprawdź gałąź i dostępność sekretu
+        env:
+          AGRORAMI_PASSWORD: ${{ secrets.AGRORAMI_PASSWORD }}
+        run: |
+          set -euo pipefail
+          [ "$GITHUB_REF" = "refs/heads/main" ] || {
+            echo "::error::Uruchom tę akcję wyłącznie z main."; exit 1;
+          }
+          [ -n "$AGRORAMI_PASSWORD" ] || {
+            echo "::error::Brak sekretu AGRORAMI_PASSWORD. Dodaj go w Settings > Secrets and variables > Actions."; exit 1;
+          }
+      - name: Konfiguracja, test API i synchronizacja MO9
+        timeout-minutes: 15
+        env:
+          AGRORAMI_PASSWORD: ${{ secrets.AGRORAMI_PASSWORD }}
+          PROD_SSH_KEY: ${{ secrets.PROD_SSH_KEY }}
+          PROD_SSH_KNOWN_HOSTS: ${{ secrets.PROD_SSH_KNOWN_HOSTS }}
+          PROD_SSH_HOST: ${{ secrets.PROD_SSH_HOST }}
+          PROD_SSH_PORT: ${{ secrets.PROD_SSH_PORT }}
+          PROD_SSH_USER: ${{ secrets.PROD_SSH_USER }}
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p ~/.ssh
+          printf '%s\n' "$PROD_SSH_KEY" > ~/.ssh/deploy_key
+          printf '%s\n' "$PROD_SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          trap 'rm -f ~/.ssh/deploy_key' EXIT
+          node -e 'process.stdout.write(JSON.stringify({
+            email: "info@agroopony.eu",
+            password: process.env.AGRORAMI_PASSWORD
+          }))' |
+            ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes \
+              -o StrictHostKeyChecking=yes \
+              -p "$PROD_SSH_PORT" "$PROD_SSH_USER@$PROD_SSH_HOST" \
+              bridge-konfiguruj-agrorami
