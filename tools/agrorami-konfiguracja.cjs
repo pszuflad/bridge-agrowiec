@@ -129,12 +129,15 @@ async function synchronize(root) {
   console.log('MO9: synchronizacja OK; aktualny agrorami-api.csv; status aktywny.');
 }
 
-async function main(root) {
+async function main(root, services = {}) {
+  const login = services.validateLogin || validateLogin;
+  const run = services.runWithEnv || runWithEnv;
+  const readInput = services.readInput || (() => fs.readFileSync(0, 'utf8'));
   const expected = path.join(process.env.HOME, 'domains/agroopony.eu/public_html/bridgeone/_app');
   if (root !== expected) throw new Error('Dozwolona jest wyłącznie produkcja BridgeOne.');
   if (process.argv[3] === '--sync') return synchronize(root);
-  const credentials = parseCredentials(fs.readFileSync(0, 'utf8'));
-  await validateLogin(credentials);
+  const credentials = parseCredentials(readInput());
+  await login(credentials);
   console.log('Agrorami: nowy token pobrany poprawnie (wartość ukryta).');
   const env = path.join(root, '.env');
   const original = fs.readFileSync(env, 'utf8');
@@ -153,18 +156,24 @@ async function main(root) {
     'zmiana: aktualizacja danych Agrorami z GitHub Secrets po poprawnym teście tokenu; restart backendu i kontrola MO9.\n' +
     'powód: przywrócenie aktualizacji cen i stanów MO9 na prośbę właścicielki.\n\n' + oldLog);
   try {
-    runWithEnv(root, path.join(root, 'pm2.sh'), ['restart', 'bridge-backend-prod', '--update-env']);
+    run(root, path.join(root, 'pm2.sh'), ['restart', 'bridge-backend-prod', '--update-env']);
+    run(root, path.join(root, 'pm2.sh'), ['save']);
   } catch (error) {
     atomicWrite(env, original);
-    try { runWithEnv(root, path.join(root, 'pm2.sh'), ['restart', 'bridge-backend-prod', '--update-env']); } catch {}
-    fs.appendFileSync(changelog, '\nAgrorami: restart nieudany, przywrócono poprzedni .env.\n');
+    try {
+      run(root, path.join(root, 'pm2.sh'), ['restart', 'bridge-backend-prod', '--update-env']);
+      run(root, path.join(root, 'pm2.sh'), ['save']);
+    } catch {}
+    atomicWrite(changelog, `${new Date().toISOString()}\nobszar: backend\n` +
+      'zmiana: nieudany restart lub zapis PM2; przywrócono poprzedni .env.\n\n' +
+      fs.readFileSync(changelog, 'utf8'));
     throw error;
   }
-  const stdout = runWithEnv(root, path.join(root, 'node/bin/node'), [__filename, root, '--sync']);
+  const stdout = run(root, path.join(root, 'node/bin/node'), [__filename, root, '--sync']);
   console.log(stdout.trim());
 }
 
-module.exports = { parseCredentials, shellQuote, replaceEnv, validateLogin };
+module.exports = { parseCredentials, shellQuote, replaceEnv, validateLogin, main };
 if (require.main === module) {
   main(process.argv[2]).catch(error => {
     // Nieoczekiwane błędy systemowe również bez treści mogącej zawierać sekret.

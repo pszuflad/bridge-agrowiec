@@ -27,7 +27,8 @@ Po poprawnym logowaniu:
 - tworzy kopię `.env.bak_agrorami_<czas>` z uprawnieniami `0600`;
 - wpisuje zmianę bez sekretów do rzeczywistego `bridgeone/_app/CHANGELOG.md`
   (dawny `/home/admin/private_apps/bridge` nie jest obecnym serwerem produkcji);
-- restartuje tylko `bridge-backend-prod` z `--update-env`; przy błędzie restartu
+- restartuje tylko `bridge-backend-prod` z `--update-env` i zapisuje stan PM2,
+  żeby nowe dane obowiązywały także po restarcie VPS; przy błędzie restartu
   przywraca poprzedni `.env` i ponawia restart ze starą konfiguracją;
 - uruchamia jedną ręczną synchronizację MO9 z istniejącym kontem Anny
   przez lokalny interfejs API; tworzy wewnętrzny token o ważności 15 minut,
