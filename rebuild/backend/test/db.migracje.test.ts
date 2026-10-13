@@ -133,7 +133,7 @@ describe("zastosujMigracje", () => {
 
     const liczba = (sqlite.prepare(`SELECT count(*) AS c FROM users`).get() as { c: number }).c;
     expect(liczba).toBe(1);
-    expect(policzTabele(sqlite)).toBe(55);
+    expect(policzTabele(sqlite)).toBe(56);
   });
 
   /**
