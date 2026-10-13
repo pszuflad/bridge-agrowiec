@@ -1,0 +1,3 @@
+# 245 — BUG: „magazyny” partnera to kody dostawców (MO1…), nie fizyczne magazyny
+
+Zgłoszenie użytkowniczki 2026-10-13 (zrzut panelu: „Magazyn 1”, „Rzeszow”, „Wroclaw”, „—”): magazyny mają być opisane MO1, MO2… Przyczyna: lista, filtr eksportu i kolumna „Warehouse” brały `products.magazyn` (fizyczny), a kody MO1.. są w `products.dostawca`. Zakres: `dostepneMagazyny` i `wybierzPozycje` po `products.dostawca`; pole `magazyn` pozycji eksportu = dostawca (kolumna „Warehouse” w plikach); krok wdrożenia `2026-10-13-partnerzy-magazyny-dostawcy` naprawia wybór partnerów skonfigurowanych błędnie krokiem 237 (poprawny wybór z panelu zostaje). Testy: selekcja, konfiguracja startowa (naprawa + start), trasy.

@@ -10,7 +10,7 @@ import { zastosujMigracje } from "../src/db/migrate.js";
 import { KROKI_WDROZENIA } from "../src/kroki/rejestr.js";
 import { uruchomKroki } from "../src/kroki/runner.js";
 import { generujPlikiPartnera } from "../src/partnerzy/generator.js";
-import { ustawKonfiguracjeStartowa } from "../src/partnerzy/konfiguracja-startowa.js";
+import { naprawMagazynyDostawcow, ustawKonfiguracjeStartowa } from "../src/partnerzy/konfiguracja-startowa.js";
 import { szczegolyPartnera } from "../src/repos/partnerzy.js";
 import { KATALOG_SCHEMATU } from "./gate/repo.js";
 
@@ -51,6 +51,27 @@ describe("konfiguracja startowa partnerów", () => {
     expect(t).toMatchObject({ aktywny: true, nazwaPliku: "tyreworld_agrowiec" });
     expect(t.kraje.map((k) => k.kraj).sort()).toEqual(["AT", "BE", "DE", "FR", "IT", "NL"]);
     expect(t.kolumny.map((k) => k.nazwaWPliku).slice(-6)).toEqual(["FR euro nett", "DE euro nett", "NL euro nett", "BE euro nett", "AT euro nett", "IT euro nett"]);
+  });
+
+  it("magazyny startowe to kody dostawców katalogu (bez MO6/MO7/MO8), nie fizyczne magazyny", async () => {
+    sqlite.prepare("UPDATE products SET magazyn = 'Rzeszow'").run();
+    await uruchomKroki(sqlite, db, KROKI_WDROZENIA, {});
+    expect(szczegolyPartnera(db, id("Adtyres"))!.magazyny).toEqual(["MO1", "MO4"]);
+  });
+
+  it("naprawa: błędny wybór (fizyczne magazyny) → dostawcy bez MO6/7/8; poprawny wybór z panelu zostaje; powtarzalne", async () => {
+    await uruchomKroki(sqlite, db, KROKI_WDROZENIA, {});
+    const a = id("Adtyres");
+    const t = id("TyreWorld");
+    sqlite.prepare("DELETE FROM partner_magazyny").run();
+    sqlite.prepare("INSERT INTO partner_magazyny (partner_id, magazyn) VALUES (?, 'Magazyn 1'), (?, 'Rzeszow')").run(a, a); // błąd z kroku 237
+    sqlite.prepare("INSERT INTO partner_magazyny (partner_id, magazyn) VALUES (?, 'MO4')").run(t); // świadomy wybór z panelu
+    const opis = naprawMagazynyDostawcow(db);
+    expect(opis).toContain("Adtyres: 2 dostawców (MO1, MO4)");
+    expect(opis).toContain("TyreWorld: wybór poprawny");
+    expect(szczegolyPartnera(db, a)!.magazyny).toEqual(["MO1", "MO4"]);
+    expect(szczegolyPartnera(db, t)!.magazyny).toEqual(["MO4"]);
+    expect(naprawMagazynyDostawcow(db)).toContain("Adtyres: wybór poprawny");
   });
 
   it("nie nadpisuje tego, co użytkowniczka już ustawiła, i jest powtarzalne", async () => {

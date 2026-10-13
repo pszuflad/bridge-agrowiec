@@ -83,7 +83,8 @@ export function wybierzPozycje(db: Baza, partnerId: number): WynikSelekcji {
       rozmiar: products.rozmiar,
       kategoria: products.kategoria,
       dostawca: products.dostawca,
-      magazyn: products.magazyn,
+      // „Magazyn” partnera to KOD DOSTAWCY (MO1, MO2…), nie fizyczny magazyn (`products.magazyn` = „Magazyn 1”, „Rzeszow”…) — decyzja użytkowniczki 2026-10-13.
+      magazyn: products.dostawca,
       stan: products.stan,
       dot: products.dot,
       cenaZakupu: products.cenaZakupu,
@@ -95,7 +96,7 @@ export function wybierzPozycje(db: Baza, partnerId: number): WynikSelekcji {
       wagaSzacowana: products.wagaSzacowana,
     })
     .from(products)
-    .where(and(eq(products.status, "aktywny"), inArray(products.magazyn, magazyny)))
+    .where(and(eq(products.status, "aktywny"), inArray(products.dostawca, magazyny)))
     .orderBy(asc(products.id))
     .all();
 
