@@ -33,6 +33,7 @@ export type TrybSelly = "wylaczony" | "tylko-odczyt" | "pelny";
  * ominąć blokadę. To jest właściwy powód istnienia tego pliku jako osobnego modułu.
  */
 export const METODY_ZAPISUJACE = [
+  "createOrder",
   "createProducer",
   "createCategory",
   "createProduct",

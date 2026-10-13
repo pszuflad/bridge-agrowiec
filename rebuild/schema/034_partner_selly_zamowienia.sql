@@ -1,0 +1,11 @@
+-- Ticket 249 (249-FEATURE-partnerzy-utworz-zamowienie-selly): identyfikatory Selly potrzebne do utworzenia zamówienia partnera w sklepie.
+--
+-- ⚠ NOWE KOLUMNY w tabeli z migracji 024, NIE ODTWORZENIE PRODUKCJI. Wszystkie NULL = nie ustawione (utworzenie zamówienia w Selly jest wtedy zablokowane).
+--   partnerzy.selly_status_id   — `status_id` nowego zamówienia (słownik „Statusy zamówień”)
+--   partnerzy.selly_payment_id  — `payment_id` (słownik „Formy płatności”)
+--   partnerzy.selly_delivery_id — `delivery_id` (słownik „Formy dostawy”)
+--   partnerzy.selly_vat_id      — `vat_rate_id` stawki VAT 0 % (słownik „Stawki VAT”); tylko w ciele tworzonego zamówienia, produktów nie dotyczy
+-- @dodaj-kolumne-jesli-brak partnerzy selly_status_id INTEGER
+-- @dodaj-kolumne-jesli-brak partnerzy selly_payment_id INTEGER
+-- @dodaj-kolumne-jesli-brak partnerzy selly_delivery_id INTEGER
+-- @dodaj-kolumne-jesli-brak partnerzy selly_vat_id INTEGER

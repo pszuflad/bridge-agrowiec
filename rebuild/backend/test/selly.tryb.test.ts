@@ -47,6 +47,7 @@ function atrapaKlienta(): { klient: KlientSelly; wywolania: string[] } {
     listProductsByEan: metoda("listProductsByEan"),
     listProductsPage: metoda("listProductsPage"),
     listVariants: metoda("listVariants"),
+    createOrder: metoda("createOrder"),
     listOrders: metoda("listOrders"),
     listOrderStatuses: metoda("listOrderStatuses"),
     listOrderPayments: metoda("listOrderPayments"),

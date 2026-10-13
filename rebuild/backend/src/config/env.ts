@@ -139,6 +139,8 @@ const schemaEnvBazowe = z.object({
    * `Nazwa=/…/customer/orders;…` (tylko w `.env` produkcji); przetworzone pliki trafiają do podkatalogu `done/`.
    */
   PARTNERZY_ODBIOR_PLIKOW: flagaBoolDomyslnieWylaczona,
+  /** Ticket 249: zezwala na ręczne tworzenie zamówień partnerów w Selly (`POST /api/orders`). Domyślnie wyłączone. */
+  PARTNERZY_SELLY_ZAMOWIENIA: flagaBoolDomyslnieWylaczona,
   PARTNERZY_ODBIOR_PLIKOW_MINUTY: z.coerce.number().int().min(1).max(1440).default(5),
   PARTNERZY_KATALOGI_ZAMOWIEN: z.string().min(1).optional(),
   /**

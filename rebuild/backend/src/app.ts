@@ -35,6 +35,7 @@ import { trasyWagiGabarytowej } from "./routes/waga-gabarytowa.js";
 import { trasyEanPary } from "./routes/ean-pary.js";
 import type { OdbiorEmail } from "./partnerzy/odbior-email.js";
 import { trasyPartnerzy } from "./routes/partnerzy.js";
+import type { KlientNbp } from "./partnerzy/kurs-nbp.js";
 import type { SerwisPartnerow } from "./partnerzy/scheduler.js";
 import { trasyNieobecne } from "./routes/nieobecne.js";
 import type { OpcjeSynchronizacji, WynikSynchronizacji } from "./import/synchronizuj.js";
@@ -90,6 +91,10 @@ export type ZaleznosciApp = {
   serwisPartnerow?: SerwisPartnerow;
   /** Odbiór zamówień partnerów z e-maila (ticket 231). Pominięty (testy) ⇒ `POST /api/partnerzy/:id/zamowienia/odbierz` odpowiada 503. */
   odbiorEmail?: OdbiorEmail;
+  /** Ticket 249: flaga `PARTNERZY_SELLY_ZAMOWIENIA` (ręczne tworzenie zamówień partnerów w Selly). */
+  sellyZamowienia?: boolean;
+  /** Ticket 250: klient NBP do podglądu aktualnego kursu w panelu partnerów. Bez niego `GET /api/partnerzy/kurs-nbp` odpowiada 503. */
+  klientNbp?: KlientNbp;
 };
 
 /**
@@ -106,6 +111,8 @@ export function stworzApp({
   discoverySelly,
   serwisPartnerow,
   odbiorEmail,
+  sellyZamowienia,
+  klientNbp,
 }: ZaleznosciApp): Express {
   const app = express();
 
@@ -260,7 +267,7 @@ export function stworzApp({
   app.use(trasyEksportuShoper({ db }));
   app.use(trasyWagiGabarytowej({ db }));
   app.use(trasyEanPary({ db }));
-  app.use(trasyPartnerzy({ db, serwis: serwisPartnerow, odbiorEmail, klientSelly: klientSellyDoUzycia }));
+  app.use(trasyPartnerzy({ db, serwis: serwisPartnerow, odbiorEmail, klientSelly: klientSellyDoUzycia, sellyZamowienia, klientNbp }));
   app.use(trasyNieobecne({ db }));
   app.use(trasyAtrybutow({ db }));
 
