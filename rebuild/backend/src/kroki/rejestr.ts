@@ -9,6 +9,7 @@ import { dirname, join } from "node:path";
 import { usunWszystkieKartyAuto } from "../import/migracje/scal-karty-auto.js";
 import { wyprowadzKatalogiTrackingu } from "../partnerzy/katalogi-trackingu.js";
 import { uzupelnijDanePartnerow } from "../partnerzy/dane-partnerow.js";
+import { ustawNarzutyStartowe } from "../partnerzy/narzuty-startowe.js";
 import { naprawMagazynyDostawcow, ustawKonfiguracjeStartowa } from "../partnerzy/konfiguracja-startowa.js";
 import { dodajPartnera } from "../repos/partnerzy.js";
 import { ustawWEnvPliku } from "./env-plik.js";
@@ -149,6 +150,13 @@ export const KROKI_WDROZENIA: Krok[] = [
       // Log wdrożenia jest publiczny (repozytorium publiczne) — bez ścieżek serwera plików: tylko nazwy partnerów i skutek.
       const skutek = opis[0]?.match(/\((dopisano|zmieniono|bez zmian)\)$/)?.[1] ?? "ustawiono";
       return `PARTNERZY_KATALOGI_TRACKINGU (${skutek}) dla: ${w.wartosc.split(";").map((x) => x.split("=")[0]).join(", ")}${w.pominiete.length ? ` — pominięto: ${w.pominiete.join("; ")}` : ""}`;
+    },
+  },
+  {
+    id: "2026-10-13-partnerzy-narzuty-startowe",
+    opis: "partnerzy B2B: narzuty startowe wg starego panelu — dopłata 5 % w krajach partnera, które mają jeszcze 0 %, oraz 7 reguł marek (Niemcy, Rolnicze: Alliance/CEAT 2 %, Vredestein 3 %); tylko uzupełnia, niczego nie nadpisuje; odkłada się, gdy nie rozpozna dostawcy w tabeli dostawców",
+    async uruchom({ db }) {
+      return ustawNarzutyStartowe(db);
     },
   },
 ];
