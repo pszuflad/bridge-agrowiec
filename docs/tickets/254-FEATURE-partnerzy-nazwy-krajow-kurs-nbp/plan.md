@@ -1,0 +1,6 @@
+# 254 — PARTNERZY: pełne nazwy krajów obok kodów, wyjaśnienie „kurs z wczoraj”
+
+Prośba użytkowniczki 2026-10-13: (1) obok skrótów krajów pokazać pełne nazwy w sekcji „Kraje, narzuty i kursy”; (2) sprawdzić, dlaczego „ostatni aktualny kurs” NBP jest z wczoraj, a nie z dzisiaj.
+(1) `src/lib/kraje.ts` (`nazwaKraju`, `kodZNazwa`; `Intl.DisplayNames('pl')`, wyjątki dla kodów VAT UE: EL = Grecja, XI, UK; nieznany kod → brak nazwy). Pokazane: tabela krajów (pod kodem; przy nowym kraju na żywo podczas wpisywania), karta „Dane do faktury wg kraju”, lista krajów w regułach narzutów (kod + nazwa, wartość nadal kod).
+(2) Diagnoza: bez błędu w kodzie. Kurs pobieramy z `GET api.nbp.pl/api/exchangerates/rates/a/eur/` = OSTATNIA OPUBLIKOWANA tabela A. NBP publikuje tabelę dnia w dni robocze ok. 11:45–12:15 (czas polski); sprawdzenie o 11:49 (09:49 UTC) 2026-10-13 wypada PRZED publikacją, więc obowiązuje tabela z 2026-10-12. Panel pokazuje teraz to wyjaśnienie obok kursu. Gdy NBP nie odpowiada, panel pokazuje „zapisany — NBP nie odpowiada” z ostrzeżeniem (to odróżnia awarię od oczekiwania na publikację). Nie mogliśmy zweryfikować odpowiedzi NBP z sesji (sieć zablokowana) — do potwierdzenia po południu: kurs z dnia dzisiejszego powinien pojawić się po „Odśwież kurs”.
+Bez zmian w backendzie i w obliczaniu cen.

@@ -231,6 +231,16 @@ describe("kraje", () => {
     await waitFor(() => expect(zadania[0]?.cialo).toMatchObject({ przesylkaStalaEur: 15, kosztyDodatkowe: 43 }));
   });
 
+  it("tabela krajów pokazuje pełną nazwę kraju obok kodu (także dla nowego kraju w trakcie wpisywania) i wyjaśnienie, kiedy NBP publikuje kurs", async () => {
+    const uzytkownik = userEvent.setup();
+    await otworz();
+    expect(await screen.findByTestId("nazwa-kraju-FR")).toHaveTextContent("Francja");
+    expect(screen.getByTestId("nazwa-kraju-nowy")).toBeEmptyDOMElement();
+    await uzytkownik.type(screen.getByTestId("input-kraj-nowy-kod"), "pl");
+    expect(screen.getByTestId("nazwa-kraju-nowy")).toHaveTextContent("Polska");
+    expect(screen.getByTestId("kurs-nbp-wyjasnienie")).toHaveTextContent("11:45–12:15");
+  });
+
   it("tabela krajów pokazuje aktualny kurs NBP (wartość i data tabeli), także przy kraju, który jeszcze go nie użył; „Odśwież kurs” pobiera na nowo", async () => {
     const uzytkownik = userEvent.setup();
     let zapytan = 0;
