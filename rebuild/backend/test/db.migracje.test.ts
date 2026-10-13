@@ -71,6 +71,7 @@ describe("zastosujMigracje", () => {
     "031_partner_dane_faktury.sql",
     "032_partner_kraje_myto_pakowanie.sql",
     "033_partner_narzuty.sql",
+    "034_partner_selly_zamowienia.sql",
   ];
 
   it("stosuje wszystkie migracje po kolei: 56 tabel i 29 indeksów", () => {
