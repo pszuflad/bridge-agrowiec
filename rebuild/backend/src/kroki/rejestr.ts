@@ -7,6 +7,7 @@ import {
 } from "../import/podmien-zrodla.js";
 import { dirname, join } from "node:path";
 import { usunWszystkieKartyAuto } from "../import/migracje/scal-karty-auto.js";
+import { wyprowadzKatalogiTrackingu } from "../partnerzy/katalogi-trackingu.js";
 import { uzupelnijDanePartnerow } from "../partnerzy/dane-partnerow.js";
 import { naprawMagazynyDostawcow, ustawKonfiguracjeStartowa } from "../partnerzy/konfiguracja-startowa.js";
 import { dodajPartnera } from "../repos/partnerzy.js";
@@ -128,6 +129,26 @@ export const KROKI_WDROZENIA: Krok[] = [
     opis: "partnerzy B2B: dopełnienie numerów VAT UE spółki Adtyres wg kraju (LT, NL i pozostałe, które były nieczytelne na pierwszym zrzucie) — uzupełnia tylko puste pola, niczego nie nadpisuje",
     async uruchom({ db }) {
       return uzupelnijDanePartnerow(db);
+    },
+  },
+  {
+    id: "2026-10-13-partnerzy-katalogi-trackingu",
+    tylkoProdukcja: true, // środowisko testowe działa na tym samym serwerze plików — nie może pisać do katalogów partnerów
+    opis: "partnerzy B2B: zapis plików trackingu do katalogów partnerów — ustawia PARTNERZY_KATALOGI_TRACKINGU w .env produkcji, wyprowadzone z PARTNERZY_KATALOGI_ZAMOWIEN (tylko istniejące katalogi; nie nadpisuje istniejącej wartości)",
+    async uruchom({ env }) {
+      if (env.PARTNERZY_KATALOGI_TRACKINGU?.trim()) return "PARTNERZY_KATALOGI_TRACKINGU jest już ustawione — bez zmian";
+      const dbPath = env.DB_PATH as string | undefined;
+      const sciezka = (env.PLIK_ENV as string | undefined) || (dbPath ? join(dirname(dbPath), "..", ".env") : "");
+      if (!sciezka) return { odloz: "brak DB_PATH — nie wiem, gdzie jest .env" };
+      if (!env.PARTNERZY_KATALOGI_ZAMOWIEN?.trim()) return { odloz: "brak PARTNERZY_KATALOGI_ZAMOWIEN w .env — wpisz tę zmienną (katalogi zamówień partnerów), a katalogi trackingu zostaną z niej wyprowadzone przy następnym wdrożeniu" };
+      const w = wyprowadzKatalogiTrackingu(env.PARTNERZY_KATALOGI_ZAMOWIEN);
+      if (!w.wartosc) return { odloz: `nie ma katalogu trackingu do wpisania (${w.pominiete.join("; ")})` };
+      // Wartość w cudzysłowie: skrypt wdrożenia czyta `.env` przez `source`, a średnik rozbiłby linię.
+      const opis = ustawWEnvPliku(sciezka, { PARTNERZY_KATALOGI_TRACKINGU: `"${w.wartosc}"` });
+      if (!opis) return { odloz: `brak pliku ${sciezka}` };
+      // Log wdrożenia jest publiczny (repozytorium publiczne) — bez ścieżek serwera plików: tylko nazwy partnerów i skutek.
+      const skutek = opis[0]?.match(/\((dopisano|zmieniono|bez zmian)\)$/)?.[1] ?? "ustawiono";
+      return `PARTNERZY_KATALOGI_TRACKINGU (${skutek}) dla: ${w.wartosc.split(";").map((x) => x.split("=")[0]).join(", ")}${w.pominiete.length ? ` — pominięto: ${w.pominiete.join("; ")}` : ""}`;
     },
   },
 ];
