@@ -39,6 +39,8 @@ export type PozycjaEksportu = {
   wysokosc: number | null;
   wagaAutoUzupelniona: boolean | null;
   wagaSzacowana: boolean | null;
+  /** Marża sklepu na tym produkcie (`products.marza_pct`, % narzutu na zakup) — baza wyceny partnera (ticket 255, wariant B): cena = zakup × (1 + marża sklepu + dopłata kraju). Brak = 0. */
+  marzaSklepuProc?: number;
   /** Pola do warunków reguł narzutów (ticket 247) — opcjonalne, wypełnia je `wybierzPozycje`. */
   konstrukcja?: string | null;
   srednica?: number | null;
@@ -94,6 +96,7 @@ export function wybierzPozycje(db: Baza, partnerId: number): WynikSelekcji {
       stan: products.stan,
       dot: products.dot,
       cenaZakupu: products.cenaZakupu,
+      marzaSklepuProc: products.marzaPct,
       waga: products.waga,
       dlugosc: products.dlugosc,
       szerokoscPaczki: products.szerokoscPaczki,
@@ -164,9 +167,13 @@ export function wycenPozycje(
     const ceny: Record<string, number | null> = {};
     for (const k of kraje) {
       const regula = reguly.length ? wybierzZPrzygotowanych(reguly, k.kraj, pozycja as unknown as Record<string, unknown>) : null;
-      const narzutProc = regula ? regula.wartosc : k.narzutProc;
-      if (!(narzutProc > 0)) {
-        // Bez narzutu cena = cena zakupu: nie publikujemy, dopóki użytkownik nie ustawi narzutu kraju albo reguły.
+      // Wariant B (decyzja użytkowniczki 2026-10-13, jak w starym systemie): „narzut” kraju/reguły to DOPŁATA w punktach procentowych DO marży sklepu na tym
+      // produkcie — cena partnera = zakup × (1 + marża sklepu + dopłata). Dzięki temu partner nigdy nie kupi taniej niż klient w sklepie polskim.
+      const doplataProc = regula ? regula.wartosc : k.narzutProc;
+      const marzaSklepu = Number.isFinite(pozycja.marzaSklepuProc) ? Math.max(0, pozycja.marzaSklepuProc as number) : 0;
+      const narzutProc = marzaSklepu + doplataProc;
+      if (!(doplataProc > 0)) {
+        // Dopłata 0 = jeszcze nieustawiona: nie publikujemy cen, dopóki użytkownik nie ustawi dopłaty kraju albo reguły (zabezpieczenie przed wypuszczeniem cen sklepu).
         ceny[k.kraj] = null;
         if (!narzutBrakWidziany.has(k.kraj)) {
           narzutBrakWidziany.add(k.kraj);

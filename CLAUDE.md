@@ -349,6 +349,13 @@ jedno polecenie: `tools/deploy-produkcja.sh`), więc **jedyna droga** to ten skr
    wdrożeniu — ale uwaga na pkt 4: sama poprawka skryptu zadziała dopiero od drugiego wdrożenia po jej merge'u; do tego czasu uprzedź
    użytkownika o drugim wdrożeniu. Sekretów w repo nadal nie wpisujemy.
 
+## Uzupełniaj, co się da (zasada ustalona 2026-10-13)
+
+Jeśli przy robocie dostajesz informacje, którymi da się uzupełnić dane lub ustawienia (zrzut ekranu, plik, wiadomość użytkownika), **uzupełniasz je od razu i w całości** — nie zostawiasz ich użytkownikowi do ręcznego wpisania w panelu. Dotyczy to też danych w kroku wdrożenia (zasada wyżej: tylko przez wdrożenie, tylko puste pola, bez nadpisywania). Wyjątki, o których mówisz wprost w odpowiedzi:
+- **dane nieczytelne lub niepewne** (obcięty numer, wątpliwy znak): nie wpisuj zgadniętej wartości — uzupełnij resztę i **od razu poproś o czytelniejsze źródło** (szerszy zrzut, plik), zamiast po cichu pominąć i zostawić dziurę (przykład: ticket 253 — numery VAT dla LT/NL/SE/ES pominięte z obciętego zrzutu, dopełnione w 255 ze szerszego);
+- **sekrety i dane osobowe** (hasła, telefony prywatne, dane klientów) — repozytorium jest publiczne, tego nie wpisujesz;
+- **dane rejestrowe firm i ogólne skrzynki firmowe** (nazwa, numer VAT UE, adres siedziby, `bill@…`) wpisywać wolno.
+
 ## Środowisko
 
 - **Nowy klon repo (nowa maszyna, nowa osoba) — raz:** `tools/wlacz-hooki.sh`
