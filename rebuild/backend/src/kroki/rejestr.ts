@@ -7,6 +7,7 @@ import {
 } from "../import/podmien-zrodla.js";
 import { dirname, join } from "node:path";
 import { usunWszystkieKartyAuto } from "../import/migracje/scal-karty-auto.js";
+import { uzupelnijDanePartnerow } from "../partnerzy/dane-partnerow.js";
 import { naprawMagazynyDostawcow, ustawKonfiguracjeStartowa } from "../partnerzy/konfiguracja-startowa.js";
 import { dodajPartnera } from "../repos/partnerzy.js";
 import { ustawWEnvPliku } from "./env-plik.js";
@@ -113,6 +114,13 @@ export const KROKI_WDROZENIA: Krok[] = [
     opis: "partnerzy B2B: naprawa wyboru „magazynów” — kody dostawców (MO1, MO2…, bez MO6/MO7/MO8) zamiast fizycznych magazynów, tylko dla partnerów z błędnym wyborem; poprawnie ustawionych nie rusza",
     async uruchom({ db }) {
       return naprawMagazynyDostawcow(db);
+    },
+  },
+  {
+    id: "2026-10-13-partnerzy-dane-faktury",
+    opis: "partnerzy B2B: dane do faktury (TyreWorld; Adtyres wg kraju dostawy), e-mail kontaktowy i stawka VAT 0 % WDT (101) — uzupełnia tylko puste pola; numerów VAT, których nie było w całości (LT, NL, SE, ES), i telefonów nie wpisuje",
+    async uruchom({ db }) {
+      return uzupelnijDanePartnerow(db);
     },
   },
 ];

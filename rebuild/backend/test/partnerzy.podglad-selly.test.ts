@@ -17,7 +17,7 @@ const produkt = (kod: string, n: Partial<Nowy> = {}): Nowy => ({
   dataAktualizacji: "2026-10-10T00:00:00.000Z", kodImportu: `IMP_${kod}`, ...n,
 });
 const FAKTURA = { fakturaNazwa: "Adtyres SL", fakturaNip: "ATU1", fakturaUlica: "Calle 1", fakturaKod: "AD500", fakturaMiasto: "Andorra", fakturaKraj: "AD" };
-const IDY_SELLY = { sellyStatusId: 3, sellyPaymentId: 71, sellyDeliveryId: 201, sellyVatId: 5 };
+const IDY_SELLY = { sellyStatusId: 3, kontaktEmail: "bill@partner.example", kontaktTelefon: "+376 111 222" };
 
 describe("zamówienie partnera → Selly", () => {
   let s: SrodowiskoTestowe;
@@ -57,30 +57,40 @@ describe("zamówienie partnera → Selly", () => {
       expect(p.zamawiajacy).toMatchObject({ nazwa: "Adtyres SL", nip: "ATU1", kraj: "AD" });
       expect(p.dostawa.CUSTOMERNAME).toBe("Jan Kowalski");
       expect(p.pozycje[0]!.dopasowanie).toMatchObject({ kod: "011200284", dostawca: "MO1", sellyProductId: 501, sellyVariantId: 601 });
-      expect(p.ostrzezenia).toEqual([expect.stringMatching(/e-mail klienta/), expect.stringMatching(/pełnego adresu dostawy.*ulica, kod pocztowy, miasto/)]);
+      expect(p.ostrzezenia).toEqual([expect.stringMatching(/pełnego adresu dostawy.*ulica, kod pocztowy, miasto/)]);
       expect(p.zadanie).toMatchObject({
-        status_id: 3, payment_id: 71, delivery_id: 201, currency: "EUR", exchange_rate: 4.25,
+        status_id: 3, payment_id: 10, delivery_id: 10, email: "bill@partner.example", phone: "+376 111 222", currency: "EUR", exchange_rate: 4.25,
         invoice_company: "Adtyres SL", invoice_nip: "ATU1", invoice_postcode: "AD500", ship_company: "Jan Kowalski", delivery_country_iso2: "AT",
       });
       expect((p.zadanie as { client_comment: string }).client_comment).toMatch(/Adtyres nr /);
       expect((p.zadanie as { products: unknown[] }).products).toEqual([
-        { product_id: 501, variant_id: 601, quantity: 2, price_with_tax: 202, vat_rate_id: 5 },
-        { product_id: 502, variant_id: 602, quantity: 1, price_with_tax: 99.5, vat_rate_id: 5 },
+        { product_id: 501, variant_id: 601, quantity: 2, price_with_tax: 202, vat_rate_id: 101 },
+        { product_id: 502, variant_id: 602, quantity: 1, price_with_tax: 99.5, vat_rate_id: 101 },
       ]);
     });
 
     it("blokady: brak identyfikatorów Selly, pozycje bez dopasowania/powiązania, brak kursu, zły status — i wtedy nie ma ciała zamówienia", () => {
-      const partnerId = dodajPartnera({ sellyVatId: null, sellyStatusId: null });
+      const partnerId = dodajPartnera({ sellyStatusId: null, kontaktEmail: null });
       s.db.insert(products).values([produkt("011200284")]).run(); // „0102 00001” bez dopasowania, 011200284 bez powiązania z Selly
       const id = zapiszZamowienie(s.db, partnerId, XML_PRZYKLAD).id; // status „nowe”
       const p = podgladDlaSelly(s.db, partnerId, id)!;
       const tekst = p.blokady.join(" | ");
-      expect(tekst).toMatch(/identyfikatorów Selly.*status, stawka VAT 0 %/);
+      expect(tekst).toMatch(/statusu nowego zamówienia Selly/);
+      expect(tekst).toMatch(/Brak adresu e-mail zamawiającego/);
       expect(tekst).toMatch(/bez dopasowania w katalogu: 1/);
       expect(tekst).toMatch(/nie ma jeszcze w Selly.*: 1/);
       expect(tekst).toMatch(/Brak zapisanego kursu EUR/);
       expect(tekst).toMatch(/status „nowe”/);
       expect(p.zadanie).toBeNull();
+    });
+
+    it("e-mail zamawiającego: z kontaktu partnera, a gdy go brak — z pliku zamówienia; płatność/dostawa/VAT to stałe, nadpisywalne kolumnami partnera", () => {
+      const partnerId = dodajPartnera({ sellyPaymentId: 71, sellyDeliveryId: 201, sellyVatId: 5 });
+      katalogZSelly();
+      kursEur();
+      const p = podgladDlaSelly(s.db, partnerId, przyjete(partnerId))!;
+      expect(p.zadanie).toMatchObject({ payment_id: 71, delivery_id: 201 });
+      expect((p.zadanie as { products: { vat_rate_id: number }[] }).products[0]!.vat_rate_id).toBe(5);
     });
 
     it("niejednoznaczne powiązanie z Selly i kraj dostawy niedwuliterowy blokują", () => {
@@ -248,13 +258,13 @@ describe("zamówienie partnera → Selly", () => {
     it("blokady podglądu zatrzymują utworzenie (409) i nie wołają Selly", async () => {
       const atrapa = stworzAtrapeSelly();
       s = await stworzSrodowiskoTestowe(undefined, { klientSelly: atrapa.klient, sellyZamowienia: true });
-      const partnerId = dodajPartnera({ sellyVatId: null });
+      const partnerId = dodajPartnera({ sellyStatusId: null });
       katalogZSelly();
       kursEur();
       const id = przyjete(partnerId);
       const odp = await request(s.app).post(url(partnerId, id)).set(await zaloguj());
       expect(odp.status).toBe(409);
-      expect(odp.body.error).toMatch(/identyfikatorów Selly/);
+      expect(odp.body.error).toMatch(/statusu nowego zamówienia Selly/);
       expect(atrapa.wywolania.filter((w) => w.metoda === "createOrder")).toHaveLength(0);
     });
 

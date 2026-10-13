@@ -47,6 +47,9 @@ export type UstawieniaPartnera = {
   sellyPaymentId: number | null;
   sellyDeliveryId: number | null;
   sellyVatId: number | null;
+  /** Kontakt zamawiającego (ticket 253): e-mail i telefon do zamówienia w Selly. */
+  kontaktEmail: string | null;
+  kontaktTelefon: string | null;
 };
 export type UstawieniaKraju = {
   narzutProc: number;
@@ -150,6 +153,16 @@ export function walidujUstawieniaPartnera(
     const kraj = v === null ? null : normalizujKraj(v);
     if (v !== null && kraj === null) return { blad: "Pole `fakturaKraj` musi być dwuliterowym kodem kraju (np. PL) albo null." };
     w.fakturaKraj = kraj;
+  }
+  if ("kontaktEmail" in cialo) {
+    const v = cialo.kontaktEmail;
+    if (v !== null && (typeof v !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()) || v.length > 120)) return { blad: "Pole `kontaktEmail` musi być poprawnym adresem e-mail albo null." };
+    w.kontaktEmail = v === null ? null : (v as string).trim();
+  }
+  if ("kontaktTelefon" in cialo) {
+    const v = cialo.kontaktTelefon;
+    if (v !== null && (typeof v !== "string" || v.trim() === "" || v.length > 40)) return { blad: "Pole `kontaktTelefon` musi być niepustym tekstem (do 40 znaków) albo null." };
+    w.kontaktTelefon = v === null ? null : (v as string).trim();
   }
   for (const pole of ["sellyStatusId", "sellyPaymentId", "sellyDeliveryId", "sellyVatId"] as const) {
     if (pole in cialo) {
