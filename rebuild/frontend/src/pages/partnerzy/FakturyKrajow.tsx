@@ -7,6 +7,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { nazwaKraju } from "@/lib/kraje";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
@@ -42,7 +43,7 @@ function Wiersz({ partnerId, kraj }: { partnerId: number; kraj: KrajPartnera }) 
   });
   return (
     <tr className="border-b last:border-0" data-testid={`row-faktura-${kraj.kraj}`}>
-      <td className="px-2 py-2 font-medium">{kraj.kraj}</td>
+      <td className="px-2 py-2 font-medium">{kraj.kraj}<span className="block text-xs font-normal text-muted-foreground">{nazwaKraju(kraj.kraj) ?? ""}</span></td>
       {POLA.map((p) => (
         <td key={p.klucz} className="px-2 py-2">
           <Input className={p.szerokosc} aria-label={`${p.etykieta} ${kraj.kraj}`} maxLength={p.klucz === "fakturaKraj" ? 2 : 120} value={pola[p.klucz]} onChange={(e) => ustawPola((x) => ({ ...x, [p.klucz]: e.target.value }))} data-testid={`input-faktura-${p.klucz}-${kraj.kraj}`} />
