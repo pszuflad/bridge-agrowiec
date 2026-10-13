@@ -11,7 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { KLUCZ_PARTNERZY, komunikatBledu } from "./api";
 
 type Rekord = Record<string, unknown>;
-type Slowniki = { statusy: Rekord[]; platnosci: Rekord[]; dostawy: Rekord[] };
+type Slowniki = { statusy: Rekord[]; platnosci: Rekord[]; dostawy: Rekord[]; vat?: Rekord[] };
 
 const tekst = (v: unknown): string => (v !== null && typeof v === "object" ? JSON.stringify(v) : String(v ?? ""));
 
@@ -51,6 +51,9 @@ function Tabela({ tytul, wiersze, testId }: { tytul: string; wiersze: Rekord[]; 
 export function SlownikiSelly() {
   const [pobierz, ustawPobierz] = useState(false);
   const q = useQuery<Slowniki | null>({ queryKey: [KLUCZ_PARTNERZY, "selly", "slowniki-zamowien"], enabled: pobierz, retry: false });
+  // Przykładowe zamówienie ze sklepu (tylko odczyt) — pokazuje kształt zamówienia Selly przed tworzeniem zamówień partnerów.
+  const [pokazWzor, ustawPokazWzor] = useState(false);
+  const wzor = useQuery<{ zamowienie: Rekord | null } | null>({ queryKey: [KLUCZ_PARTNERZY, "selly", "przykladowe-zamowienie"], enabled: pokazWzor, retry: false });
   return (
     <Card>
       <CardContent className="space-y-3 p-4">
@@ -65,11 +68,24 @@ export function SlownikiSelly() {
             {komunikatBledu(q.error)}
           </p>
         ) : null}
+        <div className="flex flex-wrap items-center gap-3">
+          <Button size="sm" variant="outline" disabled={wzor.isFetching} onClick={() => (pokazWzor ? void wzor.refetch() : ustawPokazWzor(true))} data-testid="button-wzor-zamowienia-selly">
+            {wzor.isFetching ? "Pobieranie…" : "Przykładowe zamówienie z Selly"}
+          </Button>
+          <span className="text-xs text-muted-foreground">Ostatnie zamówienie sklepu (tylko odczyt, zawiera dane klienta) — do ustalenia formatu zamówień partnerów.</span>
+        </div>
+        {wzor.isError ? <p className="text-sm text-destructive" role="alert" data-testid="text-wzor-zamowienia-blad">{komunikatBledu(wzor.error)}</p> : null}
+        {wzor.data ? (
+          <pre className="max-h-96 overflow-auto rounded-md bg-muted/40 p-3 text-xs" data-testid="wzor-zamowienia-selly">
+            {wzor.data.zamowienie ? JSON.stringify(wzor.data.zamowienie, null, 2) : "Sklep nie ma jeszcze żadnych zamówień."}
+          </pre>
+        ) : null}
         {q.data ? (
           <div className="space-y-4">
             <Tabela tytul="Statusy zamówień" wiersze={q.data.statusy} testId="tabela-selly-statusy" />
             <Tabela tytul="Formy płatności" wiersze={q.data.platnosci} testId="tabela-selly-platnosci" />
             <Tabela tytul="Formy dostawy" wiersze={q.data.dostawy} testId="tabela-selly-dostawy" />
+            <Tabela tytul="Stawki VAT" wiersze={q.data.vat ?? []} testId="tabela-selly-vat" />
           </div>
         ) : null}
       </CardContent>

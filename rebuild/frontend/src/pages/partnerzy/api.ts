@@ -245,3 +245,17 @@ export async function odbierzZamowienia(id: number): Promise<WynikOdbioru> {
 export async function zwalidujZamowienie(partnerId: number, zamowienieId: number): Promise<SzczegolyZamowienia> {
   return (await (await zadanie("POST", `${KLUCZ_PARTNERZY}/${partnerId}/zamowienia/${zamowienieId}/waliduj`, {})).json()) as SzczegolyZamowienia;
 }
+
+/** Podgląd zamówienia przed utworzeniem w Selly (ticket 248) — tylko odczyt; `blokady` niepuste = zamówienia nie wolno jeszcze tworzyć w sklepie. */
+export type PodgladSelly = {
+  zamawiajacy: { nazwa: string | null; nip: string | null; ulica: string | null; kod: string | null; miasto: string | null; kraj: string | null };
+  dostawa: Record<string, string>;
+  waluta: string | null;
+  kosztDostawy: number | null;
+  pozycje: Array<{
+    lp: number; kodPartnera: string; nazwaPartnera: string | null; ilosc: number; cena: number | null;
+    dopasowanie: { kod: string; nazwa: string; ean: string | null; dostawca: string | null; stan: number; status: string } | null;
+  }>;
+  blokady: string[];
+};
+export const kluczPodgladuSelly = (id: number, zamowienieId: number): string[] => [KLUCZ_PARTNERZY, String(id), "zamowienia", String(zamowienieId), "podglad-selly"];

@@ -177,7 +177,7 @@ describe("słowniki zamówień Selly", () => {
     server.use(
       http.get("*/api/partnerzy/selly/slowniki-zamowien", () => {
         zapytan++;
-        return HttpResponse.json({ statusy: [{ status_id: 3, name: "Nowe" }], platnosci: [{ payment_id: 7, name: "Przelew" }], dostawy: [] });
+        return HttpResponse.json({ statusy: [{ status_id: 3, name: "Nowe" }], platnosci: [{ payment_id: 7, name: "Przelew" }], dostawy: [], vat: [{ vat_id: 5, rate: "0" }] });
       }),
     );
     await otworz();
@@ -189,6 +189,19 @@ describe("słowniki zamówień Selly", () => {
     expect(within(statusy).getByText("Nowe")).toBeInTheDocument();
     expect(within(screen.getByTestId("tabela-selly-platnosci")).getByText("Przelew")).toBeInTheDocument();
     expect(within(screen.getByTestId("tabela-selly-dostawy")).getByText("brak pozycji")).toBeInTheDocument();
+    expect(within(screen.getByTestId("tabela-selly-vat")).getByText("vat_id")).toBeInTheDocument();
+    expect(zapytan).toBe(1);
+  });
+
+  it("przykładowe zamówienie Selly pobiera dopiero po kliknięciu i pokazuje JSON; brak zamówień ma komunikat", async () => {
+    let zapytan = 0;
+    zamockujApi();
+    server.use(http.get("*/api/partnerzy/selly/przykladowe-zamowienie", () => (zapytan++, HttpResponse.json({ zamowienie: { order_id: 77, products: [] } }))));
+    await otworz();
+    const przycisk = await screen.findByTestId("button-wzor-zamowienia-selly");
+    expect(zapytan).toBe(0);
+    await userEvent.setup().click(przycisk);
+    expect(await screen.findByTestId("wzor-zamowienia-selly")).toHaveTextContent('"order_id": 77');
     expect(zapytan).toBe(1);
   });
 

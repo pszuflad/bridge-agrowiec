@@ -18,6 +18,7 @@ import { requireAuth } from "../middleware/auth.js";
 import { zapiszAudyt } from "../repos/audit.js";
 import { pobierzBledy, pobierzLogi } from "../partnerzy/logi.js";
 import { OdbiorTrwaError, odbierzZamowieniaEmail, type OdbiorEmail } from "../partnerzy/odbior-email.js";
+import { podgladDlaSelly } from "../partnerzy/podglad-selly.js";
 import { zwaliduj } from "../partnerzy/walidacja-zamowienia.js";
 import { listaZamowien, szczegolyZamowieniaDlaPartnera } from "../repos/partnerzy-zamowienia.js";
 import { walidujKolumny, walidujPola, zapiszKolumny, zapiszPola } from "../repos/partnerzy-kolumny.js";
@@ -79,11 +80,26 @@ export function trasyPartnerzy({ db, serwis, odbiorEmail, klientSelly }: Zalezno
   router.get("/api/partnerzy/selly/slowniki-zamowien", requireAuth, async (_req, res) => {
     if (!klientSelly) return void res.status(503).json({ error: "Klient Selly nie jest dostępny w tej instancji." });
     try {
-      const [statusy, platnosci, dostawy] = await Promise.all([klientSelly.listOrderStatuses(), klientSelly.listOrderPayments(), klientSelly.listOrderDeliveries()]);
-      res.json({ statusy: statusy?.data ?? [], platnosci: platnosci?.data ?? [], dostawy: dostawy?.data ?? [] });
+      const [statusy, platnosci, dostawy, vat] = await Promise.all([klientSelly.listOrderStatuses(), klientSelly.listOrderPayments(), klientSelly.listOrderDeliveries(), klientSelly.listVatRates()]);
+      res.json({ statusy: statusy?.data ?? [], platnosci: platnosci?.data ?? [], dostawy: dostawy?.data ?? [], vat: vat?.data ?? [] });
     } catch (e) {
       console.error("[partnerzy] słowniki zamówień Selly:", e instanceof Error ? e.message : e);
       res.status(502).json({ error: e instanceof Error ? e.message : "Nie udało się pobrać słowników z Selly." });
+    }
+  });
+
+  /**
+   * Jedno ostatnie zamówienie ze sklepu Selly, bez interpretacji (ticket 248) — TYLKO ODCZYT. Służy do poznania kształtu zamówienia przed `POST /api/orders`.
+   * MUSI stać przed `/api/partnerzy/:id`. Zawiera dane klienta sklepu — tylko dla zalogowanych, nie logujemy treści.
+   */
+  router.get("/api/partnerzy/selly/przykladowe-zamowienie", requireAuth, async (_req, res) => {
+    if (!klientSelly) return void res.status(503).json({ error: "Klient Selly nie jest dostępny w tej instancji." });
+    try {
+      const odp = await klientSelly.listOrders({ limit: 1 });
+      res.json({ zamowienie: odp?.data?.[0] ?? null });
+    } catch (e) {
+      console.error("[partnerzy] przykładowe zamówienie Selly:", e instanceof Error ? e.message : e);
+      res.status(502).json({ error: e instanceof Error ? e.message : "Nie udało się pobrać zamówienia z Selly." });
     }
   });
 
@@ -238,6 +254,16 @@ export function trasyPartnerzy({ db, serwis, odbiorEmail, klientSelly }: Zalezno
     const z = Number.isInteger(zamowienieId) && zamowienieId > 0 ? szczegolyZamowieniaDlaPartnera(db, id, zamowienieId) : null;
     if (z === null) return void res.status(404).json({ error: "Nie ma takiego zamówienia tego partnera." });
     res.json(z);
+  });
+
+  /** Podgląd tego, co poszłoby do Selly (ticket 248): zamawiający, dostawa, pozycje dopasowane do katalogu i blokady. Tylko odczyt. */
+  router.get("/api/partnerzy/:id/zamowienia/:zamowienieId/podglad-selly", requireAuth, (req, res) => {
+    const id = idZParametru(req, res);
+    if (id === null) return;
+    const zamowienieId = Number(req.params.zamowienieId);
+    const podglad = Number.isInteger(zamowienieId) && zamowienieId > 0 ? podgladDlaSelly(db, id, zamowienieId) : null;
+    if (podglad === null) return void res.status(404).json({ error: "Nie ma takiego zamówienia tego partnera." });
+    res.json(podglad);
   });
 
   /**
