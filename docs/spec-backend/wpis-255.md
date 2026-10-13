@@ -1,0 +1,3 @@
+# Wpis 255 — wycena partnera: marża sklepu + dopłata kraju (wariant B)
+
+`wycenPozycje` (`src/partnerzy/selekcja.ts`): `narzutProc = max(0, products.marza_pct) + (regula ? regula.wartosc : partner_kraje.narzut_proc)` → `obliczCene` (zmienna `narzut` formuły = ten ułamek). Blokada publikacji dotyczy DOPŁATY (kraju/reguły) równej 0, nie sumy. `PozycjaEksportu.marzaSklepuProc` pochodzi z `products.marza_pct` (wybierzPozycje). `partner_kraje.narzut_proc` i `partner_narzuty.wartosc` zachowują nazwy kolumn — znaczenie: dopłata w punktach procentowych. Krok wdrożenia `2026-10-13-partnerzy-numery-vat-adtyres` powtarza idempotentne `uzupelnijDanePartnerow` z pełną tabelą numerów VAT.
