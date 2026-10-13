@@ -11,6 +11,7 @@ import {
   KLUCZ_PARTNERZY, LIMIT_ZAMOWIEN, komunikatBledu, kluczPodgladuSelly, kluczZamowien, kluczZamowienia, odbierzZamowienia, utworzWSelly, zwalidujZamowienie, zwolnijWysylanie,
   type ListaZamowien, type PodgladSelly, type SzczegolyPartnera, type SzczegolyZamowienia, type WynikOdbioru,
 } from "./api";
+import { PrzesylkiZamowienia } from "./PrzesylkiZamowienia";
 
 const czas = (iso: string): string => new Date(iso).toLocaleString("pl-PL");
 const ETYKIETY_STATUSOW: Record<string, string> = { nowe: "nowe", przyjete: "przyjęte", blad_importu: "błąd importu", wysylanie: "wysyłanie do Selly…", wyslane: "utworzone w Selly" };
@@ -170,6 +171,7 @@ function SzczegolyZamowieniaWidok({ partnerId, zamowienieId }: { partnerId: numb
       </table>
       </div>
       <PodgladDoSelly partnerId={partnerId} zamowienieId={zamowienieId} />
+      <PrzesylkiZamowienia partnerId={partnerId} zamowienie={data} />
       {dostawa.length > 0 ? (
         <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 text-xs" data-testid={`dostawa-${zamowienieId}`}>
           {dostawa.map(([k, v]) => (

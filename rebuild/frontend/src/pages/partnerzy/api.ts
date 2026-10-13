@@ -309,3 +309,29 @@ export async function zwolnijWysylanie(partnerId: number, zamowienieId: number):
 /** Aktualny kurs EUR z NBP (ticket 250) — do podglądu w tabeli krajów; ten sam kurs trafia do generowanych cenników. */
 export type KursNbpPodglad = { kurs: number; zrodlo: "nbp" | "nbp-zapisany"; dataTabeli: string | null; ostrzezenie: string | null };
 export const kluczKursuNbp = [KLUCZ_PARTNERZY, "kurs-nbp"];
+
+/** Przesyłka zamówienia partnera = numer listu przewozowego wpisany w panelu; z niej powstaje plik trackingu dla partnera (ticket 256). */
+export type Przesylka = {
+  id: number;
+  zamowienieId: number;
+  przewoznik: string;
+  numerPrzesylki: string;
+  typ: "delivery" | "pickup";
+  wyslano: string;
+  pozycje: { pozycjaId: number; ilosc: number }[];
+  plikNazwa: string | null;
+  /** `zapisany` = plik leży w katalogu partnera; `brak_katalogu` = katalog nie jest skonfigurowany (plik do pobrania z panelu); `blad` = zapis się nie udał. */
+  plikStatus: "zapisany" | "brak_katalogu" | "blad";
+  plikBlad: string | null;
+};
+export type ListaPrzesylek = { przesylki: Przesylka[]; katalogSkonfigurowany: boolean };
+export const kluczPrzesylek = (id: number, zamowienieId: number): string[] => [KLUCZ_PARTNERZY, String(id), "zamowienia", String(zamowienieId), "przesylki"];
+
+export type NowaPrzesylka = { przewoznik: string; numerPrzesylki: string; typ: "delivery" | "pickup"; wyslano?: string; pozycje?: { pozycjaId: number; ilosc: number }[] };
+export async function dodajPrzesylke(partnerId: number, zamowienieId: number, dane: NowaPrzesylka): Promise<{ przesylki: Przesylka[]; plik: Przesylka["plikStatus"] }> {
+  return (await (await zadanie("POST", `${KLUCZ_PARTNERZY}/${partnerId}/zamowienia/${zamowienieId}/przesylki`, dane)).json()) as { przesylki: Przesylka[]; plik: Przesylka["plikStatus"] };
+}
+export async function ponowPlikPrzesylki(partnerId: number, zamowienieId: number, wysylkaId: number): Promise<{ przesylki: Przesylka[]; plik: Przesylka["plikStatus"] }> {
+  return (await (await zadanie("POST", `${KLUCZ_PARTNERZY}/${partnerId}/zamowienia/${zamowienieId}/przesylki/${wysylkaId}/ponow`, {})).json()) as { przesylki: Przesylka[]; plik: Przesylka["plikStatus"] };
+}
+export const kluczPlikuPrzesylki = (id: number, zamowienieId: number, wysylkaId: number): string[] => [KLUCZ_PARTNERZY, String(id), "zamowienia", String(zamowienieId), "przesylki", String(wysylkaId), "plik"];

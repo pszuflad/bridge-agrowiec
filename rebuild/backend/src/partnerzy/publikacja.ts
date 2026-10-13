@@ -12,7 +12,7 @@ import { isAbsolute, join } from "node:path";
 export type KatalogiPublikacji = ReadonlyMap<string, string>;
 
 /** Parsuje `Nazwa=/ścieżka;Nazwa2=/ścieżka2` (nazwa partnera bez rozróżniania wielkości liter). Niepoprawny wpis → błąd z opisem. */
-export function parsujKatalogiPublikacji(tekst: string | undefined): Map<string, string> {
+export function parsujKatalogiPublikacji(tekst: string | undefined, zmienna = "PARTNERZY_KATALOGI_PUBLIKACJI"): Map<string, string> {
   const wynik = new Map<string, string>();
   for (const wpis of (tekst ?? "").split(";")) {
     const t = wpis.trim();
@@ -20,7 +20,7 @@ export function parsujKatalogiPublikacji(tekst: string | undefined): Map<string,
     const i = t.indexOf("=");
     const nazwa = i > 0 ? t.slice(0, i).trim() : "";
     const sciezka = i > 0 ? t.slice(i + 1).trim() : "";
-    if (nazwa === "" || !isAbsolute(sciezka)) throw new Error(`PARTNERZY_KATALOGI_PUBLIKACJI: niepoprawny wpis „${nazwa || t}” (oczekiwane Nazwa=/ścieżka bezwzględna).`);
+    if (nazwa === "" || !isAbsolute(sciezka)) throw new Error(`${zmienna}: niepoprawny wpis „${nazwa || t}” (oczekiwane Nazwa=/ścieżka bezwzględna).`);
     wynik.set(nazwa.toLowerCase(), sciezka);
   }
   return wynik;
