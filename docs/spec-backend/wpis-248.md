@@ -1,0 +1,3 @@
+# Wpis 248 — podgląd zamówienia partnera przed Selly
+
+`GET /api/partnerzy/:id/zamowienia/:zamowienieId/podglad-selly` (requireAuth, tylko odczyt): `{zamawiajacy, dostawa, waluta, kosztDostawy, pozycje[{lp, kodPartnera, ilosc, cena, dopasowanie|null}], blokady[]}`. Dopasowanie = `znajdzPozycjeKatalogu` (jedno źródło prawdy z walidacją zamówień). `GET /api/partnerzy/selly/przykladowe-zamowienie` zwraca `{zamowienie}` — pierwszy rekord `GET /api/orders?limit=1` bez interpretacji (zawiera dane klienta sklepu; nie logujemy treści). `GET /api/partnerzy/selly/slowniki-zamowien` ma dodatkowo `vat` (`GET /api/vat_rates`). Klient: `listOrders` w `METODY_ODCZYTU` (działa w trybie `tylko-odczyt`). Trasy poza `contract/openapi.yaml`.

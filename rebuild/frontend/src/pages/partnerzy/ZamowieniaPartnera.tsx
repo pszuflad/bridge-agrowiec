@@ -8,8 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/toast";
 import {
-  KLUCZ_PARTNERZY, LIMIT_ZAMOWIEN, komunikatBledu, kluczZamowien, kluczZamowienia, odbierzZamowienia, zwalidujZamowienie,
-  type ListaZamowien, type SzczegolyPartnera, type SzczegolyZamowienia, type WynikOdbioru,
+  KLUCZ_PARTNERZY, LIMIT_ZAMOWIEN, komunikatBledu, kluczPodgladuSelly, kluczZamowien, kluczZamowienia, odbierzZamowienia, zwalidujZamowienie,
+  type ListaZamowien, type PodgladSelly, type SzczegolyPartnera, type SzczegolyZamowienia, type WynikOdbioru,
 } from "./api";
 
 const czas = (iso: string): string => new Date(iso).toLocaleString("pl-PL");
@@ -169,12 +169,51 @@ function SzczegolyZamowieniaWidok({ partnerId, zamowienieId }: { partnerId: numb
         </tbody>
       </table>
       </div>
+      <PodgladDoSelly partnerId={partnerId} zamowienieId={zamowienieId} />
       {dostawa.length > 0 ? (
         <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 text-xs" data-testid={`dostawa-${zamowienieId}`}>
           {dostawa.map(([k, v]) => (
             <Fragment key={k}><dt className="text-muted-foreground">{ETYKIETY_DOSTAWY[k] ?? k}</dt><dd>{v}</dd></Fragment>
           ))}
         </dl>
+      ) : null}
+    </div>
+  );
+}
+
+/** Podgląd tego, co poszłoby do Selly (ticket 248). Tylko odczyt — tworzenie zamówienia w sklepie dojdzie po ustaleniu formatu `POST /api/orders`. */
+function PodgladDoSelly({ partnerId, zamowienieId }: { partnerId: number; zamowienieId: number }) {
+  const [pokaz, ustawPokaz] = useState(false);
+  const q = useQuery<PodgladSelly | null>({ queryKey: kluczPodgladuSelly(partnerId, zamowienieId), enabled: pokaz, retry: false });
+  const p = q.data;
+  return (
+    <div className="space-y-2 border-t pt-2" data-testid={`podglad-selly-${zamowienieId}`}>
+      <Button size="sm" variant="outline" disabled={q.isFetching} onClick={() => (pokaz ? void q.refetch() : ustawPokaz(true))} data-testid={`button-podglad-selly-${zamowienieId}`}>
+        {q.isFetching ? "Sprawdzanie…" : "Podgląd do Selly"}
+      </Button>
+      {q.isError ? <p className="text-sm text-destructive" role="alert">{komunikatBledu(q.error)}</p> : null}
+      {p ? (
+        <div className="space-y-2 text-xs">
+          <p data-testid={`podglad-zamawiajacy-${zamowienieId}`}>
+            <span className="text-muted-foreground">Zamawiający (dane do faktury): </span>
+            {[p.zamawiajacy.nazwa, p.zamawiajacy.nip && `NIP ${p.zamawiajacy.nip}`, p.zamawiajacy.ulica, [p.zamawiajacy.kod, p.zamawiajacy.miasto].filter(Boolean).join(" "), p.zamawiajacy.kraj].filter(Boolean).join(", ") || "—"}
+          </p>
+          <ul className="space-y-0.5">
+            {p.pozycje.map((x) => (
+              <li key={x.lp} className={x.dopasowanie ? "" : "text-destructive"} data-testid={`podglad-pozycja-${zamowienieId}-${x.lp}`}>
+                {x.lp}. {x.kodPartnera} × {x.ilosc}
+                {x.dopasowanie ? ` → ${x.dopasowanie.kod} (${x.dopasowanie.nazwa}${x.dopasowanie.dostawca ? `, ${x.dopasowanie.dostawca}` : ""})` : " → brak dopasowania, do ręcznej weryfikacji"}
+              </li>
+            ))}
+          </ul>
+          {p.blokady.length > 0 ? (
+            <ul className="list-disc space-y-0.5 pl-4 text-destructive" data-testid={`podglad-blokady-${zamowienieId}`}>
+              {p.blokady.map((b) => <li key={b}>{b}</li>)}
+            </ul>
+          ) : (
+            <p className="text-muted-foreground" data-testid={`podglad-gotowe-${zamowienieId}`}>Wszystkie pozycje dopasowane, dane do faktury kompletne.</p>
+          )}
+        </div>
       ) : null}
     </div>
   );

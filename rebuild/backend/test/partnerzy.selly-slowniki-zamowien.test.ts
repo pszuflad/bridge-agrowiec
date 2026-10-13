@@ -23,12 +23,23 @@ describe("GET /api/partnerzy/selly/slowniki-zamowien", () => {
       statusy: [{ status_id: 1, name: "Nowe" }],
       platnosci: [{ payment_id: 1, name: "Przelew" }],
       dostawy: [{ delivery_id: 1, name: "Kurier" }],
+      vat: expect.any(Array),
     });
-    expect(atrapa.wywolania.map((w) => w.metoda).sort()).toEqual(["listOrderDeliveries", "listOrderPayments", "listOrderStatuses"]);
+    expect(atrapa.wywolania.map((w) => w.metoda).sort()).toEqual(["listOrderDeliveries", "listOrderPayments", "listOrderStatuses", "listVatRates"]);
+  });
+
+  it("zwraca jedno przykładowe zamówienie Selly bez interpretacji (tylko odczyt)", async () => {
+    const atrapa = stworzAtrapeSelly();
+    s = await stworzSrodowiskoTestowe(undefined, { klientSelly: atrapa.klient });
+    const odp = await request(s.app).get("/api/partnerzy/selly/przykladowe-zamowienie").set("Authorization", `Bearer ${await zaloguj()}`);
+    expect(odp.status).toBe(200);
+    expect(odp.body).toEqual({ zamowienie: { order_id: 1, status_id: 1, products: [] } });
+    expect(atrapa.wywolania.map((w) => w.metoda)).toEqual(["listOrders"]);
   });
 
   it("bez zalogowania 401", async () => {
     s = await stworzSrodowiskoTestowe();
     expect((await request(s.app).get("/api/partnerzy/selly/slowniki-zamowien")).status).toBe(401);
+    expect((await request(s.app).get("/api/partnerzy/selly/przykladowe-zamowienie")).status).toBe(401);
   });
 });
