@@ -14,11 +14,16 @@ function parseCredentials(text) {
   if (Buffer.byteLength(text) > 16384) throw new Error('Zbyt duży payload konfiguracji.');
   let input;
   try { input = JSON.parse(text); } catch { throw new Error('Niepoprawny payload konfiguracji.'); }
-  if (input?.email !== EMAIL || typeof input.password !== 'string' ||
-      !input.password.length || /[\0\r\n]/.test(input.password)) {
-    throw new Error('Niepoprawne dane konfiguracji Agrorami.');
+  if (input?.email !== EMAIL) throw new Error('Niepoprawne konto docelowe Agrorami.');
+  if (typeof input.password !== 'string') throw new Error('Niepoprawny typ sekretu Agrorami.');
+  // Puste linie wokół wklejonego sekretu nie są częścią hasła.
+  const password = input.password.replace(/^[\r\n]+|[\r\n]+$/g, '');
+  if (!password.length) throw new Error('Niepoprawny sekret Agrorami: pusta wartość.');
+  if (password.includes('\0')) throw new Error('Niepoprawny sekret Agrorami: znak NUL.');
+  if (/[\r\n]/.test(password)) {
+    throw new Error('Niepoprawny sekret Agrorami: zawiera kilka wierszy. W GitHub Secret wpisz wyłącznie samo hasło.');
   }
-  return { email: EMAIL, password: input.password };
+  return { email: EMAIL, password };
 }
 
 function shellQuote(value) {
