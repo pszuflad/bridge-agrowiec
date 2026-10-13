@@ -11,7 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
 import { BAZA_API, naglowki, zadanie } from "@/lib/api";
-import { KLUCZ_PARTNERZY, komunikatBledu, liczbaZPola } from "./api";
+import { KLUCZ_PARTNERZY, komunikatBledu, liczbaZPola, type ListaPartnerow, type SzczegolyPartnera } from "./api";
 
 type TabelaGeis = { kraj: string; wspGabarytowy: number; kosztPakowania: number; maks: [number, number, number] | null; stawki: [number, number][] };
 type ListaGeis = { kraje: TabelaGeis[] };
@@ -87,6 +87,94 @@ function Kraj({ t }: { t: TabelaGeis }) {
   );
 }
 
+type PodgladPrzesylki = {
+  zrodlo: "stala-baza" | "geis";
+  wagaRozliczeniowa: number | null;
+  wagaRzeczywista: number | null;
+  wagaGabarytowa: number | null;
+  progKg: number | null;
+  baza: number;
+  paliwoProc: number;
+  paliwoEur: number;
+  pakowanieGeisEur: number;
+  mytoEur: number;
+  pakowanieKrajuEur: number;
+  razemEur: number;
+};
+const eur = (n: number): string => `${n.toFixed(2)} EUR`;
+
+/** Podgląd kosztu przesyłki dla wybranej paczki i kraju partnera (ticket 246) — to samo liczenie co w cenniku, z rozbiciem na składniki. */
+function PodgladKosztu() {
+  const lista = useQuery<ListaPartnerow | null>({ queryKey: [KLUCZ_PARTNERZY] });
+  const [partnerId, ustawPartnera] = useState("");
+  const szczegoly = useQuery<SzczegolyPartnera | null>({ queryKey: [KLUCZ_PARTNERZY, partnerId], enabled: partnerId !== "" });
+  const [kraj, ustawKraj] = useState("");
+  const [pola, ustawPola] = useState({ waga: "", dlugosc: "", szerokosc: "", wysokosc: "" });
+  const [wynik, ustawWynik] = useState<PodgladPrzesylki | null>(null);
+  const [blad, ustawBlad] = useState<string | null>(null);
+  const liczenie = useMutation<PodgladPrzesylki, Error, void>({
+    mutationFn: async () => {
+      const n = (t: string): number | null => {
+        const v = liczbaZPola(t);
+        return v === null || Number.isNaN(v) || v <= 0 ? null : v;
+      };
+      if (partnerId === "" || kraj === "") throw new Error("Wybierz partnera i kraj.");
+      const odp = await zadanie("POST", `${KLUCZ_PARTNERZY}/geis/podglad-kosztu`, {
+        partnerId: Number(partnerId), kraj, waga: n(pola.waga), dlugosc: n(pola.dlugosc), szerokosc: n(pola.szerokosc), wysokosc: n(pola.wysokosc),
+      });
+      return (await odp.json()) as PodgladPrzesylki;
+    },
+    onSuccess: (w) => {
+      ustawBlad(null);
+      ustawWynik(w);
+    },
+    onError: (e) => {
+      ustawWynik(null);
+      ustawBlad(komunikatBledu(e));
+    },
+  });
+  const ustaw = (k: keyof typeof pola, v: string) => ustawPola((p) => ({ ...p, [k]: v }));
+  const kraje = szczegoly.data?.kraje ?? [];
+  return (
+    <div className="space-y-2 border-t pt-3" data-testid="podglad-przesylki">
+      <h3 className="text-sm font-medium">Podgląd kosztu przesyłki</h3>
+      <div className="flex flex-wrap items-end gap-3 text-xs">
+        <label className="space-y-1">Partner
+          <select className="h-9 rounded-md border border-input bg-background px-2 text-sm" value={partnerId} onChange={(e) => { ustawPartnera(e.target.value); ustawKraj(""); ustawWynik(null); }} data-testid="select-przesylka-partner">
+            <option value="">— wybierz —</option>
+            {(lista.data?.partnerzy ?? []).map((p) => <option key={p.id} value={p.id}>{p.nazwa}</option>)}
+          </select>
+        </label>
+        <label className="space-y-1">Kraj
+          <select className="h-9 rounded-md border border-input bg-background px-2 text-sm" value={kraj} onChange={(e) => ustawKraj(e.target.value)} disabled={partnerId === ""} data-testid="select-przesylka-kraj">
+            <option value="">— wybierz —</option>
+            {kraje.map((k) => <option key={k.kraj} value={k.kraj}>{k.kraj}</option>)}
+          </select>
+        </label>
+        {([["waga", "Waga kg"], ["dlugosc", "Długość cm"], ["szerokosc", "Szerokość cm"], ["wysokosc", "Wysokość cm"]] as const).map(([k, etykieta]) => (
+          <label key={k} className="space-y-1">{etykieta}<Input className="w-24" inputMode="decimal" value={pola[k]} onChange={(e) => ustaw(k, e.target.value)} data-testid={`input-przesylka-${k}`} /></label>
+        ))}
+        <Button size="sm" variant="outline" disabled={liczenie.isPending} onClick={() => liczenie.mutate()} data-testid="button-przesylka-policz">Policz</Button>
+      </div>
+      {blad ? <p className="text-sm text-destructive" role="alert" data-testid="text-przesylka-blad">{blad}</p> : null}
+      {wynik ? (
+        <ul className="space-y-0.5 text-sm" data-testid="wynik-przesylki">
+          {wynik.zrodlo === "geis" ? (
+            <li>Waga rozliczeniowa {wynik.wagaRozliczeniowa?.toFixed(1)} kg (rzeczywista {wynik.wagaRzeczywista?.toFixed(1)}, gabarytowa {wynik.wagaGabarytowa?.toFixed(1)}) → próg {wynik.progKg} kg: stawka {eur(wynik.baza)}</li>
+          ) : (
+            <li>Przesyłka bazowa kraju (nadpisuje tabele GEIS): {eur(wynik.baza)}</li>
+          )}
+          <li>Paliwo {wynik.paliwoProc}%: {eur(wynik.paliwoEur)}</li>
+          {wynik.pakowanieGeisEur > 0 ? <li>Pakowanie z tabeli GEIS: {eur(wynik.pakowanieGeisEur)}</li> : null}
+          <li>Myto: {eur(wynik.mytoEur)}</li>
+          <li>Pakowanie kraju: {eur(wynik.pakowanieKrajuEur)}</li>
+          <li className="font-medium" data-testid="text-przesylka-razem">Razem: {eur(wynik.razemEur)}</li>
+        </ul>
+      ) : null}
+    </div>
+  );
+}
+
 export function GeisTabele() {
   const klient = useQueryClient();
   const { toast } = useToast();
@@ -120,6 +208,7 @@ export function GeisTabele() {
         {q.isError ? <p className="text-sm text-destructive" role="alert">{komunikatBledu(q.error)}</p> : null}
         {q.isSuccess && kraje.length === 0 ? <p className="text-sm text-muted-foreground" data-testid="text-geis-pusto">Brak tabel GEIS — zaimportuj plik Excel.</p> : null}
         {kraje.map((t) => <Kraj key={`${t.kraj}-${JSON.stringify(t)}`} t={t} />)}
+        <PodgladKosztu />
       </CardContent>
     </Card>
   );
