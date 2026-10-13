@@ -123,4 +123,11 @@ export const KROKI_WDROZENIA: Krok[] = [
       return uzupelnijDanePartnerow(db);
     },
   },
+  {
+    id: "2026-10-13-partnerzy-numery-vat-adtyres",
+    opis: "partnerzy B2B: dopełnienie numerów VAT UE spółki Adtyres wg kraju (LT, NL i pozostałe, które były nieczytelne na pierwszym zrzucie) — uzupełnia tylko puste pola, niczego nie nadpisuje",
+    async uruchom({ db }) {
+      return uzupelnijDanePartnerow(db);
+    },
+  },
 ];

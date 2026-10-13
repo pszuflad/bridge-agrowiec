@@ -138,7 +138,7 @@ export function KrajePartnera({ partner }: { partner: SzczegolyPartnera }) {
       <CardContent className="space-y-3 p-4">
         <h2 className="text-sm font-semibold">Kraje, narzuty i kursy</h2>
         <p className="text-xs text-muted-foreground">
-          Narzut w procentach od ceny zakupu (zakup × (1 + narzut)), nie marża. Koszty dodatkowe w EUR, doliczane do każdej opony. Przesyłka = baza kraju (EUR) × (1 + paliwo %) + myto + pakowanie; puste = stawki z tabel GEIS. Zmiana paliwa obowiązuje od dziś i nie przelicza wstecz. Narzut 0 % = ceny dla kraju nie są publikowane. Kurs EUR z NBP albo ręczny.
+          Dopłata (w punktach procentowych) DO MARŻY SKLEPU na danym produkcie: cena partnera = zakup × (1 + marża sklepu + dopłata) / kurs + przesyłka + koszty; np. marża sklepu 6 % + dopłata 2 % = 8 % od zakupu, więc partner nigdy nie kupi taniej niż klient w sklepie. Koszty dodatkowe w EUR, doliczane do każdej opony. Przesyłka = baza kraju (EUR) × (1 + paliwo %) + myto + pakowanie; puste = stawki z tabel GEIS. Zmiana paliwa obowiązuje od dziś i nie przelicza wstecz. Dopłata 0 % = ceny dla kraju nie są publikowane. Kurs EUR z NBP albo ręczny.
         </p>
         <div className="flex flex-wrap items-center gap-3 rounded-md bg-muted/40 px-3 py-2 text-sm" data-testid="kurs-nbp-teraz">
           {nbp.isPending ? (
@@ -159,7 +159,7 @@ export function KrajePartnera({ partner }: { partner: SzczegolyPartnera }) {
             <thead>
               <tr className="border-b text-left text-xs uppercase tracking-wide text-muted-foreground">
                 <th className="px-2 py-2 font-medium">Kraj</th>
-                <th className="px-2 py-2 font-medium">Narzut %</th>
+                <th className="px-2 py-2 font-medium">Dopłata % (do marży sklepu)</th>
                 <th className="px-2 py-2 font-medium">Kurs EUR</th>
                 <th className="px-2 py-2 font-medium">Kurs ręczny</th>
                 <th className="px-2 py-2 font-medium">Koszty dod. EUR</th>

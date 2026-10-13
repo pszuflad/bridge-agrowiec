@@ -3,8 +3,9 @@
 // Źródło: kartoteka kontrahentów użytkowniczki (zrzuty ekranu z 2026-10-13). To DANE REJESTROWE FIRM (nazwa, numer VAT UE, adres siedziby) i adresy
 // ogólnych skrzynek firmowych — nie dane osób. Telefonów NIE wpisujemy do repozytorium (publiczne): użytkowniczka uzupełnia je w panelu.
 // Zasada jak w `konfiguracja-startowa.ts`: UZUPEŁNIA tylko puste pola, niczego nie nadpisuje (użytkowniczka mogła coś już ustawić w panelu).
-// NIE wpisujemy numerów VAT, których na zrzucie nie było w całości (LT, NL, SE — obcięte; ES — niepewny ostatni znak): użytkowniczka dopisuje je w panelu,
-// a do tego czasu zamówienie z takim krajem dostawy jest zablokowane (brak NIP w danych kraju), a nie wystawione z błędnym numerem.
+// Numery VAT UE wpisujemy WYŁĄCZNIE, gdy były czytelne w całości. Pierwszy zrzut miał obcięte LT, NL, SE i niepewne ES — pominięte; drugi, szerszy zrzut
+// (2026-10-13) pokazał wszystkie w całości, więc tabela jest pełna (23 kraje; wpisy dla krajów, których partner nie ma, nic nie robią — dopiero gdy kraj
+// zostanie dodany i krok zostanie uruchomiony ponownie). Nowy krok wdrożenia ponownie uruchamia tę samą idempotentną funkcję i dopełnia brakujące kraje.
 
 import { and, eq, isNull } from "drizzle-orm";
 
@@ -23,10 +24,12 @@ const ADTYRES_SIEDZIBA = {
 };
 const ADTYRES_EMAIL = "bill@adtyre.com";
 
-/** Numer VAT UE spółki Adtyres w danym kraju (z prefiksem kraju) — tylko te, które były czytelne w całości. */
+/** Numer VAT UE spółki Adtyres w danym kraju (z prefiksem kraju) wg kartoteki kontrahentów. EL = Grecja (prefiks VAT UE). */
 export const ADTYRES_VAT_WG_KRAJU: Record<string, string> = {
-  AT: "ATU71690869", BE: "BE0668751256", CZ: "CZ683941214", DE: "DE307418599", FR: "FR08822336640", HU: "HU30406090",
-  IT: "IT01644590083", LU: "LU29012574", LV: "LV90010986441", RO: "RO36571660", SK: "SK4120053949",
+  AT: "ATU71690869", BE: "BE0668751256", CZ: "CZ683941214", DE: "DE307418599", DK: "DK35444653", EE: "EE101908205", ES: "ESN0432014I",
+  FI: "FI27850355", FR: "FR08822336640", HR: "HR41174915629", HU: "HU30406090", IT: "IT01644590083", LT: "LT100010434310", LU: "LU29012574",
+  LV: "LV90010986441", NL: "NL824295304B01", PL: "PL5263170593", PT: "PT980563933", RO: "RO36571660", SE: "SE502078002801", SI: "SI23751720",
+  SK: "SK4120053949", EL: "EL997521800",
 };
 
 /** Stawka VAT „0 % WDT” w Selly (potwierdzona przez użytkowniczkę 2026-10-13). */

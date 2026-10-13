@@ -34,14 +34,14 @@ describe("dane partnerów (ticket 253)", () => {
   const partner = (nazwa: string) => db.select().from(partnerzy).all().find((p) => p.nazwa === nazwa)!;
   const kraj = (k: string) => db.select().from(partnerKraje).all().find((r) => r.kraj === k)!;
 
-  it("TyreWorld: dane do faktury, e-mail i VAT 101; Adtyres: siedziba bez NIP-u i dane wg kraju tylko dla czytelnych numerów (LT/NL pominięte)", () => {
+  it("TyreWorld: dane do faktury, e-mail i VAT 101; Adtyres: siedziba bez NIP-u domyślnego i dane wg kraju z numerem VAT UE (także LT, NL)", () => {
     uzupelnijDanePartnerow(db);
     expect(partner("TyreWorld")).toMatchObject({ fakturaNazwa: "B. Fuhrmann Einzelhandel GmbH", fakturaNip: "DE254343915", fakturaKod: "44149", fakturaKraj: "DE", kontaktEmail: "buchhaltung@tyre-world.de", sellyVatId: 101, kontaktTelefon: null });
     expect(partner("Adtyres")).toMatchObject({ fakturaNazwa: "AD Tyres International SLU", fakturaNip: null, fakturaKraj: "AD", kontaktEmail: "bill@adtyre.com", sellyVatId: 101 });
     expect(kraj("AT")).toMatchObject({ fakturaNazwa: "AD Tyres International SLU", fakturaNip: "ATU71690869", fakturaKod: "AD500", fakturaKraj: "AD" });
     expect(kraj("SK").fakturaNip).toBe("SK4120053949");
-    expect(kraj("LT").fakturaNazwa).toBeNull();
-    expect(kraj("NL").fakturaNazwa).toBeNull();
+    expect(kraj("LT")).toMatchObject({ fakturaNazwa: "AD Tyres International SLU", fakturaNip: "LT100010434310" });
+    expect(kraj("NL").fakturaNip).toBe("NL824295304B01");
   });
 
   it("niczego nie nadpisuje: ręcznie ustawione pola partnera i kraju zostają, powtórne uruchomienie nic nie zmienia", () => {
@@ -68,6 +68,17 @@ describe("dane partnerów (ticket 253)", () => {
     const w2 = await uruchomKroki(sqlite, db, [krok], {});
     expect(w2.wykonane).toEqual([]);
     expect(partner("TyreWorld").fakturaNip).toBe("DE254343915");
+  });
+
+  it("kroki są dwa: drugi (dopełnienie numerów VAT) po pierwszym niczego nie psuje, a dopełnia kraj, który w pierwszym biegu nie miał danych", async () => {
+    const pierwszy = KROKI_WDROZENIA.find((k) => k.id === "2026-10-13-partnerzy-dane-faktury")!;
+    const drugi = KROKI_WDROZENIA.find((k) => k.id === "2026-10-13-partnerzy-numery-vat-adtyres")!;
+    expect(drugi).toBeDefined();
+    await uruchomKroki(sqlite, db, [pierwszy], {});
+    db.update(partnerKraje).set({ fakturaNazwa: null, fakturaNip: null }).where(eq(partnerKraje.kraj, "LT")).run(); // jak na produkcji sprzed uzupełnienia
+    const w = await uruchomKroki(sqlite, db, [pierwszy, drugi], {});
+    expect(w.wykonane).toEqual([drugi.id]);
+    expect(kraj("LT").fakturaNip).toBe("LT100010434310");
   });
 
   it("brak partnerów: krok się kończy bez błędu", () => {
