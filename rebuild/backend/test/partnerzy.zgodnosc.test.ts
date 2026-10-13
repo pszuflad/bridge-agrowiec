@@ -40,7 +40,7 @@ describe("zgodność cenników partnerów z układem plików wzorcowych", () => 
     for (const k of KRAJE) ustawPaliwo(db, k, 11, "2026-01-01");
 
     const baza = (kod: string, nad: Partial<Nowy> = {}): Nowy => ({
-      kod, nazwa: `  Mitas   AC85 ${kod}  `, marka: "MITAS", model: " AC85 ", rozmiar: "600/65R38", kategoria: "Rolnicze", dostawca: "MO1", magazyn: "MO1", stan: 8,
+      kod, nazwa: `  Mitas   AC85 ${kod}  `, marka: "MITAS", model: " AC85 ", rozmiar: "600/65R38", kategoria: "Rolnicze", dostawca: nad.dostawca ?? nad.magazyn ?? "MO1", magazyn: "MO1", stan: 8,
       cenaZakupu: 1000 + kod.length, cenaSprzedazy: 1500, marzaPct: 50, dataAktualizacji: "2026-10-10T00:00:00.000Z", kodImportu: `IMP_${kod}`, ean: "5901234123457",
       dot: "", waga: 56, dlugosc: 80, szerokoscPaczki: 60, wysokosc: 85, ...nad,
     });

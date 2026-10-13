@@ -17,7 +17,7 @@ const produkt = (kod: string, nadpisania: Partial<Nowy> = {}): Nowy => ({
   nazwa: "OPONA TESTOWA",
   marka: "MITAS",
   kategoria: "Rolnicze",
-  dostawca: "MO1",
+  dostawca: nadpisania.dostawca ?? nadpisania.magazyn ?? "MO1", // „magazyn” partnera = kod dostawcy
   magazyn: "MO1",
   stan: 5,
   cenaZakupu: 1000,
@@ -141,5 +141,12 @@ describe("selekcja i wycena partnera", () => {
     expect(w.wiersze.map((x) => x.ceny.FR)).toEqual([null, null]);
     expect(w.bledy).toHaveLength(1); // jeden komunikat na kraj, nie na pozycję
     expect(w.bledy[0]!.powod).toMatch(/Narzut kraju nie jest ustawiony/);
+  });
+
+  it("„magazyn” partnera to kod dostawcy (MO4), a nie fizyczny magazyn („Rzeszow”)", () => {
+    magazyny("MO4");
+    wstaw(produkt("D1", { dostawca: "MO4", magazyn: "Rzeszow" }), produkt("D2", { dostawca: "MO5", magazyn: "Rzeszow" }), produkt("D3", { dostawca: "MO4", magazyn: "Magazyn 1" }));
+    const w = wybierzPozycje(db, partnerId);
+    expect(w.pozycje.map((p) => [p.kod, p.magazyn])).toEqual([["D1", "MO4"], ["D3", "MO4"]]); // kolumna „Warehouse” też pokazuje dostawcę
   });
 });

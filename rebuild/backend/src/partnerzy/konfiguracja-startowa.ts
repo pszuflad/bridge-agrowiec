@@ -86,3 +86,27 @@ export function ustawKonfiguracjeStartowa(db: Baza): string | { odloz: string } 
   }
   return wyniki.join("; ");
 }
+
+/**
+ * Naprawa wyboru „magazynów” partnerów po błędzie z 2026-10-12 (krok 237 wziął nazwy FIZYCZNYCH magazynów z `products.magazyn`, a trzeba kodów dostawców MO1, MO2…
+ * z `products.dostawca`). Partner, którego zapisane magazyny zawierają cokolwiek spoza kodów dostawców katalogu, dostaje komplet dostawców bez MO6/MO7/MO8;
+ * partner z poprawnym wyborem (choćby zmienionym w panelu) zostaje nietknięty. Idempotentne.
+ */
+export function naprawMagazynyDostawcow(db: Baza): string | { odloz: string } {
+  const dostawcy = dostepneMagazyny(db).map((m) => m.magazyn);
+  const docelowe = dostawcy.filter((m) => !(WYKLUCZONE_MAGAZYNY as readonly string[]).includes(m));
+  if (docelowe.length === 0) return { odloz: "katalog nie ma jeszcze aktywnych pozycji z dostawcami — brak czego przypisać" };
+  const wyniki: string[] = [];
+  for (const nazwa of ["Adtyres", "TyreWorld"]) {
+    const p = db.select().from(partnerzy).where(eq(partnerzy.nazwa, nazwa)).get();
+    if (!p) continue;
+    const obecne = db.select().from(partnerMagazyny).where(eq(partnerMagazyny.partnerId, p.id)).all().map((m) => m.magazyn);
+    if (obecne.length > 0 && obecne.every((m) => dostawcy.includes(m))) {
+      wyniki.push(`${nazwa}: wybór poprawny, bez zmian`);
+      continue;
+    }
+    ustawMagazyny(db, p.id, docelowe);
+    wyniki.push(`${nazwa}: ${docelowe.length} dostawców (${docelowe.join(", ")})`);
+  }
+  return wyniki.join("; ");
+}

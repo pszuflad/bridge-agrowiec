@@ -107,12 +107,12 @@ describe("trasy /api/partnerzy", () => {
   });
 
   it("GET /api/partnerzy/magazyny oddaje magazyny aktywnych pozycji z liczbami (i nie jest brany za id)", async () => {
-    const baza = { marka: "M", kategoria: "Rolnicze", dostawca: "MO1", stan: 5, cenaZakupu: 1, cenaSprzedazy: 2, marzaPct: 1, dataAktualizacji: "x" };
+    const baza = { marka: "M", kategoria: "Rolnicze", magazyn: "Magazyn 1", stan: 5, cenaZakupu: 1, cenaSprzedazy: 2, marzaPct: 1, dataAktualizacji: "x" };
     s.db.insert(products).values([
-      { ...baza, kod: "A", nazwa: "A", magazyn: "MO2" },
-      { ...baza, kod: "B", nazwa: "B", magazyn: "MO1" },
-      { ...baza, kod: "C", nazwa: "C", magazyn: "MO1" },
-      { ...baza, kod: "D", nazwa: "D", magazyn: "MO9", status: "wstrzymany" },
+      { ...baza, kod: "A", nazwa: "A", dostawca: "MO2" },
+      { ...baza, kod: "B", nazwa: "B", dostawca: "MO1" },
+      { ...baza, kod: "C", nazwa: "C", dostawca: "MO1" },
+      { ...baza, kod: "D", nazwa: "D", dostawca: "MO9", status: "wstrzymany" },
     ]).run();
     expect((await request(s.app).get("/api/partnerzy/magazyny")).status).toBe(401);
     const odp = await get("/api/partnerzy/magazyny");
