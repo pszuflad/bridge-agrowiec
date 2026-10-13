@@ -39,6 +39,18 @@ test('payload wymaga właściwego konta i niepustego hasła', () => {
     assert.throws(() => parseCredentials(text));
   }
 });
+test('walidator usuwa puste linie przed i po haśle, ale zachowuje spacje', () => {
+  const password = ' test-only-placeholder ';
+  assert.deepEqual(parseCredentials(JSON.stringify({ ...credentials, password: '\r\n' + password + '\n' })),
+    { ...credentials, password });
+});
+test('błędy rozróżniają format bez ujawniania wartości', () => {
+  const multi = { ...credentials, password: 'first-test-line\nsecond-test-line' };
+  assert.throws(() => parseCredentials(JSON.stringify(multi)), error =>
+    error.message.includes('kilka wierszy') && !error.message.includes('first-test-line'));
+  assert.throws(() => parseCredentials(JSON.stringify({ ...credentials, email: 'other' })), /konto docelowe/);
+  assert.throws(() => parseCredentials(JSON.stringify({ ...credentials, password: '\n' })), /pusta wartość/);
+});
 test('podmiana usuwa duplikaty i zachowuje inne ustawienia', () => {
   const result = replaceEnv('JWT_SECRET=unchanged\nAGRORAMI_EMAIL=old\nexport AGRORAMI_PASSWORD=old\nAGRORAMI_PASSWORD=duplicate\n', credentials);
   assert.equal((result.match(/^AGRORAMI_PASSWORD=/gm) || []).length, 1);

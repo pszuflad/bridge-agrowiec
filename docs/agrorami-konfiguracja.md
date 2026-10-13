@@ -11,6 +11,8 @@ Mechanizm jest dostępny w [akcji Agrorami](https://github.com/pszuflad/bridge-a
 - Wykorzystuje istniejące `PROD_SSH_*`; sekret przekazywany jest jako JSON na stdin szyfrowanego SSH.
 - Producent JSON usuwa wyłącznie końcowe CR/LF dodane przy kopiowaniu sekretu.
   Spacje i inne znaki hasła pozostają bez zmian; złamanie linii wewnątrz jest nadal odrzucane.
+- Walidator serwera usuwa także puste linie przed hasłem i podaje osobny,
+  bezpieczny komunikat dla wielowierszowej wartości, bez wypisywania jej treści.
 - Forced command w `deploy-produkcja.sh` rozpoznaje wyłącznie `bridge-konfiguruj-agrorami`.
   Pozostałe polecenia nadal uruchamiają dotychczasowy deploy; nie jest to dowolna powłoka.
 - Przed pierwszym użyciem nowy dispatcher i helper muszą znaleźć się w produkcyjnym checkoutcie `repo/`.
