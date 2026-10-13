@@ -1,11 +1,14 @@
-/** Ticket 248: podgląd zamówienia partnera przed utworzeniem w Selly — dopasowanie pozycji, dane do faktury, blokady. Nic nie jest wysyłane. */
+/** Tickety 248/249: podgląd zamówienia partnera przed Selly i jego ręczne utworzenie — dopasowanie, blokady, brak duplikatów. Zawsze atrapa Selly. */
+import { eq } from "drizzle-orm";
 import request from "supertest";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { partnerzy, products } from "../src/db/schema.js";
+import { kursyNbp, partnerZamowienia, partnerzy, products, sellyProducts } from "../src/db/schema.js";
 import { podgladDlaSelly } from "../src/partnerzy/podglad-selly.js";
 import { zapiszZamowienie } from "../src/repos/partnerzy-zamowienia.js";
+import type { KlientSelly } from "../src/selly/klient.js";
 import { stworzSrodowiskoTestowe, type SrodowiskoTestowe } from "./gate/index.js";
+import { stworzAtrapeSelly } from "./gate/selly-atrapa.js";
 import { XML_PRZYKLAD } from "./partnerzy.zamowienie-przyklad.js";
 
 type Nowy = typeof products.$inferInsert;
@@ -14,49 +17,161 @@ const produkt = (kod: string, n: Partial<Nowy> = {}): Nowy => ({
   dataAktualizacji: "2026-10-10T00:00:00.000Z", kodImportu: `IMP_${kod}`, ...n,
 });
 const FAKTURA = { fakturaNazwa: "Adtyres SL", fakturaNip: "ATU1", fakturaUlica: "Calle 1", fakturaKod: "AD500", fakturaMiasto: "Andorra", fakturaKraj: "AD" };
+const IDY_SELLY = { sellyStatusId: 3, sellyPaymentId: 71, sellyDeliveryId: 201, sellyVatId: 5 };
 
-describe("podgląd zamówienia partnera dla Selly", () => {
+describe("zamówienie partnera → Selly", () => {
   let s: SrodowiskoTestowe;
-  const dodajPartnera = (faktura: Partial<typeof FAKTURA> = FAKTURA): number =>
-    Number(s.db.insert(partnerzy).values({ nazwa: "Adtyres", aktywny: true, utworzono: "x", zmieniono: "x", ...faktura }).run().lastInsertRowid);
-  beforeEach(async () => {
-    s = await stworzSrodowiskoTestowe();
-  });
+  const dodajPartnera = (nadpisania: Record<string, unknown> = {}): number =>
+    Number(s.db.insert(partnerzy).values({ nazwa: "Adtyres", aktywny: true, utworzono: "x", zmieniono: "x", ...FAKTURA, ...IDY_SELLY, ...nadpisania }).run().lastInsertRowid);
+  /** Katalog zgodny z XML_PRZYKLAD (011200284 i „0102 00001”), oba powiązane z Selly. */
+  const katalogZSelly = () => {
+    s.db.insert(products).values([produkt("011200284"), produkt("0102 00001")]).run();
+    s.db.insert(sellyProducts).values([
+      { kodImportu: "A", dostawca: "MO1", bridgeKod: "011200284", sellyProductId: 501, sellyVariantId: 601 },
+      { kodImportu: "B", dostawca: "MO1", bridgeKod: "0102 00001", sellyProductId: 502, sellyVariantId: 602 },
+    ]).run();
+  };
+  const kursEur = () => s.db.insert(kursyNbp).values({ data: "2026-10-12", kurs: 4.25, pobrano: "x" }).run();
+  const przyjete = (partnerId: number): number => {
+    const id = zapiszZamowienie(s.db, partnerId, XML_PRZYKLAD).id;
+    s.db.update(partnerZamowienia).set({ status: "przyjete" }).where(eq(partnerZamowienia.id, id)).run();
+    return id;
+  };
+  const zaloguj = async (): Promise<{ Authorization: string }> => {
+    const odp = await request(s.app).post("/api/login").send({ email: s.dane.email, password: s.dane.haslo });
+    return { Authorization: `Bearer ${(odp.body as { token: string }).token}` };
+  };
   afterEach(() => s.posprzataj());
 
-  it("dopasowuje pozycje po kodzie, pokazuje zamawiającego i dostawę z zamówienia; nieznane pozycje blokują", () => {
-    const partnerId = dodajPartnera();
-    s.db.insert(products).values([produkt("011200284")]).run(); // „0102 00001” z przykładu zostaje bez dopasowania
-    const id = zapiszZamowienie(s.db, partnerId, XML_PRZYKLAD).id;
-    const p = podgladDlaSelly(s.db, partnerId, id)!;
-    expect(p.zamawiajacy).toMatchObject({ nazwa: "Adtyres SL", nip: "ATU1", kraj: "AD" });
-    expect(p.dostawa.CUSTOMERNAME).toBe("Jan Kowalski");
-    expect(p.pozycje).toHaveLength(2);
-    expect(p.pozycje[0]!.dopasowanie).toMatchObject({ kod: "011200284", nazwa: "OPONA CEAT", dostawca: "MO1" });
-    expect(p.pozycje[1]!.dopasowanie).toBeNull();
-    expect(p.blokady).toEqual([expect.stringMatching(/bez dopasowania.*1.*ręcznej weryfikacji/)]);
+  describe("podgląd (248)", () => {
+    beforeEach(async () => {
+      s = await stworzSrodowiskoTestowe();
+    });
+
+    it("kompletne zamówienie: dopasowania z identyfikatorami Selly, ciało zamówienia, ostrzeżenie o braku adresu dostawy", () => {
+      const partnerId = dodajPartnera();
+      katalogZSelly();
+      kursEur();
+      const p = podgladDlaSelly(s.db, partnerId, przyjete(partnerId))!;
+      expect(p.blokady).toEqual([]);
+      expect(p.zamawiajacy).toMatchObject({ nazwa: "Adtyres SL", nip: "ATU1", kraj: "AD" });
+      expect(p.dostawa.CUSTOMERNAME).toBe("Jan Kowalski");
+      expect(p.pozycje[0]!.dopasowanie).toMatchObject({ kod: "011200284", dostawca: "MO1", sellyProductId: 501, sellyVariantId: 601 });
+      expect(p.ostrzezenia).toEqual([expect.stringMatching(/pełnego adresu dostawy.*ulica, kod pocztowy, miasto/)]);
+      expect(p.zadanie).toMatchObject({
+        status_id: 3, payment_id: 71, delivery_id: 201, currency: "EUR", exchange_rate: 4.25,
+        invoice_company: "Adtyres SL", invoice_nip: "ATU1", invoice_postcode: "AD500", ship_company: "Jan Kowalski", delivery_country_iso2: "AT",
+      });
+      expect((p.zadanie as { client_comment: string }).client_comment).toMatch(/Adtyres nr /);
+      expect((p.zadanie as { products: unknown[] }).products).toEqual([
+        { product_id: 501, variant_id: 601, quantity: 2, price_with_tax: 202, vat_rate_id: 5 },
+        { product_id: 502, variant_id: 602, quantity: 1, price_with_tax: 99.5, vat_rate_id: 5 },
+      ]);
+    });
+
+    it("blokady: brak identyfikatorów Selly, pozycje bez dopasowania/powiązania, brak kursu, zły status — i wtedy nie ma ciała zamówienia", () => {
+      const partnerId = dodajPartnera({ sellyVatId: null, sellyStatusId: null });
+      s.db.insert(products).values([produkt("011200284")]).run(); // „0102 00001” bez dopasowania, 011200284 bez powiązania z Selly
+      const id = zapiszZamowienie(s.db, partnerId, XML_PRZYKLAD).id; // status „nowe”
+      const p = podgladDlaSelly(s.db, partnerId, id)!;
+      const tekst = p.blokady.join(" | ");
+      expect(tekst).toMatch(/identyfikatorów Selly.*status, stawka VAT 0 %/);
+      expect(tekst).toMatch(/bez dopasowania w katalogu: 1/);
+      expect(tekst).toMatch(/nie ma jeszcze w Selly.*: 1/);
+      expect(tekst).toMatch(/Brak zapisanego kursu EUR/);
+      expect(tekst).toMatch(/status „nowe”/);
+      expect(p.zadanie).toBeNull();
+    });
+
+    it("brak danych do faktury partnera blokuje i wymienia brakujące pola", () => {
+      const partnerId = dodajPartnera({ fakturaNip: null, fakturaUlica: null, fakturaKod: null, fakturaMiasto: null, fakturaKraj: null });
+      const id = zapiszZamowienie(s.db, partnerId, XML_PRZYKLAD).id;
+      expect(podgladDlaSelly(s.db, partnerId, id)!.blokady[0]).toMatch(/NIP, ulica, kod pocztowy, miasto, kraj/);
+    });
+
+    it("trasa podglądu: 404 dla cudzego/nieistniejącego zamówienia, 200 dla własnego; bez zalogowania 401", async () => {
+      const partnerId = dodajPartnera();
+      const inny = dodajPartnera({ nazwa: "Inny" });
+      const id = zapiszZamowienie(s.db, partnerId, XML_PRZYKLAD).id;
+      const auth = await zaloguj();
+      expect((await request(s.app).get(`/api/partnerzy/${partnerId}/zamowienia/${id}/podglad-selly`)).status).toBe(401);
+      expect((await request(s.app).get(`/api/partnerzy/${inny}/zamowienia/${id}/podglad-selly`).set(auth)).status).toBe(404);
+      expect((await request(s.app).get(`/api/partnerzy/${partnerId}/zamowienia/999/podglad-selly`).set(auth)).status).toBe(404);
+      const ok = await request(s.app).get(`/api/partnerzy/${partnerId}/zamowienia/${id}/podglad-selly`).set(auth);
+      expect(ok.status).toBe(200);
+      expect(ok.body.pozycje).toHaveLength(2);
+      expect(ok.body.tworzenieWlaczone).toBe(false);
+    });
   });
 
-  it("brak danych do faktury partnera blokuje i wymienia brakujące pola", () => {
-    const partnerId = dodajPartnera({ fakturaNazwa: "Adtyres SL" });
-    s.db.insert(products).values([produkt("011200284"), produkt("0102 00001")]).run();
-    const id = zapiszZamowienie(s.db, partnerId, XML_PRZYKLAD).id;
-    const p = podgladDlaSelly(s.db, partnerId, id)!;
-    expect(p.blokady).toHaveLength(1);
-    expect(p.blokady[0]).toMatch(/NIP, ulica, kod pocztowy, miasto, kraj/);
-  });
+  describe("utworzenie w Selly (249)", () => {
+    const url = (partnerId: number, id: number) => `/api/partnerzy/${partnerId}/zamowienia/${id}/utworz-w-selly`;
+    const stan = (id: number) => s.db.select({ status: partnerZamowienia.status, numer: partnerZamowienia.numerWlasny }).from(partnerZamowienia).where(eq(partnerZamowienia.id, id)).get();
 
-  it("trasa: 404 dla cudzego/nieistniejącego zamówienia, 200 dla własnego; bez zalogowania 401", async () => {
-    const partnerId = dodajPartnera();
-    const inny = Number(s.db.insert(partnerzy).values({ nazwa: "Inny", aktywny: true, utworzono: "x", zmieniono: "x" }).run().lastInsertRowid);
-    const id = zapiszZamowienie(s.db, partnerId, XML_PRZYKLAD).id;
-    const login = await request(s.app).post("/api/login").send({ email: s.dane.email, password: s.dane.haslo });
-    const auth = { Authorization: `Bearer ${(login.body as { token: string }).token}` };
-    expect((await request(s.app).get(`/api/partnerzy/${partnerId}/zamowienia/${id}/podglad-selly`)).status).toBe(401);
-    expect((await request(s.app).get(`/api/partnerzy/${inny}/zamowienia/${id}/podglad-selly`).set(auth)).status).toBe(404);
-    expect((await request(s.app).get(`/api/partnerzy/${partnerId}/zamowienia/999/podglad-selly`).set(auth)).status).toBe(404);
-    const ok = await request(s.app).get(`/api/partnerzy/${partnerId}/zamowienia/${id}/podglad-selly`).set(auth);
-    expect(ok.status).toBe(200);
-    expect(ok.body.pozycje).toHaveLength(2);
+    it("flaga wyłączona: 403 i zero wywołań Selly", async () => {
+      const atrapa = stworzAtrapeSelly();
+      s = await stworzSrodowiskoTestowe(undefined, { klientSelly: atrapa.klient });
+      const partnerId = dodajPartnera();
+      katalogZSelly();
+      kursEur();
+      const id = przyjete(partnerId);
+      const odp = await request(s.app).post(url(partnerId, id)).set(await zaloguj());
+      expect(odp.status).toBe(403);
+      expect(atrapa.wywolania.filter((w) => w.metoda === "createOrder")).toHaveLength(0);
+      expect(stan(id)).toEqual({ status: "przyjete", numer: null });
+    });
+
+    it("flaga włączona: wysyła dokładnie ciało z podglądu RAZ, zapisuje numer i status; drugie kliknięcie to 409 bez drugiego zamówienia", async () => {
+      const atrapa = stworzAtrapeSelly();
+      s = await stworzSrodowiskoTestowe(undefined, { klientSelly: atrapa.klient, sellyZamowienia: true });
+      const partnerId = dodajPartnera();
+      katalogZSelly();
+      kursEur();
+      const id = przyjete(partnerId);
+      const auth = await zaloguj();
+      const podglad = (await request(s.app).get(`/api/partnerzy/${partnerId}/zamowienia/${id}/podglad-selly`).set(auth)).body;
+      const odp = await request(s.app).post(url(partnerId, id)).set(auth);
+      expect(odp.status).toBe(200);
+      expect(odp.body).toEqual({ numerWlasny: "10/2026", idSelly: 100 });
+      const wyslane = atrapa.wywolania.filter((w) => w.metoda === "createOrder");
+      expect(wyslane).toHaveLength(1);
+      expect(wyslane[0]!.argumenty[0]).toEqual(podglad.zadanie);
+      expect(stan(id)).toEqual({ status: "wyslane", numer: "10/2026" });
+      const drugi = await request(s.app).post(url(partnerId, id)).set(auth);
+      expect(drugi.status).toBe(409);
+      expect(atrapa.wywolania.filter((w) => w.metoda === "createOrder")).toHaveLength(1);
+    });
+
+    it("odmowa Selly: 502 z komunikatem, zamówienie wraca do „przyjete” (można ponowić)", async () => {
+      const atrapa = stworzAtrapeSelly();
+      const klient: KlientSelly = { ...atrapa.klient, createOrder: () => Promise.reject(new Error("[Selly] 422 niepoprawne pole")) };
+      s = await stworzSrodowiskoTestowe(undefined, { klientSelly: klient, sellyZamowienia: true });
+      const partnerId = dodajPartnera();
+      katalogZSelly();
+      kursEur();
+      const id = przyjete(partnerId);
+      const odp = await request(s.app).post(url(partnerId, id)).set(await zaloguj());
+      expect(odp.status).toBe(502);
+      expect(odp.body.error).toMatch(/Selly odrzuciło.*niepoprawne pole/);
+      expect(stan(id)).toEqual({ status: "przyjete", numer: null });
+    });
+
+    it("blokady podglądu zatrzymują utworzenie (409) i nie wołają Selly", async () => {
+      const atrapa = stworzAtrapeSelly();
+      s = await stworzSrodowiskoTestowe(undefined, { klientSelly: atrapa.klient, sellyZamowienia: true });
+      const partnerId = dodajPartnera({ sellyVatId: null });
+      katalogZSelly();
+      kursEur();
+      const id = przyjete(partnerId);
+      const odp = await request(s.app).post(url(partnerId, id)).set(await zaloguj());
+      expect(odp.status).toBe(409);
+      expect(odp.body.error).toMatch(/identyfikatorów Selly/);
+      expect(atrapa.wywolania.filter((w) => w.metoda === "createOrder")).toHaveLength(0);
+    });
+
+    it("bez zalogowania 401", async () => {
+      s = await stworzSrodowiskoTestowe();
+      expect((await request(s.app).post(url(1, 1))).status).toBe(401);
+    });
   });
 });

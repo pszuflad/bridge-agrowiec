@@ -147,6 +147,11 @@ export type SzczegolyPartnera = {
   fakturaKod?: string | null;
   fakturaMiasto?: string | null;
   fakturaKraj?: string | null;
+  /** Identyfikatory Selly do tworzenia zamówień partnera (ticket 249) — null = nie ustawione. */
+  sellyStatusId?: number | null;
+  sellyPaymentId?: number | null;
+  sellyDeliveryId?: number | null;
+  sellyVatId?: number | null;
   zmieniono: string;
   magazyny: string[];
   wykluczenia: string[];
@@ -157,7 +162,7 @@ export type SzczegolyPartnera = {
 
 export type UstawieniaDoZapisu = Pick<
   SzczegolyPartnera,
-  "nazwa" | "stanMin" | "zaokraglanie" | "harmonogramMinuty" | "tolerancjaCenyProc" | "formatPliku" | "csvSeparator" | "kanalFtp" | "kanalEmail" | "emailSkrzynka" | "nazwaPliku" | "fakturaNazwa" | "fakturaNip" | "fakturaUlica" | "fakturaKod" | "fakturaMiasto" | "fakturaKraj"
+  "nazwa" | "stanMin" | "zaokraglanie" | "harmonogramMinuty" | "tolerancjaCenyProc" | "formatPliku" | "csvSeparator" | "kanalFtp" | "kanalEmail" | "emailSkrzynka" | "nazwaPliku" | "fakturaNazwa" | "fakturaNip" | "fakturaUlica" | "fakturaKod" | "fakturaMiasto" | "fakturaKraj" | "sellyStatusId" | "sellyPaymentId" | "sellyDeliveryId" | "sellyVatId"
 >;
 export type UstawieniaKraju = Pick<KrajPartnera, "narzutProc" | "kursZrodlo" | "kursReczny" | "kosztyDodatkowe" | "przesylkaStalaEur" | "mytoEur" | "pakowanieEur"> & { paliwoProc?: number | null };
 export type MagazynKatalogu = { magazyn: string; liczbaPozycji: number };
@@ -254,8 +259,18 @@ export type PodgladSelly = {
   kosztDostawy: number | null;
   pozycje: Array<{
     lp: number; kodPartnera: string; nazwaPartnera: string | null; ilosc: number; cena: number | null;
-    dopasowanie: { kod: string; nazwa: string; ean: string | null; dostawca: string | null; stan: number; status: string } | null;
+    dopasowanie: { kod: string; nazwa: string; ean: string | null; dostawca: string | null; stan: number; status: string; sellyProductId: number | null; sellyVariantId: number | null } | null;
   }>;
   blokady: string[];
+  ostrzezenia: string[];
+  /** Ciało `POST /api/orders` dokładnie w postaci, w jakiej pójdzie do Selly; null przy blokadach. */
+  zadanie: Record<string, unknown> | null;
+  /** Flaga serwera PARTNERZY_SELLY_ZAMOWIENIA. */
+  tworzenieWlaczone: boolean;
 };
 export const kluczPodgladuSelly = (id: number, zamowienieId: number): string[] => [KLUCZ_PARTNERZY, String(id), "zamowienia", String(zamowienieId), "podglad-selly"];
+
+/** Ręczne utworzenie zamówienia partnera w Selly (ticket 249). Błędy (403 flaga, 409 blokady, 502 odmowa Selly) wracają jako wyjątek z komunikatem serwera. */
+export async function utworzWSelly(partnerId: number, zamowienieId: number): Promise<{ numerWlasny: string; idSelly: number | null }> {
+  return (await (await zadanie("POST", `${KLUCZ_PARTNERZY}/${partnerId}/zamowienia/${zamowienieId}/utworz-w-selly`, {})).json()) as { numerWlasny: string; idSelly: number | null };
+}

@@ -128,6 +128,8 @@ export type KlientSelly = {
   listOrderDeliveries(): Promise<OdpowiedzListy<PozycjaSlownikaZamowien>>;
   /** Ticket 248: `GET /api/orders` — tylko odczyt; służy do poznania kształtu zamówienia Selly przed `POST /api/orders` (kształt nieustalony → bez interpretacji). */
   listOrders(query?: { limit?: number }): Promise<OdpowiedzListy<PozycjaSlownikaZamowien>>;
+  /** Ticket 249: `POST /api/orders` — ZAPIS do sklepu (tylko ręcznie, za flagą `PARTNERZY_SELLY_ZAMOWIENIA` i trybem `pelny`). Ciało wyprowadzone z kształtu `GET /api/orders` — format odpowiedzi nieustalony. */
+  createOrder(zamowienie: Record<string, unknown>): Promise<unknown>;
   listProducers(query?: { limit?: number }): Promise<OdpowiedzListy<ProducentSelly>>;
   createProducer(producent: { name: string }): Promise<unknown>;
   listCategories(query?: { limit?: number }): Promise<OdpowiedzListy<KategoriaSelly>>;
@@ -394,6 +396,7 @@ export function stworzKlientaSelly(konfiguracja: KonfiguracjaSelly): KlientSelly
 
     listVatRates: async () => (await dane("GET", "/api/vat_rates")) as OdpowiedzListy<StawkaVatSelly>,
 
+    createOrder: (zamowienie) => dane("POST", "/api/orders", { body: zamowienie }),
     listOrders: async (query) => (await dane("GET", "/api/orders", { query })) as OdpowiedzListy<PozycjaSlownikaZamowien>,
     listOrderStatuses: async () => (await dane("GET", "/api/order_statuses")) as OdpowiedzListy<PozycjaSlownikaZamowien>,
     listOrderPayments: async () => (await dane("GET", "/api/order_payments")) as OdpowiedzListy<PozycjaSlownikaZamowien>,

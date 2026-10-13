@@ -157,6 +157,7 @@ const app = stworzApp({
   discoverySelly,
   serwisPartnerow,
   odbiorEmail,
+  sellyZamowienia: env.PARTNERZY_SELLY_ZAMOWIENIA,
 });
 
 const server = app.listen(env.PORT, env.HOST, () => {

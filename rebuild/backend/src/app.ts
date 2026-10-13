@@ -90,6 +90,8 @@ export type ZaleznosciApp = {
   serwisPartnerow?: SerwisPartnerow;
   /** Odbiór zamówień partnerów z e-maila (ticket 231). Pominięty (testy) ⇒ `POST /api/partnerzy/:id/zamowienia/odbierz` odpowiada 503. */
   odbiorEmail?: OdbiorEmail;
+  /** Ticket 249: flaga `PARTNERZY_SELLY_ZAMOWIENIA` (ręczne tworzenie zamówień partnerów w Selly). */
+  sellyZamowienia?: boolean;
 };
 
 /**
@@ -106,6 +108,7 @@ export function stworzApp({
   discoverySelly,
   serwisPartnerow,
   odbiorEmail,
+  sellyZamowienia,
 }: ZaleznosciApp): Express {
   const app = express();
 
@@ -260,7 +263,7 @@ export function stworzApp({
   app.use(trasyEksportuShoper({ db }));
   app.use(trasyWagiGabarytowej({ db }));
   app.use(trasyEanPary({ db }));
-  app.use(trasyPartnerzy({ db, serwis: serwisPartnerow, odbiorEmail, klientSelly: klientSellyDoUzycia }));
+  app.use(trasyPartnerzy({ db, serwis: serwisPartnerow, odbiorEmail, klientSelly: klientSellyDoUzycia, sellyZamowienia }));
   app.use(trasyNieobecne({ db }));
   app.use(trasyAtrybutow({ db }));
 

@@ -132,7 +132,8 @@ describe("ustawienia", () => {
     expect(zadania[0]).toEqual({
       metoda: "PUT", sciezka: "/",
       cialo: { nazwa: "TyreWorld", stanMin: 5, zaokraglanie: "gora10", harmonogramMinuty: null, tolerancjaCenyProc: 1.5, formatPliku: "xml", csvSeparator: ";", kanalFtp: true, kanalEmail: false, emailSkrzynka: null, nazwaPliku: null,
-        fakturaNazwa: null, fakturaNip: null, fakturaUlica: null, fakturaKod: null, fakturaMiasto: null, fakturaKraj: null },
+        fakturaNazwa: null, fakturaNip: null, fakturaUlica: null, fakturaKod: null, fakturaMiasto: null, fakturaKraj: null,
+        sellyStatusId: null, sellyPaymentId: null, sellyDeliveryId: null, sellyVatId: null },
     });
     expect(await screen.findByText("Zapisano ustawienia partnera")).toBeInTheDocument();
   });
@@ -232,6 +233,21 @@ describe("kraje", () => {
     await uzytkownik.type(screen.getByTestId("input-ustawienia-faktura-kraj"), "ad");
     await uzytkownik.click(screen.getByTestId("button-ustawienia-zapisz"));
     await waitFor(() => expect(zadania[0]?.cialo).toMatchObject({ fakturaNazwa: "Firma Test", fakturaKraj: "AD", fakturaNip: null }));
+  });
+
+  it("identyfikatory Selly trafiają w PUT jako liczby (puste → null); nieliczbowa wartość blokuje zapis", async () => {
+    const uzytkownik = userEvent.setup();
+    zamockujApi();
+    await otworz();
+    await uzytkownik.type(await screen.findByTestId("input-ustawienia-selly-status"), "3");
+    await uzytkownik.type(screen.getByTestId("input-ustawienia-selly-vat"), "5");
+    await uzytkownik.click(screen.getByTestId("button-ustawienia-zapisz"));
+    await waitFor(() => expect(zadania[0]?.cialo).toMatchObject({ sellyStatusId: 3, sellyVatId: 5, sellyPaymentId: null, sellyDeliveryId: null }));
+    const dotad = zadania.length;
+    await uzytkownik.type(screen.getByTestId("input-ustawienia-selly-platnosc"), "abc");
+    await uzytkownik.click(screen.getByTestId("button-ustawienia-zapisz"));
+    expect(await screen.findByText("Identyfikatory Selly muszą być liczbami całkowitymi (albo puste).")).toBeInTheDocument();
+    expect(zadania.length).toBe(dotad);
   });
 
   it("paliwo, myto i pakowanie kraju trafiają w PUT; nowy kraj ma domyślne zera", async () => {

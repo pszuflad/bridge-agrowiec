@@ -645,6 +645,10 @@ export const partnerzy = sqliteTable("partnerzy", {
 	fakturaKod: text("faktura_kod"),
 	fakturaMiasto: text("faktura_miasto"),
 	fakturaKraj: text("faktura_kraj"),
+	sellyStatusId: integer("selly_status_id"),
+	sellyPaymentId: integer("selly_payment_id"),
+	sellyDeliveryId: integer("selly_delivery_id"),
+	sellyVatId: integer("selly_vat_id"),
 	utworzono: text().notNull(),
 	zmieniono: text().notNull(),
 });

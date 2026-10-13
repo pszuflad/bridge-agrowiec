@@ -41,6 +41,11 @@ export type UstawieniaPartnera = {
   fakturaKod: string | null;
   fakturaMiasto: string | null;
   fakturaKraj: string | null;
+  /** Identyfikatory Selly do utworzenia zamówienia partnera (ticket 249); `null` = nie ustawione. */
+  sellyStatusId: number | null;
+  sellyPaymentId: number | null;
+  sellyDeliveryId: number | null;
+  sellyVatId: number | null;
 };
 export type UstawieniaKraju = {
   narzutProc: number;
@@ -144,6 +149,13 @@ export function walidujUstawieniaPartnera(
     const kraj = v === null ? null : normalizujKraj(v);
     if (v !== null && kraj === null) return { blad: "Pole `fakturaKraj` musi być dwuliterowym kodem kraju (np. PL) albo null." };
     w.fakturaKraj = kraj;
+  }
+  for (const pole of ["sellyStatusId", "sellyPaymentId", "sellyDeliveryId", "sellyVatId"] as const) {
+    if (pole in cialo) {
+      const v = cialo[pole];
+      if (v !== null && !(typeof v === "number" && Number.isInteger(v) && v >= 0)) return { blad: `Pole \`${pole}\` musi być nieujemną liczbą całkowitą (ID z Selly) albo null.` };
+      w[pole] = v as number | null;
+    }
   }
   return w;
 }

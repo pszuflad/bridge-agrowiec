@@ -8,12 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/toast";
 import {
-  KLUCZ_PARTNERZY, LIMIT_ZAMOWIEN, komunikatBledu, kluczPodgladuSelly, kluczZamowien, kluczZamowienia, odbierzZamowienia, zwalidujZamowienie,
+  KLUCZ_PARTNERZY, LIMIT_ZAMOWIEN, komunikatBledu, kluczPodgladuSelly, kluczZamowien, kluczZamowienia, odbierzZamowienia, utworzWSelly, zwalidujZamowienie,
   type ListaZamowien, type PodgladSelly, type SzczegolyPartnera, type SzczegolyZamowienia, type WynikOdbioru,
 } from "./api";
 
 const czas = (iso: string): string => new Date(iso).toLocaleString("pl-PL");
-const ETYKIETY_STATUSOW: Record<string, string> = { nowe: "nowe", przyjete: "przyjęte", blad_importu: "błąd importu" };
+const ETYKIETY_STATUSOW: Record<string, string> = { nowe: "nowe", przyjete: "przyjęte", blad_importu: "błąd importu", wysylanie: "wysyłanie do Selly…", wyslane: "utworzone w Selly" };
 /** Opis błędu zbiorczy dużego zamówienia bywa bardzo długi — w toaście tylko początek (całość jest w ramce przy zamówieniu). */
 const przytnij = (tekst: string, maks = 240): string => (tekst.length > maks ? `${tekst.slice(0, maks)}…` : tekst);
 const etykietaStatusu = (status: string): string => ETYKIETY_STATUSOW[status] ?? status;
@@ -181,11 +181,28 @@ function SzczegolyZamowieniaWidok({ partnerId, zamowienieId }: { partnerId: numb
   );
 }
 
-/** Podgląd tego, co poszłoby do Selly (ticket 248). Tylko odczyt — tworzenie zamówienia w sklepie dojdzie po ustaleniu formatu `POST /api/orders`. */
+/** Podgląd tego, co poszłoby do Selly (ticket 248) i ręczne utworzenie zamówienia w sklepie (ticket 249, dwa kliknięcia: przycisk + potwierdzenie). */
 function PodgladDoSelly({ partnerId, zamowienieId }: { partnerId: number; zamowienieId: number }) {
   const [pokaz, ustawPokaz] = useState(false);
+  const [potwierdzenie, ustawPotwierdzenie] = useState(false);
+  const klient = useQueryClient();
+  const { toast } = useToast();
   const q = useQuery<PodgladSelly | null>({ queryKey: kluczPodgladuSelly(partnerId, zamowienieId), enabled: pokaz, retry: false });
   const p = q.data;
+  const tworzenie = useMutation<{ numerWlasny: string }, Error, void>({
+    mutationFn: () => utworzWSelly(partnerId, zamowienieId),
+    onSuccess: (w) => {
+      toast({ title: "Zamówienie utworzone w Selly", description: `Numer w Selly: ${w.numerWlasny}.` });
+      ustawPotwierdzenie(false);
+    },
+    onError: (e) => {
+      toast({ title: "Nie utworzono zamówienia w Selly", description: komunikatBledu(e), variant: "destructive" });
+      ustawPotwierdzenie(false);
+    },
+    // Po sukcesie i po błędzie: zamówienie i podgląd od nowa (status mógł się zmienić albo wrócić do „przyjęte”).
+    onSettled: () => void klient.invalidateQueries({ queryKey: [KLUCZ_PARTNERZY, String(partnerId)], predicate: ({ queryKey }) => /^zamowienia/.test(String(queryKey[2])) }),
+  });
+  const mozna = !!p && p.blokady.length === 0 && p.tworzenieWlaczone;
   return (
     <div className="space-y-2 border-t pt-2" data-testid={`podglad-selly-${zamowienieId}`}>
       <Button size="sm" variant="outline" disabled={q.isFetching} onClick={() => (pokaz ? void q.refetch() : ustawPokaz(true))} data-testid={`button-podglad-selly-${zamowienieId}`}>
@@ -206,13 +223,38 @@ function PodgladDoSelly({ partnerId, zamowienieId }: { partnerId: number; zamowi
               </li>
             ))}
           </ul>
+          {p.ostrzezenia.length > 0 ? (
+            <ul className="list-disc space-y-0.5 pl-4 text-muted-foreground" data-testid={`podglad-ostrzezenia-${zamowienieId}`}>
+              {p.ostrzezenia.map((o) => <li key={o}>{o}</li>)}
+            </ul>
+          ) : null}
           {p.blokady.length > 0 ? (
             <ul className="list-disc space-y-0.5 pl-4 text-destructive" data-testid={`podglad-blokady-${zamowienieId}`}>
               {p.blokady.map((b) => <li key={b}>{b}</li>)}
             </ul>
           ) : (
-            <p className="text-muted-foreground" data-testid={`podglad-gotowe-${zamowienieId}`}>Wszystkie pozycje dopasowane, dane do faktury kompletne.</p>
+            <p className="text-muted-foreground" data-testid={`podglad-gotowe-${zamowienieId}`}>Wszystkie pozycje dopasowane i powiązane z Selly, dane do faktury kompletne.</p>
           )}
+          {p.zadanie ? (
+            <details>
+              <summary className="cursor-pointer text-muted-foreground">Ciało zamówienia wysyłane do Selly</summary>
+              <pre className="mt-1 max-h-72 overflow-auto rounded-md bg-muted/40 p-2" data-testid={`podglad-zadanie-${zamowienieId}`}>{JSON.stringify(p.zadanie, null, 2)}</pre>
+            </details>
+          ) : null}
+          <div className="flex flex-wrap items-center gap-2">
+            {potwierdzenie ? (
+              <>
+                <span className="text-destructive">Utworzyć to zamówienie w żywym sklepie Selly?</span>
+                <Button size="sm" disabled={tworzenie.isPending} onClick={() => tworzenie.mutate()} data-testid={`button-selly-potwierdz-${zamowienieId}`}>
+                  {tworzenie.isPending ? "Tworzenie…" : "Tak, utwórz"}
+                </Button>
+                <Button size="sm" variant="outline" disabled={tworzenie.isPending} onClick={() => ustawPotwierdzenie(false)}>Anuluj</Button>
+              </>
+            ) : (
+              <Button size="sm" disabled={!mozna} onClick={() => ustawPotwierdzenie(true)} data-testid={`button-selly-utworz-${zamowienieId}`}>Utwórz w Selly</Button>
+            )}
+            {!p.tworzenieWlaczone ? <span className="text-muted-foreground" data-testid={`podglad-wylaczone-${zamowienieId}`}>Tworzenie zamówień w Selly jest wyłączone na serwerze (PARTNERZY_SELLY_ZAMOWIENIA).</span> : null}
+          </div>
         </div>
       ) : null}
     </div>

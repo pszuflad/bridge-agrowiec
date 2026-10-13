@@ -18,7 +18,7 @@ import { requireAuth } from "../middleware/auth.js";
 import { zapiszAudyt } from "../repos/audit.js";
 import { pobierzBledy, pobierzLogi } from "../partnerzy/logi.js";
 import { OdbiorTrwaError, odbierzZamowieniaEmail, type OdbiorEmail } from "../partnerzy/odbior-email.js";
-import { podgladDlaSelly } from "../partnerzy/podglad-selly.js";
+import { BladTworzenia, podgladDlaSelly, utworzWSelly } from "../partnerzy/podglad-selly.js";
 import { zwaliduj } from "../partnerzy/walidacja-zamowienia.js";
 import { listaZamowien, szczegolyZamowieniaDlaPartnera } from "../repos/partnerzy-zamowienia.js";
 import { walidujKolumny, walidujPola, zapiszKolumny, zapiszPola } from "../repos/partnerzy-kolumny.js";
@@ -41,9 +41,9 @@ import {
   walidujUstawieniaPartnera,
 } from "../repos/partnerzy.js";
 
-export type ZaleznosciPartnerzy = { db: Baza; serwis?: SerwisPartnerow; odbiorEmail?: OdbiorEmail; klientSelly?: KlientSelly };
+export type ZaleznosciPartnerzy = { db: Baza; serwis?: SerwisPartnerow; odbiorEmail?: OdbiorEmail; klientSelly?: KlientSelly; sellyZamowienia?: boolean };
 
-export function trasyPartnerzy({ db, serwis, odbiorEmail, klientSelly }: ZaleznosciPartnerzy): Router {
+export function trasyPartnerzy({ db, serwis, odbiorEmail, klientSelly, sellyZamowienia = false }: ZaleznosciPartnerzy): Router {
   const router = Router();
   const wgrywanieGeis = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5_000_000 } });
 
@@ -261,9 +261,29 @@ export function trasyPartnerzy({ db, serwis, odbiorEmail, klientSelly }: Zalezno
     const id = idZParametru(req, res);
     if (id === null) return;
     const zamowienieId = Number(req.params.zamowienieId);
-    const podglad = Number.isInteger(zamowienieId) && zamowienieId > 0 ? podgladDlaSelly(db, id, zamowienieId) : null;
+    const podglad = Number.isInteger(zamowienieId) && zamowienieId > 0 ? podgladDlaSelly(db, id, zamowienieId, sellyZamowienia) : null;
     if (podglad === null) return void res.status(404).json({ error: "Nie ma takiego zamówienia tego partnera." });
     res.json(podglad);
+  });
+
+  /**
+   * Ręczne utworzenie zamówienia partnera w Selly (ticket 249). Tylko z flagą `PARTNERZY_SELLY_ZAMOWIENIA`, bez blokad podglądu i w statusie `przyjete`;
+   * 403 (flaga), 404, 409 (blokady/zmiana statusu), 502 (odmowa Selly), 503 (brak klienta). Odpowiedź: `{numerWlasny, idSelly}`.
+   */
+  router.post("/api/partnerzy/:id/zamowienia/:zamowienieId/utworz-w-selly", requireAuth, async (req, res) => {
+    const id = idZParametru(req, res);
+    if (id === null) return;
+    if (!klientSelly) return void res.status(503).json({ error: "Klient Selly nie jest dostępny w tej instancji." });
+    const zamowienieId = Number(req.params.zamowienieId);
+    if (!Number.isInteger(zamowienieId) || zamowienieId < 1) return void res.status(404).json({ error: "Nie ma takiego zamówienia tego partnera." });
+    try {
+      const wynik = await utworzWSelly(db, klientSelly, id, zamowienieId, sellyZamowienia);
+      audytuj(req, "partner_zamowienie_utworz_w_selly", id, { zamowienieId, numerWlasny: wynik.numerWlasny });
+      res.json(wynik);
+    } catch (e) {
+      if (e instanceof BladTworzenia) return void res.status(e.status).json({ error: e.message });
+      throw e;
+    }
   });
 
   /**

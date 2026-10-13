@@ -49,6 +49,8 @@ export type OpcjeSrodowiska = {
   serwisPartnerow?: SerwisPartnerow;
   /** Odbiór zamówień z e-maila partnerów (ticket 231) — atrapa skrzynki. Bez niego trasa „odbierz” odpowiada 503. */
   odbiorEmail?: OdbiorEmail;
+  /** Ticket 249: flaga `PARTNERZY_SELLY_ZAMOWIENIA` (domyślnie wyłączona, jak na produkcji). */
+  sellyZamowienia?: boolean;
 };
 
 /**
@@ -86,6 +88,7 @@ export async function stworzSrodowiskoTestowe(
     discoverySelly: opcje.discoverySelly,
     serwisPartnerow: opcje.serwisPartnerow,
     odbiorEmail: opcje.odbiorEmail,
+    sellyZamowienia: opcje.sellyZamowienia,
   });
   return { ...baza, app, env, uzytkownik, dane, katalogArchiwum, katalogCsvSelly };
 }

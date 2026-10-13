@@ -26,6 +26,12 @@ describe("ticket 235 — walidacja i szczegóły", () => {
       expect(czyBlad(walidujUstawieniaPartnera(zle, true))).toBe(true);
   });
 
+  it("identyfikatory Selly (ticket 249): nieujemne liczby całkowite albo null", () => {
+    expect(walidujUstawieniaPartnera({ sellyStatusId: 3, sellyPaymentId: 71, sellyDeliveryId: 0, sellyVatId: null }, true)).toEqual({ sellyStatusId: 3, sellyPaymentId: 71, sellyDeliveryId: 0, sellyVatId: null });
+    for (const zle of [{ sellyStatusId: -1 }, { sellyVatId: 1.5 }, { sellyPaymentId: "7" }, { sellyDeliveryId: NaN }])
+      expect(czyBlad(walidujUstawieniaPartnera(zle, true))).toBe(true);
+  });
+
   it("kraj: myto i pakowanie (≥ 0, domyślnie 0) oraz opcjonalne paliwo 0–1000 %", () => {
     expect(walidujUstawieniaKraju({})).toMatchObject({ mytoEur: 0, pakowanieEur: 0, paliwoProc: null });
     expect(walidujUstawieniaKraju({ mytoEur: 9.92, pakowanieEur: 15, paliwoProc: 44 })).toMatchObject({ mytoEur: 9.92, pakowanieEur: 15, paliwoProc: 44 });
