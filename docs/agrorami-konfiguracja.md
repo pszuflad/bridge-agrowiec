@@ -9,6 +9,8 @@ Mechanizm jest dostępny w [akcji Agrorami](https://github.com/pszuflad/bridge-a
 - W [GitHub Secrets](https://github.com/pszuflad/bridge-agrowiec/settings/secrets/actions) dodaj `AGRORAMI_PASSWORD`.
 - Uruchom akcję z `main`. Konto docelowe jest jawnie ograniczone do `info@agroopony.eu`.
 - Wykorzystuje istniejące `PROD_SSH_*`; sekret przekazywany jest jako JSON na stdin szyfrowanego SSH.
+- Producent JSON usuwa wyłącznie końcowe CR/LF dodane przy kopiowaniu sekretu.
+  Spacje i inne znaki hasła pozostają bez zmian; złamanie linii wewnątrz jest nadal odrzucane.
 - Forced command w `deploy-produkcja.sh` rozpoznaje wyłącznie `bridge-konfiguruj-agrorami`.
   Pozostałe polecenia nadal uruchamiają dotychczasowy deploy; nie jest to dowolna powłoka.
 - Przed pierwszym użyciem nowy dispatcher i helper muszą znaleźć się w produkcyjnym checkoutcie `repo/`.
