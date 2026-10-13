@@ -193,14 +193,14 @@ export const czyBlad = (v: unknown): v is BladWalidacji => jestObiektem(v) && "b
 
 const teraz = (): string => new Date().toISOString();
 
-/** Magazyny widoczne w katalogu (`products.magazyn`) z liczbą aktywnych pozycji — do wyboru w panelu partnera. */
+/** „Magazyny” do wyboru w panelu partnera = kody dostawców katalogu (`products.dostawca`: MO1, MO2…) z liczbą aktywnych pozycji. */
 export function dostepneMagazyny(db: Baza): { magazyn: string; liczbaPozycji: number }[] {
   return db
-    .select({ magazyn: products.magazyn, liczbaPozycji: sql<number>`count(*)` })
+    .select({ magazyn: products.dostawca, liczbaPozycji: sql<number>`count(*)` })
     .from(products)
     .where(eq(products.status, "aktywny"))
-    .groupBy(products.magazyn)
-    .orderBy(asc(products.magazyn))
+    .groupBy(products.dostawca)
+    .orderBy(asc(products.dostawca))
     .all()
     .map((w) => ({ magazyn: w.magazyn, liczbaPozycji: Number(w.liczbaPozycji) }));
 }
