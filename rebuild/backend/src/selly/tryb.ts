@@ -51,6 +51,7 @@ export const METODY_ODCZYTU = [
   "listProducers",
   "listCategories",
   "listVatRates",
+  "listOrders",
   "listOrderStatuses",
   "listOrderPayments",
   "listOrderDeliveries",

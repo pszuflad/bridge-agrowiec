@@ -252,6 +252,36 @@ describe("zamówienia partnera", () => {
     expect(screen.getByTestId("pozycja-blad-1-1")).toBeEmptyDOMElement();
   });
 
+  it("„Podgląd do Selly” pobiera podgląd dopiero po kliknięciu: dopasowania, zamawiający i blokady", async () => {
+    const uzytkownik = userEvent.setup();
+    let zapytan = 0;
+    server.use(
+      http.get("*/api/partnerzy/1/zamowienia/1/podglad-selly", () => {
+        zapytan++;
+        return HttpResponse.json({
+          zamawiajacy: { nazwa: "Adtyres SL", nip: "ATU1", ulica: null, kod: null, miasto: null, kraj: "AD" },
+          dostawa: {}, waluta: "EUR", kosztDostawy: null,
+          pozycje: [
+            { lp: 1, kodPartnera: "011200284", nazwaPartnera: null, ilosc: 2, cena: 202, dopasowanie: { kod: "K1", nazwa: "OPONA", ean: "1", dostawca: "MO1", stan: 5, status: "aktywny" } },
+            { lp: 2, kodPartnera: "X", nazwaPartnera: null, ilosc: 1, cena: null, dopasowanie: null },
+          ],
+          blokady: ["Brak danych do faktury partnera: ulica (uzupełnij w ustawieniach partnera).", "Pozycje bez dopasowania w katalogu: 1 — do ręcznej weryfikacji."],
+        });
+      }),
+    );
+    zamowienia = [naLiscie(1, "A01")];
+    await otworz();
+    await uzytkownik.click(await screen.findByTestId("button-zamowienie-1"));
+    const przycisk = await screen.findByTestId("button-podglad-selly-1");
+    expect(zapytan).toBe(0);
+    await uzytkownik.click(przycisk);
+    expect(await screen.findByTestId("podglad-zamawiajacy-1")).toHaveTextContent("Adtyres SL, NIP ATU1, AD");
+    expect(screen.getByTestId("podglad-pozycja-1-1")).toHaveTextContent("→ K1 (OPONA, MO1)");
+    expect(screen.getByTestId("podglad-pozycja-1-2")).toHaveTextContent("do ręcznej weryfikacji");
+    expect(screen.getByTestId("podglad-blokady-1")).toHaveTextContent("Brak danych do faktury");
+    expect(screen.queryByTestId("podglad-gotowe-1")).not.toBeInTheDocument();
+  });
+
   it("„Sprawdź ponownie” woła walidację i pokazuje wynik; zamówienie w porządku nie ma ramki błędu", async () => {
     const uzytkownik = userEvent.setup();
     zamowienia = [naLiscie(1, "A01")];
