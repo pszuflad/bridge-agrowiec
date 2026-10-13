@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
+import { nazwaKraju } from "@/lib/kraje";
 import { KLUCZ_PARTNERZY, kluczKursuNbp, komunikatBledu, liczbaZPola, usunKraj, zapiszKraj, type KrajPartnera, type KursNbpPodglad, type SzczegolyPartnera } from "./api";
 
 const KLASA_SELECT = "h-9 rounded-md border border-input bg-background px-2 text-sm";
@@ -87,7 +88,12 @@ function WierszKraju({ partnerId, kraj, nowy, kursNbp }: { partnerId: number; kr
   return (
     <tr className="border-b last:border-0" data-testid={`row-kraj-${testId}`}>
       <td className="px-2 py-2">
-        {nowy ? <Input className="w-20 uppercase" maxLength={2} placeholder="FR" aria-label="Kod nowego kraju" value={kod} onChange={(e) => ustawKod(e.target.value)} data-testid="input-kraj-nowy-kod" /> : <span className="font-medium">{kraj!.kraj}</span>}
+        {nowy ? (
+          <div>
+            <Input className="w-20 uppercase" maxLength={2} placeholder="FR" aria-label="Kod nowego kraju" value={kod} onChange={(e) => ustawKod(e.target.value)} data-testid="input-kraj-nowy-kod" />
+            <span className="block text-xs text-muted-foreground" data-testid="nazwa-kraju-nowy">{nazwaKraju(kod) ?? ""}</span>
+          </div>
+        ) : <span className="font-medium">{kraj!.kraj}<span className="block text-xs font-normal text-muted-foreground" data-testid={`nazwa-kraju-${kraj!.kraj}`}>{nazwaKraju(kraj!.kraj) ?? ""}</span></span>}
       </td>
       <td className="px-2 py-2"><Input className="w-24" inputMode="decimal" aria-label={`Narzut % ${testId}`} value={narzut} onChange={(e) => ustawNarzut(e.target.value)} data-testid={`input-kraj-narzut-${testId}`} /></td>
       <td className="px-2 py-2">
@@ -146,7 +152,7 @@ export function KrajePartnera({ partner }: { partner: SzczegolyPartnera }) {
             </>
           )}
           <Button size="sm" variant="outline" disabled={nbp.isFetching} onClick={() => void nbp.refetch()} data-testid="button-kurs-nbp-odswiez">{nbp.isFetching ? "Pobieranie…" : "Odśwież kurs"}</Button>
-          <span className="text-xs text-muted-foreground">To kurs, którego użyje najbliższy wygenerowany cennik (wiersze z „NBP”). Ręczny kurs ustawiasz w wierszu kraju.</span>
+          <span className="text-xs text-muted-foreground" data-testid="kurs-nbp-wyjasnienie">To kurs, którego użyje najbliższy wygenerowany cennik (wiersze z „NBP”). NBP publikuje tabelę A w dni robocze ok. 11:45–12:15 — przed publikacją obowiązuje kurs z poprzedniego dnia roboczego. Ręczny kurs ustawiasz w wierszu kraju.</span>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">

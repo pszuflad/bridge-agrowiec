@@ -13,6 +13,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
 import { zadanie } from "@/lib/api";
+import { kodZNazwa } from "@/lib/kraje";
 import { KLUCZ_PARTNERZY, komunikatBledu, liczbaZPola, type SzczegolyPartnera } from "./api";
 
 type Warunek = { typ: string; wartosc: string };
@@ -108,7 +109,7 @@ export function NarzutyPartnera({ partner }: { partner: SzczegolyPartnera }) {
                   <tr key={r.id} className="border-b last:border-0" data-testid={`row-regula-${r.id}`}>
                     <td className="px-2 py-2 font-medium">{r.nazwa}</td>
                     <td className="px-2 py-2">{opisWarunkow(r.warunki)}</td>
-                    <td className="px-2 py-2">{r.kraj ?? "wszystkie"}</td>
+                    <td className="px-2 py-2">{r.kraj ? kodZNazwa(r.kraj) : "wszystkie"}</td>
                     <td className="px-2 py-2">{r.wartosc}</td>
                     <td className="px-2 py-2">{r.priorytet}</td>
                     <td className="px-2 py-2">{r.status}</td>
@@ -130,7 +131,7 @@ export function NarzutyPartnera({ partner }: { partner: SzczegolyPartnera }) {
               <label className="space-y-1">Kraj
                 <select className={KLASA_SELECT} value={f.kraj} onChange={(e) => ustawPole("kraj", e.target.value)} data-testid="select-regula-kraj">
                   <option value="">wszystkie kraje</option>
-                  {partner.kraje.map((k) => <option key={k.kraj} value={k.kraj}>{k.kraj}</option>)}
+                  {partner.kraje.map((k) => <option key={k.kraj} value={k.kraj}>{kodZNazwa(k.kraj)}</option>)}
                 </select>
               </label>
               <label className="space-y-1">Priorytet (0–1000)<Input className="w-24" inputMode="numeric" value={f.priorytet} onChange={(e) => ustawPole("priorytet", e.target.value)} data-testid="input-regula-priorytet" /></label>
