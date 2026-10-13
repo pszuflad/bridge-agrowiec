@@ -139,7 +139,7 @@ describe("ustawienia", () => {
       metoda: "PUT", sciezka: "/",
       cialo: { nazwa: "TyreWorld", stanMin: 5, zaokraglanie: "gora10", harmonogramMinuty: null, tolerancjaCenyProc: 1.5, formatPliku: "xml", csvSeparator: ";", kanalFtp: true, kanalEmail: false, emailSkrzynka: null, nazwaPliku: null,
         fakturaNazwa: null, fakturaNip: null, fakturaUlica: null, fakturaKod: null, fakturaMiasto: null, fakturaKraj: null,
-        sellyStatusId: null, sellyPaymentId: null, sellyDeliveryId: null, sellyVatId: null },
+        sellyStatusId: null, kontaktEmail: null, kontaktTelefon: null },
     });
     expect(await screen.findByText("Zapisano ustawienia partnera")).toBeInTheDocument();
   });
@@ -284,18 +284,27 @@ describe("kraje", () => {
     }));
   });
 
-  it("identyfikatory Selly trafiają w PUT jako liczby (puste → null); nieliczbowa wartość blokuje zapis", async () => {
+  it("Selly i kontakt: status jako liczba, e-mail i telefon w PUT (puste → null); VAT/płatność/dostawa NIE są wysyłane; błędne wartości blokują zapis", async () => {
     const uzytkownik = userEvent.setup();
     zamockujApi();
     await otworz();
     await uzytkownik.type(await screen.findByTestId("input-ustawienia-selly-status"), "3");
-    await uzytkownik.type(screen.getByTestId("input-ustawienia-selly-vat"), "5");
+    await uzytkownik.type(screen.getByTestId("input-ustawienia-kontakt-email"), "bill@partner.example");
     await uzytkownik.click(screen.getByTestId("button-ustawienia-zapisz"));
-    await waitFor(() => expect(zadania[0]?.cialo).toMatchObject({ sellyStatusId: 3, sellyVatId: 5, sellyPaymentId: null, sellyDeliveryId: null }));
+    await waitFor(() => expect(zadania[0]?.cialo).toMatchObject({ sellyStatusId: 3, kontaktEmail: "bill@partner.example", kontaktTelefon: null }));
+    const cialo = zadania[0]?.cialo as Record<string, unknown>;
+    for (const k of ["sellyVatId", "sellyPaymentId", "sellyDeliveryId"]) expect(cialo).not.toHaveProperty(k);
     const dotad = zadania.length;
-    await uzytkownik.type(screen.getByTestId("input-ustawienia-selly-platnosc"), "abc");
+    await uzytkownik.clear(screen.getByTestId("input-ustawienia-kontakt-email"));
+    await uzytkownik.type(screen.getByTestId("input-ustawienia-kontakt-email"), "to-nie-email");
     await uzytkownik.click(screen.getByTestId("button-ustawienia-zapisz"));
-    expect(await screen.findByText("Identyfikatory Selly muszą być liczbami całkowitymi (albo puste).")).toBeInTheDocument();
+    expect(await screen.findByText("Kontakt: e-mail musi być poprawnym adresem (albo puste).")).toBeInTheDocument();
+    expect(zadania.length).toBe(dotad);
+    await uzytkownik.clear(screen.getByTestId("input-ustawienia-kontakt-email"));
+    await uzytkownik.clear(screen.getByTestId("input-ustawienia-selly-status"));
+    await uzytkownik.type(screen.getByTestId("input-ustawienia-selly-status"), "abc");
+    await uzytkownik.click(screen.getByTestId("button-ustawienia-zapisz"));
+    expect(await screen.findByText("Identyfikator statusu Selly musi być liczbą całkowitą (albo puste).")).toBeInTheDocument();
     expect(zadania.length).toBe(dotad);
   });
 

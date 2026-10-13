@@ -1,0 +1,7 @@
+-- Ticket 253 (253-FEATURE-partnerzy-kontakt-dane-faktury): dane kontaktowe partnera (zamawiającego) do zamówienia w Selly.
+--
+-- ⚠ NOWE KOLUMNY w tabeli z migracji 024, NIE ODTWORZENIE PRODUKCJI. NULL = nie ustawione.
+--   partnerzy.kontakt_email   — adres e-mail zamawiającego (pole `email` zamówienia w Selly); bez niego tworzenie zamówienia jest zablokowane
+--   partnerzy.kontakt_telefon — telefon zamawiającego (pole `phone`); gdy brak, zamówienie dostaje telefon odbiorcy z pliku partnera
+-- @dodaj-kolumne-jesli-brak partnerzy kontakt_email TEXT
+-- @dodaj-kolumne-jesli-brak partnerzy kontakt_telefon TEXT

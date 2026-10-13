@@ -47,13 +47,10 @@ export function UstawieniaPartnera({ partner }: { partner: SzczegolyPartnera }) 
     fakturaMiasto: partner.fakturaMiasto ?? "",
     fakturaKraj: partner.fakturaKraj ?? "",
   });
-  const [selly, ustawSelly] = useState({
-    sellyStatusId: partner.sellyStatusId?.toString() ?? "",
-    sellyPaymentId: partner.sellyPaymentId?.toString() ?? "",
-    sellyDeliveryId: partner.sellyDeliveryId?.toString() ?? "",
-    sellyVatId: partner.sellyVatId?.toString() ?? "",
-  });
-  const zmienSelly = (pole: keyof typeof selly, wartosc: string) => ustawSelly((f) => ({ ...f, [pole]: wartosc }));
+  // Selly: jedyne ustawienie to status nowego zamówienia (płatność, dostawa i VAT 101 są stałymi po stronie serwera); kontakt zamawiającego do zamówienia.
+  const [sellyStatus, ustawSellyStatus] = useState(partner.sellyStatusId?.toString() ?? "");
+  const [kontaktEmail, ustawKontaktEmail] = useState(partner.kontaktEmail ?? "");
+  const [kontaktTelefon, ustawKontaktTelefon] = useState(partner.kontaktTelefon ?? "");
   const zmienFakture = (pole: keyof typeof faktura, wartosc: string) => ustawFakture((f) => ({ ...f, [pole]: wartosc }));
 
   const zapis = useMutation<void, Error, void>({
@@ -67,15 +64,14 @@ export function UstawieniaPartnera({ partner }: { partner: SzczegolyPartnera }) 
       if (tol !== null && (Number.isNaN(tol) || tol < 0)) throw new Error("Tolerancja ceny musi być liczbą ≥ 0 albo puste.");
       const np = nazwaPliku.trim();
       if (np !== "" && !/^[A-Za-z0-9_-]{1,60}$/.test(np)) throw new Error("Nazwa pliku: litery, cyfry, _ i - (do 60 znaków).");
-      const idSelly: Record<string, number | null> = {};
-      for (const [k, v] of Object.entries(selly)) {
-        const t = v.trim();
-        if (t === "") idSelly[k] = null;
-        else if (!/^\d+$/.test(t)) throw new Error("Identyfikatory Selly muszą być liczbami całkowitymi (albo puste).");
-        else idSelly[k] = Number(t);
-      }
+      const st = sellyStatus.trim();
+      if (st !== "" && !/^\d+$/.test(st)) throw new Error("Identyfikator statusu Selly musi być liczbą całkowitą (albo puste).");
+      const em = kontaktEmail.trim();
+      if (em !== "" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) throw new Error("Kontakt: e-mail musi być poprawnym adresem (albo puste).");
       await zapiszUstawienia(partner.id, {
-        ...idSelly,
+        sellyStatusId: st === "" ? null : Number(st),
+        kontaktEmail: em === "" ? null : em,
+        kontaktTelefon: kontaktTelefon.trim() === "" ? null : kontaktTelefon.trim(),
         nazwa: nazwa.trim(), stanMin: stan, zaokraglanie, harmonogramMinuty: harm, tolerancjaCenyProc: tol,
         formatPliku: format, csvSeparator: separator, kanalFtp: ftp, kanalEmail: email, emailSkrzynka: skrzynka.trim() === "" ? null : skrzynka.trim(), nazwaPliku: np === "" ? null : np,
         ...Object.fromEntries(Object.entries(faktura).map(([k, v]) => [k, v.trim() === "" ? null : k === "fakturaKraj" ? v.trim().toUpperCase() : v.trim()])),
@@ -119,10 +115,9 @@ export function UstawieniaPartnera({ partner }: { partner: SzczegolyPartnera }) 
           <Pole etykieta="Faktura: ulica i numer"><Input value={faktura.fakturaUlica} onChange={(e) => zmienFakture("fakturaUlica", e.target.value)} data-testid="input-ustawienia-faktura-ulica" /></Pole>
           <Pole etykieta="Faktura: kod pocztowy"><Input value={faktura.fakturaKod} onChange={(e) => zmienFakture("fakturaKod", e.target.value)} data-testid="input-ustawienia-faktura-kod" /></Pole>
           <Pole etykieta="Faktura: miasto"><Input value={faktura.fakturaMiasto} onChange={(e) => zmienFakture("fakturaMiasto", e.target.value)} data-testid="input-ustawienia-faktura-miasto" /></Pole>
-          <Pole etykieta="Selly: ID statusu nowego zamówienia"><Input inputMode="numeric" value={selly.sellyStatusId} onChange={(e) => zmienSelly("sellyStatusId", e.target.value)} data-testid="input-ustawienia-selly-status" /></Pole>
-          <Pole etykieta="Selly: ID formy płatności"><Input inputMode="numeric" value={selly.sellyPaymentId} onChange={(e) => zmienSelly("sellyPaymentId", e.target.value)} data-testid="input-ustawienia-selly-platnosc" /></Pole>
-          <Pole etykieta="Selly: ID formy dostawy"><Input inputMode="numeric" value={selly.sellyDeliveryId} onChange={(e) => zmienSelly("sellyDeliveryId", e.target.value)} data-testid="input-ustawienia-selly-dostawa" /></Pole>
-          <Pole etykieta="Selly: ID stawki VAT 0 %"><Input inputMode="numeric" value={selly.sellyVatId} onChange={(e) => zmienSelly("sellyVatId", e.target.value)} data-testid="input-ustawienia-selly-vat" /></Pole>
+          <Pole etykieta="Selly: ID statusu nowego zamówienia"><Input inputMode="numeric" value={sellyStatus} onChange={(e) => ustawSellyStatus(e.target.value)} data-testid="input-ustawienia-selly-status" /></Pole>
+          <Pole etykieta="Kontakt zamawiającego: e-mail"><Input value={kontaktEmail} onChange={(e) => ustawKontaktEmail(e.target.value)} data-testid="input-ustawienia-kontakt-email" /></Pole>
+          <Pole etykieta="Kontakt zamawiającego: telefon"><Input value={kontaktTelefon} onChange={(e) => ustawKontaktTelefon(e.target.value)} data-testid="input-ustawienia-kontakt-telefon" /></Pole>
           <Pole etykieta="Faktura: kraj (kod, np. AD, ES)"><Input maxLength={2} value={faktura.fakturaKraj} onChange={(e) => zmienFakture("fakturaKraj", e.target.value)} data-testid="input-ustawienia-faktura-kraj" /></Pole>
           <Pole etykieta="Skrzynka e-mail do zamówień"><Input type="email" value={skrzynka} onChange={(e) => ustawSkrzynke(e.target.value)} data-testid="input-ustawienia-skrzynka" /></Pole>
         </div>

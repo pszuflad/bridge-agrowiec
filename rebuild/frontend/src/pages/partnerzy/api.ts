@@ -164,6 +164,9 @@ export type SzczegolyPartnera = {
   sellyPaymentId?: number | null;
   sellyDeliveryId?: number | null;
   sellyVatId?: number | null;
+  /** Kontakt zamawiającego (ticket 253): e-mail i telefon do zamówienia w Selly. */
+  kontaktEmail?: string | null;
+  kontaktTelefon?: string | null;
   zmieniono: string;
   magazyny: string[];
   wykluczenia: string[];
@@ -174,7 +177,7 @@ export type SzczegolyPartnera = {
 
 export type UstawieniaDoZapisu = Pick<
   SzczegolyPartnera,
-  "nazwa" | "stanMin" | "zaokraglanie" | "harmonogramMinuty" | "tolerancjaCenyProc" | "formatPliku" | "csvSeparator" | "kanalFtp" | "kanalEmail" | "emailSkrzynka" | "nazwaPliku" | "fakturaNazwa" | "fakturaNip" | "fakturaUlica" | "fakturaKod" | "fakturaMiasto" | "fakturaKraj" | "sellyStatusId" | "sellyPaymentId" | "sellyDeliveryId" | "sellyVatId"
+  "nazwa" | "stanMin" | "zaokraglanie" | "harmonogramMinuty" | "tolerancjaCenyProc" | "formatPliku" | "csvSeparator" | "kanalFtp" | "kanalEmail" | "emailSkrzynka" | "nazwaPliku" | "fakturaNazwa" | "fakturaNip" | "fakturaUlica" | "fakturaKod" | "fakturaMiasto" | "fakturaKraj" | "sellyStatusId" | "kontaktEmail" | "kontaktTelefon"
 >;
 export type UstawieniaKraju = Pick<KrajPartnera, "narzutProc" | "kursZrodlo" | "kursReczny" | "kosztyDodatkowe" | "przesylkaStalaEur" | "mytoEur" | "pakowanieEur"> & { paliwoProc?: number | null };
 export type MagazynKatalogu = { magazyn: string; liczbaPozycji: number };
