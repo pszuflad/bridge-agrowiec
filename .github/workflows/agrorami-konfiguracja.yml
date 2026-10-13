@@ -44,7 +44,7 @@ jobs:
           trap 'rm -f ~/.ssh/deploy_key' EXIT
           node -e 'process.stdout.write(JSON.stringify({
             email: "info@agroopony.eu",
-            password: process.env.AGRORAMI_PASSWORD
+            password: process.env.AGRORAMI_PASSWORD.replace(/[\r\n]+$/, "")
           }))' |
             ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes \
               -o StrictHostKeyChecking=yes \
