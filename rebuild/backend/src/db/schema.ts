@@ -672,6 +672,19 @@ export const partnerKraje = sqliteTable("partner_kraje", {
 	pakowanieEur: real("pakowanie_eur").default(0).notNull(),
 }, (table) => [unique().on(table.partnerId, table.kraj)]);
 
+// Ticket 247 (migracja 033) — reguły narzutów partnera (osobne od `markups` sklepu).
+export const partnerNarzuty = sqliteTable("partner_narzuty", {
+	id: integer().primaryKey({ autoIncrement: true }),
+	partnerId: integer("partner_id").notNull().references(() => partnerzy.id, { onDelete: "cascade" }),
+	kraj: text(),
+	nazwa: text().notNull(),
+	warunki: text().default("[]").notNull(),
+	wartosc: real().notNull(),
+	priorytet: integer().default(50).notNull(),
+	status: text().default("aktywny").notNull(),
+	zmieniono: text().notNull(),
+}, (table) => [index("idx_partner_narzuty_partner").on(table.partnerId)]);
+
 export const partnerPolaObliczeniowe = sqliteTable("partner_pola_obliczeniowe", {
 	id: integer().primaryKey({ autoIncrement: true }),
 	partnerId: integer("partner_id").notNull().references(() => partnerzy.id, { onDelete: "cascade" }),
