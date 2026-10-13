@@ -67,7 +67,13 @@ async function validateLogin(credentials, transport = fetch) {
   const rejected = messages.some(message =>
     /nieprawidłowe|nieprawidlowe|incorrect|invalid credentials|account.*disabled|konto.*wyłącz|konto.*wylacz/.test(message));
   const schemaError = messages.some(message => /cannot query field|unknown argument|syntax error|variable.*required/.test(message));
+  const captcha = messages.some(message => /captcha/.test(message));
+  const confirmation = messages.some(message => /confirm|potwierdz/.test(message));
+  const permission = messages.some(message => /unauthoriz|not authorized|permission|forbidden|uprawnie|autoryzac/.test(message));
   const reason = rejected ? 'odrzucone dane logowania lub konto czasowo wyłączone'
+    : captcha ? 'API wymaga weryfikacji CAPTCHA'
+    : confirmation ? 'API wymaga potwierdzenia konta'
+    : permission ? 'API odrzuciło uprawnienia'
     : schemaError ? 'niezgodność mutacji GraphQL' : 'odpowiedź GraphQL bez tokenu';
   throw new Error(`Agrorami: ${reason} (HTTP ${status}). Konfiguracji nie zmieniono.`);
 }

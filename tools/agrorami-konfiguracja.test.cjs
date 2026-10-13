@@ -90,6 +90,9 @@ test('diagnostyka rozróżnia odrzucone konto, HTTP, sieć i błędny JSON bez o
     [async () => ({ ok: false, status: 403, json: async () => ({}) }), /błąd HTTP 403/],
     [async () => { throw new Error(credentials.password); }, /błąd połączenia/],
     [async () => ({ ok: true, status: 200, json: async () => { throw new Error(credentials.password); } }), /niepoprawny JSON/],
+    [async () => ({ ok: true, status: 200, json: async () => ({ errors: [{ message: 'ReCaptcha validation failed.' }] }) }), /CAPTCHA/],
+    [async () => ({ ok: true, status: 200, json: async () => ({ errors: [{ message: "This account isn't confirmed." }] }) }), /potwierdzenia konta/],
+    [async () => ({ ok: true, status: 200, json: async () => ({ errors: [{ message: 'Not authorized.' }] }) }), /uprawnienia/],
   ];
   for (const [transport, expected] of scenarios) {
     await assert.rejects(validateLogin(credentials, transport), error =>
