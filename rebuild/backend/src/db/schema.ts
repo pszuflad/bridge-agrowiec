@@ -649,6 +649,9 @@ export const partnerzy = sqliteTable("partnerzy", {
 	sellyPaymentId: integer("selly_payment_id"),
 	sellyDeliveryId: integer("selly_delivery_id"),
 	sellyVatId: integer("selly_vat_id"),
+	// Ticket 253 (migracja 036): kontakt zamawiającego w zamówieniu Selly.
+	kontaktEmail: text("kontakt_email"),
+	kontaktTelefon: text("kontakt_telefon"),
 	utworzono: text().notNull(),
 	zmieniono: text().notNull(),
 });

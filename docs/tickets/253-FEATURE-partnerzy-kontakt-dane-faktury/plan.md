@@ -1,0 +1,9 @@
+# 253 — PARTNERZY: kontakt zamawiającego, dane do faktury (krok wdrożenia), uproszczone ustawienia Selly
+
+Zgłoszenie użytkowniczki 2026-10-13: „uzupełnij te dane" (zrzuty z kartoteki kontrahentów: TyreWorld = B. Fuhrmann Einzelhandel GmbH, Adtyres = AD Tyres International SLU z numerem VAT UE osobno dla każdego kraju) „i dane kontaktowe naszych partnerów”; oraz uproszczenie: w ustawieniach partnera wystarczy JEDNO pole Selly — status nowego zamówienia (statusy dalej zmieniają handlowcy w Selly).
+Zakres:
+1. Migracja 036: `partnerzy.kontakt_email`, `kontakt_telefon` (NULL); walidacja; pola w „Ustawieniach” partnera. Ciało zamówienia Selly: `email` = kontakt partnera (fallback: e-mail z pliku zamówienia; brak obu = blokada), `phone` = telefon partnera, a gdy brak — telefon odbiorcy z pliku.
+2. Ustawienia Selly: w panelu zostaje tylko „ID statusu nowego zamówienia”. Płatność i dostawa = stałe 10, VAT = 101 („0 % WDT”, potwierdzone) w `podglad-selly.ts`; kolumny `selly_payment_id/delivery_id/vat_id` (migracja 034) zostają jako niewidoczne nadpisania. Panel NIE wysyła już tych trzech pól (zapis ustawień nie kasuje nadpisań).
+3. Krok wdrożenia `2026-10-13-partnerzy-dane-faktury` (`partnerzy/dane-partnerow.ts`): uzupełnia TYLKO PUSTE pola — TyreWorld: dane do faktury, e-mail `buchhaltung@…`, VAT 101; Adtyres: siedziba (bez NIP-u domyślnego), e-mail `bill@…`, VAT 101 oraz dane do faktury wg kraju z numerem VAT UE dla krajów, które partner ma (AT BE CZ DE FR HU IT LU LV RO SK).
+Świadome pominięcia (do uzupełnienia w panelu przez użytkowniczkę): numery VAT obcięte na zrzucie (LT, NL, SE) lub z niepewnym znakiem (ES) — wpisanie błędnego numeru na fakturę byłoby gorsze niż blokada zamówienia; telefony (repozytorium publiczne). Dane to rejestrowe dane firm i ogólne skrzynki firmowe.
+Do sprawdzenia przy pierwszym zamówieniu: ID płatności/dostawy = 10 (założone ze słowników pokazanych wcześniej przez użytkowniczkę).

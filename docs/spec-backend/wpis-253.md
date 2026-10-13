@@ -1,0 +1,3 @@
+# Wpis 253 — kontakt zamawiającego i uproszczone ustawienia Selly
+
+`PUT /api/partnerzy/:id` przyjmuje `kontaktEmail` (poprawny adres lub null) i `kontaktTelefon` (≤ 40 znaków lub null); migracja 036. `podgladDlaSelly`: `email` zamówienia = `kontaktEmail` partnera, a bez niego e-mail z pliku zamówienia (brak obu = blokada „Brak adresu e-mail zamawiającego”); `phone` = `kontaktTelefon` albo telefon odbiorcy. Stałe: `SELLY_VAT_ID = 101`, `SELLY_PLATNOSC_ID = 10`, `SELLY_DOSTAWA_ID = 10` (nadpisywalne kolumnami `partnerzy.selly_*_id`); jedyne wymagane ustawienie Selly to `sellyStatusId`. Krok wdrożenia `2026-10-13-partnerzy-dane-faktury` uzupełnia puste pola danych do faktury, kontaktu i `selly_vat_id` (nie nadpisuje).

@@ -12,6 +12,15 @@ import { szczegolyZamowieniaDlaPartnera } from "../repos/partnerzy-zamowienia.js
 import { BladSelly, type KlientSelly } from "../selly/klient.js";
 import { znajdzPozycjeKatalogu } from "./walidacja-zamowienia.js";
 
+/**
+ * Stałe zamówień partnerów w Selly (decyzja użytkowniczki 2026-10-13): VAT „0 % WDT” = 101 (potwierdzone), forma płatności i dostawy „System zewnętrzny” = 10
+ * (ID ze słowników Selly pokazanych przez użytkowniczkę — do sprawdzenia przy pierwszym zamówieniu). Kolumny `partnerzy.selly_payment_id/delivery_id/vat_id`
+ * (migracja 034) zostają jako opcjonalne nadpisania; panel ich nie pokazuje — w ustawieniach partnera jest tylko status.
+ */
+export const SELLY_VAT_ID = 101;
+export const SELLY_PLATNOSC_ID = 10;
+export const SELLY_DOSTAWA_ID = 10;
+
 export const STATUS_WYSYLANIE = "wysylanie";
 export const STATUS_WYSLANE = "wyslane";
 
@@ -114,10 +123,8 @@ export function podgladDlaSelly(db: Baza, partnerId: number, zamowienieId: numbe
   const ostrzezenia: string[] = [];
   const brak = BRAKUJE.filter(([k]) => !zamawiajacy[k]?.trim()).map(([, e]) => e);
   if (brak.length) blokady.push(`Brak danych do faktury ${zKraju ? `kraju ${krajDostawy}` : "partnera"}: ${brak.join(", ")} (uzupełnij w ustawieniach ${zKraju ? "kraju" : "partnera"}).`);
-  const brakIdSelly = (
-    [["sellyStatusId", "status"], ["sellyPaymentId", "płatność"], ["sellyDeliveryId", "dostawa"], ["sellyVatId", "stawka VAT 0 %"]] as const
-  ).filter(([k]) => p?.[k] === null || p?.[k] === undefined).map(([, e]) => e);
-  if (brakIdSelly.length) blokady.push(`Brak identyfikatorów Selly w ustawieniach partnera: ${brakIdSelly.join(", ")}.`);
+  // Jedyne ustawienie Selly partnera to status nowego zamówienia (decyzja 2026-10-13: dalsze statusy zmieniają handlowcy w Selly).
+  if (p?.sellyStatusId === null || p?.sellyStatusId === undefined) blokady.push("Brak identyfikatora statusu nowego zamówienia Selly w ustawieniach partnera.");
   const nieznane = pozycje.filter((x) => !x.dopasowanie).length;
   if (nieznane) blokady.push(`Pozycje bez dopasowania w katalogu: ${nieznane} — do ręcznej weryfikacji.`);
   const bezSelly = pozycje.filter((x) => x.dopasowanie && x.dopasowanie.sellyVariantId === null).length;
@@ -136,7 +143,10 @@ export function podgladDlaSelly(db: Baza, partnerId: number, zamowienieId: numbe
 
   if (kursWpis && Date.now() - Date.parse(kursWpis.data) > 5 * 86_400_000) ostrzezenia.push(`Kurs EUR w ciele zamówienia pochodzi z tabeli NBP z ${kursWpis.data} (starszy niż 5 dni).`);
   const adres = adresDostawy(z.dostawa);
-  if (adres.email === "") ostrzezenia.push("Zamówienie nie zawiera adresu e-mail klienta.");
+  // Zamawiającym jest partner (ticket 253): e-mail z jego kontaktu (fallback: e-mail z pliku zamówienia), telefon partnera, a gdy brak — telefon odbiorcy z pliku.
+  const emailZamawiajacego = p?.kontaktEmail?.trim() || adres.email;
+  const telefon = p?.kontaktTelefon?.trim() || adres.telefon;
+  if (emailZamawiajacego === "") blokady.push("Brak adresu e-mail zamawiającego (uzupełnij „Kontakt: e-mail” w ustawieniach partnera).");
   if (!/^[A-Za-z]{2}$/.test(adres.kraj)) blokady.push(`Zamówienie nie ma dwuliterowego kodu kraju dostawy (jest: „${adres.kraj || "brak"}”).`);
   const bezAdresu = (["ulica", "kod", "miasto"] as const).filter((k) => adres[k] === "");
   if (bezAdresu.length) ostrzezenia.push(`Zamówienie nie zawiera pełnego adresu dostawy (brak: ${bezAdresu.map((k) => ({ ulica: "ulica", kod: "kod pocztowy", miasto: "miasto" })[k]).join(", ")}) — uzupełnij w Selly.`);
@@ -145,13 +155,13 @@ export function podgladDlaSelly(db: Baza, partnerId: number, zamowienieId: numbe
   if (blokady.length === 0 && p && kurs !== null) {
     zadanie = {
       status_id: p.sellyStatusId,
-      payment_id: p.sellyPaymentId,
-      delivery_id: p.sellyDeliveryId,
+      payment_id: p.sellyPaymentId ?? SELLY_PLATNOSC_ID,
+      delivery_id: p.sellyDeliveryId ?? SELLY_DOSTAWA_ID,
       currency: waluta,
       exchange_rate: kurs,
       delivery_price: z.kosztDostawy ?? 0,
-      email: adres.email,
-      phone: adres.telefon,
+      email: emailZamawiajacego,
+      phone: telefon,
       ship_company: adres.odbiorca,
       ship_first_name: "-",
       ship_last_name: "-",
@@ -174,7 +184,7 @@ export function podgladDlaSelly(db: Baza, partnerId: number, zamowienieId: numbe
         variant_id: x.dopasowanie!.sellyVariantId,
         quantity: x.ilosc,
         price_with_tax: x.cena,
-        vat_rate_id: p.sellyVatId,
+        vat_rate_id: p.sellyVatId ?? SELLY_VAT_ID,
       })),
     };
   }
