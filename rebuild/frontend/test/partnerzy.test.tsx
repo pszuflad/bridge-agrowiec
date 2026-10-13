@@ -75,6 +75,22 @@ describe("lista partnerów", () => {
     expect(await screen.findByTestId("text-partnerzy-pusto")).toHaveTextContent("Nie ma jeszcze żadnego partnera");
   });
 
+  it("licznik zamówień: kolumna z podziałem na błędy/zablokowane/do Selly i podsumowanie nad tabelą; partner bez zamówień ma „brak”", async () => {
+    partnerzy = [
+      partner({ zamowienia: { lacznie: 7, nowe: 1, doSelly: 2, bledy: 3, wBlokadzie: 1, wyslane: 0 } }),
+      partner({ id: 2, nazwa: "Adtyres", zamowienia: { lacznie: 0, nowe: 0, doSelly: 0, bledy: 0, wBlokadzie: 0, wyslane: 0 } }),
+    ];
+    zamockujApi();
+    await otworz();
+    const komorka = await screen.findByTestId("zamowienia-licznik-1");
+    expect(komorka).toHaveTextContent("7 łącznie");
+    expect(screen.getByTestId("zamowienia-bledy-1")).toHaveTextContent("3 z błędem");
+    expect(screen.getByTestId("zamowienia-blokada-1")).toHaveTextContent("1 zablokowane");
+    expect(screen.getByTestId("zamowienia-do-selly-1")).toHaveTextContent("2 do Selly");
+    expect(screen.getByTestId("zamowienia-licznik-2")).toHaveTextContent("brak");
+    expect(screen.getByTestId("zamowienia-podsumowanie")).toHaveTextContent("7 łącznie · 4 wymaga uwagi · 2 do utworzenia w Selly");
+  });
+
   it("pokazuje partnerów ze statusem, harmonogramem, liczbami i ostatnim generowaniem", async () => {
     partnerzy = [partner(), partner({ id: 2, nazwa: "Adtyres", aktywny: true, harmonogramMinuty: null, liczbaMagazynow: 1, liczbaKrajow: 1, liczbaWykluczen: 3 })];
     logi = { 1: [wpisLogu()] };

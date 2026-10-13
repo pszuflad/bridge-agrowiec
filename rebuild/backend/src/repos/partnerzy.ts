@@ -9,6 +9,7 @@ import {
   partnerKolumny,
   partnerKraje,
   partnerMagazyny,
+  partnerZamowienia,
   partnerPolaObliczeniowe,
   partnerWykluczenia,
   partnerzy,
@@ -217,6 +218,9 @@ export function dostepneMagazyny(db: Baza): { magazyn: string; liczbaPozycji: nu
     .map((w) => ({ magazyn: w.magazyn, liczbaPozycji: Number(w.liczbaPozycji) }));
 }
 
+/** Zamówienia partnera wg statusu: `doSelly` = przyjęte (czekają na utworzenie w Selly), `wBlokadzie` = „wysylanie” (sprawdź w Selly), `bledy` = błąd importu. */
+export type LicznikZamowien = { lacznie: number; nowe: number; doSelly: number; bledy: number; wBlokadzie: number; wyslane: number };
+
 export function listaPartnerow(db: Baza) {
   const wiersze = db.select().from(partnerzy).orderBy(asc(partnerzy.nazwa)).all();
   const policz = (tabela: typeof partnerMagazyny | typeof partnerWykluczenia | typeof partnerKraje, id: number): number =>
@@ -227,8 +231,29 @@ export function listaPartnerow(db: Baza) {
         .where(eq(tabela.partnerId, id))
         .get()?.n ?? 0,
     );
+  // Licznik zamówień (ticket 251): jedno zapytanie grupujące po partnerze i statusie, nie N zapytań.
+  const wgStatusu = db
+    .select({ partnerId: partnerZamowienia.partnerId, status: partnerZamowienia.status, n: sql<number>`count(*)` })
+    .from(partnerZamowienia)
+    .groupBy(partnerZamowienia.partnerId, partnerZamowienia.status)
+    .all();
+  const zamowienia = (id: number): LicznikZamowien => {
+    const l: LicznikZamowien = { lacznie: 0, nowe: 0, doSelly: 0, bledy: 0, wBlokadzie: 0, wyslane: 0 };
+    for (const w of wgStatusu) {
+      if (w.partnerId !== id) continue;
+      const n = Number(w.n);
+      l.lacznie += n;
+      if (w.status === "nowe") l.nowe += n;
+      else if (w.status === "przyjete") l.doSelly += n;
+      else if (w.status === "blad_importu") l.bledy += n;
+      else if (w.status === "wysylanie") l.wBlokadzie += n;
+      else if (w.status === "wyslane") l.wyslane += n;
+    }
+    return l;
+  };
   return wiersze.map((p) => ({
     ...p,
+    zamowienia: zamowienia(p.id),
     liczbaMagazynow: policz(partnerMagazyny, p.id),
     liczbaWykluczen: policz(partnerWykluczenia, p.id),
     liczbaKrajow: policz(partnerKraje, p.id),
