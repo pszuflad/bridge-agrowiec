@@ -6,7 +6,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const vm = require('node:vm');
-const { parseCredentials, replaceEnv, validateLogin, main } = require('./agrorami-konfiguracja.cjs');
+const { parseCredentials, replaceEnv, validateLogin, safeApiMessage, main } = require('./agrorami-konfiguracja.cjs');
 
 const credentials = { email: 'info@agroopony.eu', password: 'test-only-placeholder' };
 function workflowPayload(password) {
@@ -98,6 +98,16 @@ test('diagnostyka rozróżnia odrzucone konto, HTTP, sieć i błędny JSON bez o
     await assert.rejects(validateLogin(credentials, transport), error =>
       expected.test(error.message) && !error.message.includes(credentials.password));
   }
+});
+test('redakcja komunikatu API ukrywa sekret, kodowanie JSON/URL/base64, e-maile i długie identyfikatory', () => {
+  const c = { email: 'info@agroopony.eu', password: 'test-only"placeholder@' };
+  const variants = [c.email, c.password, JSON.stringify(c.password).slice(1, -1),
+    encodeURIComponent(c.password), Buffer.from(c.password).toString('base64')];
+  const safe = safeApiMessage(variants.join(' | ') + ' other@example.org abcdefghijklmnopqrstuvwxyz12345\n', c);
+  for (const value of variants) assert.ok(!safe.includes(value));
+  assert.ok(!safe.includes('other@example.org'));
+  assert.ok(!safe.includes('abcdefghijklmnopqrstuvwxyz12345'));
+  assert.ok(!safe.includes('\n'));
 });
 async function sandbox(callback) {
   const home = fs.mkdtempSync(path.join(os.tmpdir(), 'agrorami-test-'));

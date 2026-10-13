@@ -39,6 +39,20 @@ function replaceEnv(original, credentials) {
     `AGRORAMI_PASSWORD=${shellQuote(credentials.password)}\n`;
 }
 
+function safeApiMessage(message, credentials) {
+  let safe = message;
+  for (const value of [credentials.email, credentials.password]) {
+    for (const variant of [value, value.toLowerCase(), value.toUpperCase(),
+      JSON.stringify(value).slice(1, -1), encodeURIComponent(value),
+      Buffer.from(value).toString('base64')]) {
+      if (variant) safe = safe.replaceAll(variant, '[ukryte]');
+    }
+  }
+  return safe.replace(/[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}/g, '[email ukryty]')
+    .replace(/[A-Za-z0-9_-]{24,}(?:\.[A-Za-z0-9_-]+)*/g, '[identyfikator ukryty]')
+    .replace(/[\r\n]/g, ' ').slice(0, 300);
+}
+
 async function validateLogin(credentials, transport = fetch) {
   let response;
   let result;
@@ -62,8 +76,11 @@ async function validateLogin(credentials, transport = fetch) {
   if (!response.ok) throw new Error(`Agrorami: błąd HTTP ${status}. Konfiguracji nie zmieniono.`);
   if (result.data?.generateCustomerToken?.token) return;
   // Klasyfikujemy treść odpowiedzi, ale nigdy jej nie wypisujemy: może odbijać sekret.
-  const messages = (Array.isArray(result.errors) ? result.errors : [])
-    .map(error => typeof error.message === 'string' ? error.message.toLowerCase() : '');
+  const rawMessages = (Array.isArray(result.errors) ? result.errors : [])
+    .map(error => typeof error.message === 'string' ? error.message : '')
+    .filter(Boolean);
+  if (typeof result.message === 'string') rawMessages.push(result.message);
+  const messages = rawMessages.map(message => message.toLowerCase());
   const rejected = messages.some(message =>
     /nieprawidłowe|nieprawidlowe|incorrect|invalid credentials|account.*disabled|konto.*wyłącz|konto.*wylacz/.test(message));
   const schemaError = messages.some(message => /cannot query field|unknown argument|syntax error|variable.*required/.test(message));
@@ -75,7 +92,8 @@ async function validateLogin(credentials, transport = fetch) {
     : confirmation ? 'API wymaga potwierdzenia konta'
     : permission ? 'API odrzuciło uprawnienia'
     : schemaError ? 'niezgodność mutacji GraphQL' : 'odpowiedź GraphQL bez tokenu';
-  throw new Error(`Agrorami: ${reason} (HTTP ${status}). Konfiguracji nie zmieniono.`);
+  const detail = rawMessages.slice(0, 2).map(message => safeApiMessage(message, credentials)).join(' | ');
+  throw new Error(`Agrorami: ${reason} (HTTP ${status}). Konfiguracji nie zmieniono.${detail ? ` Komunikat API po redakcji: ${detail}` : ''}`);
 }
 
 function runWithEnv(root, command, args) {
@@ -195,7 +213,7 @@ async function main(root, services = {}) {
   console.log(stdout.trim());
 }
 
-module.exports = { parseCredentials, shellQuote, replaceEnv, validateLogin, main };
+module.exports = { parseCredentials, shellQuote, replaceEnv, validateLogin, safeApiMessage, main };
 if (require.main === module) {
   main(process.argv[2]).catch(error => {
     // Nieoczekiwane błędy systemowe również bez treści mogącej zawierać sekret.
