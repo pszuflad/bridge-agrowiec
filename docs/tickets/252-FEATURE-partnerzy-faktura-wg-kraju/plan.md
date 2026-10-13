@@ -1,0 +1,6 @@
+# 252 — PARTNERZY: dane do faktury wg kraju dostawy
+
+Zgłoszenie użytkowniczki 2026-10-13: VAT wszędzie „0 % WDT” (ID 101 — wpisuje się w ustawieniach partnera, bez zmian w kodzie), ale Adtyres ma różne dane (zamawiający/faktura) zależnie od kraju — trzeba móc wpisać je osobno.
+Interpretacja (przyjęta, bo kraje partnera już mają własne ustawienia): klucz = KRAJ DOSTAWY z zamówienia (`DELIVERY/COUNTRY`, TyreWorld `lkz`), czyli ten sam kod co w tabeli „Kraje, narzuty i kursy”.
+Zakres: migracja 035 (`partner_kraje.faktura_nazwa/nip/ulica/kod/miasto/kraj`, NULL), `PUT /api/partnerzy/:id/kraje/:kraj/faktura` (walidacja jak ustawienia faktury partnera; nazwa firmy wymagana, gdy podano jakiekolwiek pole; puste wszystko = dane domyślne partnera), podgląd/ciało zamówienia Selly bierze komplet z kraju dostawy, a gdy kraj nie ma nazwy firmy — domyślne partnera. Bez mieszania pól między źródłami. Podgląd pokazuje, skąd pochodzą dane („kraj XX” / „domyślne partnera”); blokada „brak danych do faktury kraju XX: …” przy niepełnych danych kraju. Panel: karta „Dane do faktury wg kraju dostawy” pod tabelą krajów.
+Do potwierdzenia przez użytkowniczkę: czy klucz „kraj dostawy” jest właściwy (alternatywa: `INVOICE/COUNTRY` z pliku Adtyres = kraj spółki wystawiającej). Zapis ustawień kraju (narzut itd.) nie kasuje danych do faktury (osobna ścieżka, test).

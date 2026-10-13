@@ -35,6 +35,7 @@ danych dla odbudowy backendu.
 | `032_partner_kraje_myto_pakowanie.sql` | **Ticket 243**: `partner_kraje.myto_eur` i `partner_kraje.pakowanie_eur` (domyślnie 0) — składniki kosztu przesyłki edytowane w panelu, przez `@dodaj-kolumne-jesli-brak`. ⚠ **NOWE kolumny, nie odtworzenie produkcji**. |
 | `033_partner_narzuty.sql` | **Ticket 247**: tabela `partner_narzuty` (reguły narzutów partnera: kraj lub wszystkie, warunki JSON, wartość %, priorytet, status) + indeks `idx_partner_narzuty_partner`. ⚠ **NOWA tabela, nie odtworzenie produkcji**; powstaje pusta. |
 | `034_partner_selly_zamowienia.sql` | **Ticket 249**: `partnerzy.selly_status_id/selly_payment_id/selly_delivery_id/selly_vat_id` (identyfikatory Selly do tworzenia zamówień partnera). ⚠ **NOWE kolumny, nie odtworzenie produkcji**; domyślnie NULL. |
+| `035_partner_kraje_faktura.sql` | **Ticket 252**: `partner_kraje.faktura_nazwa/nip/ulica/kod/miasto/kraj` (dane do faktury per kraj dostawy; NULL = dane domyślne partnera). ⚠ **NOWE kolumny, nie odtworzenie produkcji**. |
 
 ### Dyrektywy runnera (od ticketu 107)
 

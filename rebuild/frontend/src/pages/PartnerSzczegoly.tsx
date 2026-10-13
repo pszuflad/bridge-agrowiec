@@ -9,6 +9,7 @@ import { Link, useParams } from "wouter";
 import { PageHeader } from "@/components/PageHeader";
 import { KLUCZ_PARTNERZY, komunikatBledu, type SzczegolyPartnera } from "./partnerzy/api";
 import { AkcjePartnera, LogiPartnera } from "./partnerzy/GenerowanieILogi";
+import { FakturyKrajow } from "./partnerzy/FakturyKrajow";
 import { KrajePartnera } from "./partnerzy/KrajePartnera";
 import { NarzutyPartnera } from "./partnerzy/NarzutyPartnera";
 import { MagazynyPartnera, WykluczeniaPartnera } from "./partnerzy/MagazynyIWykluczenia";
@@ -45,6 +46,7 @@ export function PartnerSzczegoly() {
           <MagazynyPartnera key={`m-${data.magazyny.join(",")}`} partner={data} />
           <WykluczeniaPartnera key={`w-${data.wykluczenia.join(",")}`} partner={data} />
           <KrajePartnera partner={data} />
+          <FakturyKrajow partner={data} />
           <NarzutyPartnera key={`n-${data.kraje.map((k) => k.kraj).join(",")}`} partner={data} />
           {/* `key` z zapisanych danych — po zapisie formularz startuje od wartości z serwera */}
           <PolaObliczeniowe key={`p-${JSON.stringify(data.polaObliczeniowe)}-${data.kraje.length}`} partner={data} />

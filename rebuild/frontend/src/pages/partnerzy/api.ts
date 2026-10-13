@@ -75,6 +75,13 @@ export type KrajPartnera = {
   mytoEur?: number;
   pakowanieEur?: number;
   paliwoProc?: number;
+  /** Dane do faktury dla zamówień z tym krajem dostawy (ticket 252); null w `fakturaNazwa` = dane domyślne partnera. */
+  fakturaNazwa?: string | null;
+  fakturaNip?: string | null;
+  fakturaUlica?: string | null;
+  fakturaKod?: string | null;
+  fakturaMiasto?: string | null;
+  fakturaKraj?: string | null;
   /** Kurs użyty w ostatnio wygenerowanym pliku; null = jeszcze nie generowano. */
   ostatniKurs: { kurs: number; zrodlo: string; zapisano: string } | null;
 };
@@ -256,6 +263,12 @@ export async function zwalidujZamowienie(partnerId: number, zamowienieId: number
   return (await (await zadanie("POST", `${KLUCZ_PARTNERZY}/${partnerId}/zamowienia/${zamowienieId}/waliduj`, {})).json()) as SzczegolyZamowienia;
 }
 
+/** Dane do faktury kraju partnera (ticket 252) — pełny komplet; puste pola = null (dane domyślne partnera). */
+export type FakturaKraju = { fakturaNazwa: string | null; fakturaNip: string | null; fakturaUlica: string | null; fakturaKod: string | null; fakturaMiasto: string | null; fakturaKraj: string | null };
+export async function zapiszFakturaKraju(partnerId: number, kraj: string, dane: FakturaKraju): Promise<void> {
+  await zadanie("PUT", `${KLUCZ_PARTNERZY}/${partnerId}/kraje/${kraj}/faktura`, dane);
+}
+
 /** Podgląd zamówienia przed utworzeniem w Selly (ticket 248) — tylko odczyt; `blokady` niepuste = zamówienia nie wolno jeszcze tworzyć w sklepie. */
 export type PodgladSelly = {
   zamawiajacy: { nazwa: string | null; nip: string | null; ulica: string | null; kod: string | null; miasto: string | null; kraj: string | null };
@@ -266,6 +279,9 @@ export type PodgladSelly = {
     lp: number; kodPartnera: string; nazwaPartnera: string | null; ilosc: number; cena: number | null;
     dopasowanie: { kod: string; nazwa: string; ean: string | null; dostawca: string | null; stan: number; status: string; sellyProductId: number | null; sellyVariantId: number | null } | null;
   }>;
+  /** Skąd dane do faktury w podglądzie: `kraj` (ustawione dla kraju dostawy) albo `partner` (domyślne). */
+  zrodloFaktury?: "kraj" | "partner";
+  krajFaktury?: string | null;
   blokady: string[];
   ostrzezenia: string[];
   /** Ciało `POST /api/orders` dokładnie w postaci, w jakiej pójdzie do Selly; null przy blokadach. */

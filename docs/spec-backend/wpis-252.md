@@ -1,0 +1,3 @@
+# Wpis 252 — dane do faktury wg kraju dostawy
+
+`PUT /api/partnerzy/:id/kraje/:kraj/faktura` (requireAuth; ciało `{fakturaNazwa, fakturaNip, fakturaUlica, fakturaKod, fakturaMiasto, fakturaKraj}`, brakujące = null; 400 przy polach bez nazwy firmy lub kraju niedwuliterowym; 404, gdy partner nie ma kraju) → szczegóły partnera. Kolumny `partner_kraje.faktura_*` (migracja 035). `podgladDlaSelly`: kraj dostawy z zamówienia → wiersz `partner_kraje`; niepusta `faktura_nazwa` = cały komplet z kraju, inaczej komplet z `partnerzy.faktura_*`. Odpowiedź podglądu ma `zrodloFaktury` (`kraj`|`partner`) i `krajFaktury`. `PUT …/kraje/:kraj` (ustawienia kraju) nie zmienia tych kolumn.

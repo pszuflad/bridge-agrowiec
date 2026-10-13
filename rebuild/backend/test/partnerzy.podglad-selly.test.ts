@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import request from "supertest";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { kursyNbp, partnerZamowienia, partnerzy, products, sellyProducts } from "../src/db/schema.js";
+import { kursyNbp, partnerKraje, partnerZamowienia, partnerzy, products, sellyProducts } from "../src/db/schema.js";
 import { podgladDlaSelly } from "../src/partnerzy/podglad-selly.js";
 import { zapiszZamowienie } from "../src/repos/partnerzy-zamowienia.js";
 import { BladSelly, type KlientSelly } from "../src/selly/klient.js";
@@ -103,6 +103,52 @@ describe("zamówienie partnera → Selly", () => {
       const p = podgladDlaSelly(s.db, partnerId, przyjete(partnerId))!;
       expect(p.kurs).toEqual({ kurs: 4.5, data: "2020-01-02" });
       expect(p.ostrzezenia.join(" ")).toMatch(/starszy niż 5 dni/);
+    });
+
+    it("dane do faktury wg kraju dostawy (ticket 252): kraj z własnymi danymi je wygrywa, inny kraj dostaje domyślne partnera, bez mieszania pól", () => {
+      const partnerId = dodajPartnera();
+      katalogZSelly();
+      kursEur();
+      // XML_PRZYKLAD dostarcza do AT. Dla AT: własne dane (bez NIP-u celowo — nie wolno dociągnąć NIP-u partnera).
+      s.db.insert(partnerKraje).values({ partnerId, kraj: "AT", fakturaNazwa: "Adtyres Austria GmbH", fakturaUlica: "Ring 1", fakturaKod: "1010", fakturaMiasto: "Wien", fakturaKraj: "AT" }).run();
+      const id = przyjete(partnerId);
+      const at = podgladDlaSelly(s.db, partnerId, id)!;
+      expect(at.zrodloFaktury).toBe("kraj");
+      expect(at.krajFaktury).toBe("AT");
+      expect(at.zamawiajacy).toMatchObject({ nazwa: "Adtyres Austria GmbH", nip: null, miasto: "Wien" });
+      expect(at.blokady.join(" ")).toMatch(/Brak danych do faktury kraju AT: NIP/);
+      // Kraj dostawy bez własnych danych → domyślne partnera.
+      s.db.update(partnerKraje).set({ fakturaNazwa: null }).where(eq(partnerKraje.partnerId, partnerId)).run();
+      const domyslne = podgladDlaSelly(s.db, partnerId, id)!;
+      expect(domyslne.zrodloFaktury).toBe("partner");
+      expect(domyslne.zamawiajacy).toMatchObject({ nazwa: "Adtyres SL", nip: "ATU1" });
+      expect(domyslne.blokady).toEqual([]);
+    });
+
+    it("trasa PUT …/kraje/:kraj/faktura: zapis, wymóg nazwy, 404 dla nieistniejącego kraju, czyszczenie, 401", async () => {
+      const partnerId = dodajPartnera();
+      s.db.insert(partnerKraje).values({ partnerId, kraj: "DE" }).run();
+      const url = `/api/partnerzy/${partnerId}/kraje/DE/faktura`;
+      const auth = await zaloguj();
+      expect((await request(s.app).put(url).send({})).status).toBe(401);
+      expect((await request(s.app).put(`/api/partnerzy/${partnerId}/kraje/FR/faktura`).set(auth).send({ fakturaNazwa: "X" })).status).toBe(404);
+      expect((await request(s.app).put(url).set(auth).send({ fakturaNip: "DE1" })).status).toBe(400); // pola bez nazwy firmy
+      expect((await request(s.app).put(url).set(auth).send({ fakturaNazwa: "X", fakturaKraj: "GER" })).status).toBe(400);
+      const ok = await request(s.app).put(url).set(auth).send({ fakturaNazwa: " Adtyres DE ", fakturaNip: "DE123", fakturaKraj: "de" });
+      expect(ok.status).toBe(200);
+      expect(ok.body.kraje.find((k: { kraj: string }) => k.kraj === "DE")).toMatchObject({ fakturaNazwa: "Adtyres DE", fakturaNip: "DE123", fakturaKraj: "DE", fakturaUlica: null });
+      const czysc = await request(s.app).put(url).set(auth).send({});
+      expect(czysc.status).toBe(200);
+      expect(czysc.body.kraje.find((k: { kraj: string }) => k.kraj === "DE").fakturaNazwa).toBeNull();
+    });
+
+    it("zapis ustawień kraju (narzut itd.) NIE kasuje jego danych do faktury", async () => {
+      const partnerId = dodajPartnera();
+      const auth = await zaloguj();
+      await request(s.app).put(`/api/partnerzy/${partnerId}/kraje/DE`).set(auth).send({ narzutProc: 5 });
+      await request(s.app).put(`/api/partnerzy/${partnerId}/kraje/DE/faktura`).set(auth).send({ fakturaNazwa: "Adtyres DE" });
+      const po = await request(s.app).put(`/api/partnerzy/${partnerId}/kraje/DE`).set(auth).send({ narzutProc: 7 });
+      expect(po.body.kraje[0]).toMatchObject({ narzutProc: 7, fakturaNazwa: "Adtyres DE" });
     });
 
     it("brak danych do faktury partnera blokuje i wymienia brakujące pola", () => {
