@@ -17,7 +17,12 @@ export type PartnerNaLiscie = {
   liczbaMagazynow: number;
   liczbaWykluczen: number;
   liczbaKrajow: number;
+  /** Licznik zamówień wg statusu (ticket 251). */
+  zamowienia?: LicznikZamowien;
 };
+
+/** `doSelly` = przyjęte (czekają na utworzenie w Selly), `wBlokadzie` = „wysylanie” (sprawdź w Selly), `bledy` = błąd importu. */
+export type LicznikZamowien = { lacznie: number; nowe: number; doSelly: number; bledy: number; wBlokadzie: number; wyslane: number };
 
 export type ListaPartnerow = { partnerzy: PartnerNaLiscie[] };
 export type WpisLogu = { id: number; partnerId: number; kiedy: string; operacja: string; opis: string; liczbaPozycji: number | null };
