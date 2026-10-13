@@ -82,6 +82,20 @@ test('odrzucenie loginu, błąd HTTP i błąd sieci nie ujawniają danych', asyn
       !error.message.includes(credentials.password) && error.message.includes('Konfiguracji nie zmieniono'));
   }
 });
+test('diagnostyka rozróżnia odrzucone konto, HTTP, sieć i błędny JSON bez odpowiedzi API', async () => {
+  const scenarios = [
+    [async () => ({ ok: true, status: 200, json: async () => ({
+      errors: [{ message: 'Podane dane są nieprawidłowe lub Twoje konto zostało tymczasowo wyłączone. ' + credentials.password }],
+    }) }), /odrzucone dane logowania.*HTTP 200/],
+    [async () => ({ ok: false, status: 403, json: async () => ({}) }), /błąd HTTP 403/],
+    [async () => { throw new Error(credentials.password); }, /błąd połączenia/],
+    [async () => ({ ok: true, status: 200, json: async () => { throw new Error(credentials.password); } }), /niepoprawny JSON/],
+  ];
+  for (const [transport, expected] of scenarios) {
+    await assert.rejects(validateLogin(credentials, transport), error =>
+      expected.test(error.message) && !error.message.includes(credentials.password));
+  }
+});
 async function sandbox(callback) {
   const home = fs.mkdtempSync(path.join(os.tmpdir(), 'agrorami-test-'));
   const oldHome = process.env.HOME;

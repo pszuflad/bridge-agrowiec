@@ -23,6 +23,9 @@ Helper `tools/agrorami-konfiguracja.cjs` wykonuje jeden test `generateCustomerTo
 pod `https://hurtownia.agrorami.pl/graphql` z nagłówkiem `Store: pl`.
 Odrzucenie logowania lub błąd sieci kończy operację przed zmianą plików i restartem.
 Nie drukuje odpowiedzi API, tokenów ani środowiska PM2.
+Diagnostyka rozróżnia błąd sieci, HTTP, niepoprawny JSON, odrzucone logowanie
+lub czasowo wyłączone konto oraz brak tokenu GraphQL. Pokazuje tylko stałe
+etykiety i kod HTTP, nigdy pełną odpowiedź API.
 
 Po poprawnym logowaniu:
 

@@ -41,6 +41,7 @@ function replaceEnv(original, credentials) {
 
 async function validateLogin(credentials, transport = fetch) {
   let response;
+  let result;
   try {
     response = await transport(GRAPHQL, {
       method: 'POST',
@@ -51,14 +52,24 @@ async function validateLogin(credentials, transport = fetch) {
       }),
       signal: AbortSignal.timeout(120000),
     });
-    const result = await response.json();
-    if (!response.ok || !result.data?.generateCustomerToken?.token) {
-      throw new Error('rejected');
-    }
   } catch {
-    // Odpowiedź API może zawierać dane wejścia; nie drukujemy jej.
-    throw new Error('Agrorami odrzuciło logowanie lub API jest niedostępne. Konfiguracji nie zmieniono.');
+    throw new Error('Agrorami: błąd połączenia z API. Konfiguracji nie zmieniono.');
   }
+  const status = Number.isInteger(response.status) && response.status >= 100 && response.status <= 599
+    ? response.status : 0;
+  try { result = await response.json(); }
+  catch { throw new Error(`Agrorami: API zwróciło niepoprawny JSON (HTTP ${status}). Konfiguracji nie zmieniono.`); }
+  if (!response.ok) throw new Error(`Agrorami: błąd HTTP ${status}. Konfiguracji nie zmieniono.`);
+  if (result.data?.generateCustomerToken?.token) return;
+  // Klasyfikujemy treść odpowiedzi, ale nigdy jej nie wypisujemy: może odbijać sekret.
+  const messages = (Array.isArray(result.errors) ? result.errors : [])
+    .map(error => typeof error.message === 'string' ? error.message.toLowerCase() : '');
+  const rejected = messages.some(message =>
+    /nieprawidłowe|nieprawidlowe|incorrect|invalid credentials|account.*disabled|konto.*wyłącz|konto.*wylacz/.test(message));
+  const schemaError = messages.some(message => /cannot query field|unknown argument|syntax error|variable.*required/.test(message));
+  const reason = rejected ? 'odrzucone dane logowania lub konto czasowo wyłączone'
+    : schemaError ? 'niezgodność mutacji GraphQL' : 'odpowiedź GraphQL bez tokenu';
+  throw new Error(`Agrorami: ${reason} (HTTP ${status}). Konfiguracji nie zmieniono.`);
 }
 
 function runWithEnv(root, command, args) {
