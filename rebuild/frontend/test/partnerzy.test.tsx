@@ -120,7 +120,7 @@ describe("dodawanie partnera", () => {
     await uzytkownik.click(przycisk);
 
     await waitFor(() => expect(zadania).toEqual([{ metoda: "POST", sciezka: "/api/partnerzy", cialo: { nazwa: "Nowy Partner" } }]));
-    expect(await screen.findByText("Nowy Partner")).toBeInTheDocument();
+    expect(await screen.findByTestId("row-partner-10")).toHaveTextContent("Nowy Partner");
     expect(screen.getByTestId("input-partner-nazwa")).toHaveValue("");
     expect(await screen.findByText(/Dodano partnera/)).toBeInTheDocument();
   });
@@ -232,5 +232,35 @@ describe("tabele GEIS", () => {
     zamockujApi();
     await otworz();
     expect(await screen.findByTestId("text-geis-pusto")).toBeInTheDocument();
+  });
+
+  it("podgląd kosztu przesyłki: wybór partnera i kraju, wysyłka paczki, rozbicie kosztu; błąd z backendu pokazany", async () => {
+    partnerzy = [partner()];
+    const ciala: Record<string, unknown>[] = [];
+    zamockujApi();
+    server.use(
+      http.get("*/api/partnerzy/1", () => HttpResponse.json({ ...partner(), kraje: [{ id: 1, partnerId: 1, kraj: "FR" }, { id: 2, partnerId: 1, kraj: "DE" }] })),
+      http.post("*/api/partnerzy/geis/podglad-kosztu", async ({ request }) => {
+        const c = (await request.json()) as Record<string, unknown>;
+        ciala.push(c);
+        if (c.kraj === "DE") return HttpResponse.json({ error: "Brak tabeli transportowej GEIS dla kraju DE." }, { status: 400 });
+        return HttpResponse.json({ zrodlo: "geis", wagaRozliczeniowa: 100, wagaRzeczywista: 60, wagaGabarytowa: 100, progKg: 100, baza: 150, paliwoProc: 44, paliwoEur: 66, pakowanieGeisEur: 0, mytoEur: 9.92, pakowanieKrajuEur: 15, razemEur: 240.92 });
+      }),
+    );
+    await otworz();
+    const u = userEvent.setup();
+    await u.selectOptions(await screen.findByTestId("select-przesylka-partner"), "1");
+    await waitFor(() => expect(screen.getByTestId("select-przesylka-kraj")).not.toBeDisabled());
+    await u.selectOptions(await screen.findByRole("option", { name: "FR" }).then(() => screen.getByTestId("select-przesylka-kraj")), "FR");
+    await u.type(screen.getByTestId("input-przesylka-waga"), "60");
+    await u.type(screen.getByTestId("input-przesylka-dlugosc"), "80");
+    await u.click(screen.getByTestId("button-przesylka-policz"));
+    expect(await screen.findByTestId("text-przesylka-razem")).toHaveTextContent("240.92 EUR");
+    expect(screen.getByTestId("wynik-przesylki")).toHaveTextContent("Paliwo 44%: 66.00 EUR");
+    expect(ciala[0]).toMatchObject({ partnerId: 1, kraj: "FR", waga: 60, dlugosc: 80, szerokosc: null });
+    await u.selectOptions(screen.getByTestId("select-przesylka-kraj"), "DE");
+    await u.click(screen.getByTestId("button-przesylka-policz"));
+    expect(await screen.findByTestId("text-przesylka-blad")).toHaveTextContent("Brak tabeli transportowej GEIS dla kraju DE.");
+    expect(screen.queryByTestId("wynik-przesylki")).not.toBeInTheDocument();
   });
 });

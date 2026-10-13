@@ -10,6 +10,7 @@ import multer from "multer";
 import type { Baza } from "../db/index.js";
 import type { KlientSelly } from "../selly/klient.js";
 import { parsujGeisXlsx } from "../partnerzy/geis-xlsx.js";
+import { podgladKosztuPrzesylki } from "../partnerzy/podglad-przesylki.js";
 import { BladTransportu, importujTabeleGeis, ustawPaliwo, type TabeleGeisJson } from "../partnerzy/transport.js";
 import { listaGeis } from "../repos/partnerzy-geis.js";
 import { requireAuth } from "../middleware/auth.js";
@@ -104,6 +105,32 @@ export function trasyPartnerzy({ db, serwis, odbiorEmail, klientSelly }: Zalezno
     }
     audytuj(req, "partner_geis_edycja", 0, { kraj });
     res.json({ kraje: listaGeis(db) });
+  });
+
+  /**
+   * Podgląd kosztu przesyłki (ticket 246): `{partnerId, kraj, waga, dlugosc, szerokosc, wysokosc}` (cm, kg) → rozbicie kosztu w EUR.
+   * 400 z komunikatem, gdy nie da się policzyć (brak tabeli kraju, wymiary ponad limit, waga ponad najwyższy próg).
+   */
+  router.post("/api/partnerzy/geis/podglad-kosztu", requireAuth, (req, res) => {
+    const c = (req.body ?? {}) as Record<string, unknown>;
+    const partnerId = Number(c.partnerId);
+    const kraj = normalizujKraj(c.kraj);
+    const liczba = (v: unknown): number | null => (typeof v === "number" && Number.isFinite(v) && v > 0 ? v : null);
+    if (!Number.isInteger(partnerId) || szczegolyPartnera(db, partnerId) === null) return void res.status(404).json({ error: "Nie ma takiego partnera." });
+    if (kraj === null) return void res.status(400).json({ error: "Kraj musi być dwuliterowym kodem (np. FR)." });
+    try {
+      const wynik = podgladKosztuPrzesylki(
+        db,
+        partnerId,
+        kraj,
+        { waga: liczba(c.waga), dlugosc: liczba(c.dlugosc), szerokosc: liczba(c.szerokosc), wysokosc: liczba(c.wysokosc) },
+        new Date().toISOString().slice(0, 10),
+      );
+      res.json(wynik);
+    } catch (e) {
+      if (e instanceof BladTransportu || e instanceof Error) return void res.status(400).json({ error: e.message });
+      throw e;
+    }
   });
 
   router.post("/api/partnerzy/geis/import", requireAuth, (req, res, next) => {

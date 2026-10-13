@@ -74,6 +74,33 @@ describe("API GEIS", () => {
     expect((await request(s.app).post("/api/partnerzy/geis/import").set(auth).attach("plik", Buffer.from("nie excel"), "x.xlsx")).status).toBe(400);
   });
 
+  it("podgląd kosztu przesyłki: rozbicie GEIS (waga rozliczeniowa, stawka, paliwo, myto, pakowanie) i stała baza kraju; błędy 400/404", async () => {
+    s = await stworzSrodowiskoTestowe();
+    const auth = { Authorization: `Bearer ${await token()}` };
+    await request(s.app).post("/api/partnerzy/geis/import").set(auth).attach("plik", xlsx({ Francja: arkusz(250, "0 × 0 × 0", [[50, 100], [100, 150], [200, 260]]) }), "g.xlsx");
+    const id = Number((await request(s.app).post("/api/partnerzy").set(auth).send({ nazwa: "P" })).body.id);
+    await request(s.app).put(`/api/partnerzy/${id}/kraje/FR`).set(auth).send({ narzutProc: 10, mytoEur: 9.92, pakowanieEur: 15, paliwoProc: 44 });
+    const paczka = { partnerId: id, kraj: "FR", waga: 60, dlugosc: 100, szerokosc: 100, wysokosc: 100 };
+
+    // gabaryt: 1 m³ × 250 = 250 kg > 60 kg → próg 200 nie wystarcza (250 > 200) → błąd; mniejsza paczka: 0,4 m³ × 250 = 100 kg → próg 100
+    const za_duza = await request(s.app).post("/api/partnerzy/geis/podglad-kosztu").set(auth).send(paczka);
+    expect(za_duza.status).toBe(400);
+    expect(za_duza.body.error).toMatch(/przekracza najwyższy próg/);
+
+    const ok = await request(s.app).post("/api/partnerzy/geis/podglad-kosztu").set(auth).send({ ...paczka, dlugosc: 80, szerokosc: 50, wysokosc: 100 });
+    expect(ok.status).toBe(200);
+    expect(ok.body).toMatchObject({ zrodlo: "geis", wagaRozliczeniowa: 100, progKg: 100, baza: 150, paliwoProc: 44, mytoEur: 9.92, pakowanieKrajuEur: 15 });
+    expect(ok.body.razemEur).toBeCloseTo(150 * 1.44 + 2 + 9.92 + 15, 6); // pakowanie GEIS (2) z arkusza testowego
+
+    await request(s.app).put(`/api/partnerzy/${id}/kraje/FR`).set(auth).send({ narzutProc: 10, przesylkaStalaEur: 20, mytoEur: 1, pakowanieEur: 2, paliwoProc: 10 });
+    const stala = await request(s.app).post("/api/partnerzy/geis/podglad-kosztu").set(auth).send(paczka);
+    expect(stala.body).toMatchObject({ zrodlo: "stala-baza", baza: 20, paliwoProc: 10 });
+    expect(stala.body.razemEur).toBeCloseTo(20 * 1.1 + 1 + 2, 6);
+
+    expect((await request(s.app).post("/api/partnerzy/geis/podglad-kosztu").set(auth).send({ ...paczka, kraj: "DE" })).status).toBe(400);
+    expect((await request(s.app).post("/api/partnerzy/geis/podglad-kosztu").set(auth).send({ ...paczka, partnerId: 999 })).status).toBe(404);
+  });
+
   it("bez zalogowania 401", async () => {
     s = await stworzSrodowiskoTestowe();
     expect((await request(s.app).get("/api/partnerzy/geis")).status).toBe(401);
