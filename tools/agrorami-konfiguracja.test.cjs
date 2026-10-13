@@ -6,7 +6,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const vm = require('node:vm');
-const { parseCredentials, replaceEnv, validateLogin, main } = require('./agrorami-konfiguracja.cjs');
+const { parseCredentials, replaceEnv, validateLogin, safeApiMessage, main } = require('./agrorami-konfiguracja.cjs');
 
 const credentials = { email: 'info@agroopony.eu', password: 'test-only-placeholder' };
 function workflowPayload(password) {
@@ -81,6 +81,33 @@ test('odrzucenie loginu, błąd HTTP i błąd sieci nie ujawniają danych', asyn
     await assert.rejects(validateLogin(credentials, transport), error =>
       !error.message.includes(credentials.password) && error.message.includes('Konfiguracji nie zmieniono'));
   }
+});
+test('diagnostyka rozróżnia odrzucone konto, HTTP, sieć i błędny JSON bez odpowiedzi API', async () => {
+  const scenarios = [
+    [async () => ({ ok: true, status: 200, json: async () => ({
+      errors: [{ message: 'Podane dane są nieprawidłowe lub Twoje konto zostało tymczasowo wyłączone. ' + credentials.password }],
+    }) }), /odrzucone dane logowania.*HTTP 200/],
+    [async () => ({ ok: false, status: 403, json: async () => ({}) }), /błąd HTTP 403/],
+    [async () => { throw new Error(credentials.password); }, /błąd połączenia/],
+    [async () => ({ ok: true, status: 200, json: async () => { throw new Error(credentials.password); } }), /niepoprawny JSON/],
+    [async () => ({ ok: true, status: 200, json: async () => ({ errors: [{ message: 'ReCaptcha validation failed.' }] }) }), /CAPTCHA/],
+    [async () => ({ ok: true, status: 200, json: async () => ({ errors: [{ message: "This account isn't confirmed." }] }) }), /potwierdzenia konta/],
+    [async () => ({ ok: true, status: 200, json: async () => ({ errors: [{ message: 'Not authorized.' }] }) }), /uprawnienia/],
+  ];
+  for (const [transport, expected] of scenarios) {
+    await assert.rejects(validateLogin(credentials, transport), error =>
+      expected.test(error.message) && !error.message.includes(credentials.password));
+  }
+});
+test('redakcja komunikatu API ukrywa sekret, kodowanie JSON/URL/base64, e-maile i długie identyfikatory', () => {
+  const c = { email: 'info@agroopony.eu', password: 'test-only"placeholder@' };
+  const variants = [c.email, c.password, JSON.stringify(c.password).slice(1, -1),
+    encodeURIComponent(c.password), Buffer.from(c.password).toString('base64')];
+  const safe = safeApiMessage(variants.join(' | ') + ' other@example.org abcdefghijklmnopqrstuvwxyz12345\n', c);
+  for (const value of variants) assert.ok(!safe.includes(value));
+  assert.ok(!safe.includes('other@example.org'));
+  assert.ok(!safe.includes('abcdefghijklmnopqrstuvwxyz12345'));
+  assert.ok(!safe.includes('\n'));
 });
 async function sandbox(callback) {
   const home = fs.mkdtempSync(path.join(os.tmpdir(), 'agrorami-test-'));
