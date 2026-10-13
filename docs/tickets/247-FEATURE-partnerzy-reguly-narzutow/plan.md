@@ -1,0 +1,7 @@
+# 247 — PARTNERZY: reguły narzutów partnera (marka, kategoria… per kraj)
+
+Decyzja użytkowniczki 2026-10-13: reguły narzutów jak w „narzutach i promocjach”, ale OSOBNE dla partnerów (nie wspólne ze sklepem).
+Wzorzec (research z kodu: `repos/ceny.ts`): specyficzna reguła (z warunkami) bije globalną niezależnie od priorytetu; między specyficznymi wygrywa wyższy priorytet; warunki = koniunkcja, `dopasujWarunek` ten sam co w sklepie (dostawca i średnica przez równość, reszta przez zawieranie bez wielkości liter; pusta wartość i nieznany typ = pasuje); `wartosc` = procent narzutu „od” zakupu.
+Zakres: migracja 033 (`partner_narzuty`: partner, kraj lub wszystkie, nazwa, warunki JSON, wartość %, priorytet, status), silnik `partnerzy/reguly-narzutow.ts` (reużywa `dopasujWarunek`), integracja w `wycenPozycje` (pasująca reguła zastępuje narzut kraju; brak = narzut kraju; narzut 0 % i brak reguły = pozycja nie jest publikowana), API `GET/POST/PATCH/DELETE /api/partnerzy/:id/narzuty[/:regulaId]`, sekcja „Reguły narzutów” w panelu partnera (z polem priorytetu, którego sklep w UI nie ma).
+Różnice od sklepu (świadome): deterministyczny tie-break przy remisie (kraj przed „wszystkie kraje”, potem niższe id); mutacja reguły NIE przelicza katalogu (ceny partnera powstają przy generowaniu pliku).
+Poza zakresem: promocje z datami dla partnerów, minimalna marża/opłacalność (nie istnieje w sklepie — nowa funkcja, do decyzji).

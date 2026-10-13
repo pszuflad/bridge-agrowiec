@@ -1,0 +1,3 @@
+# Wpis 247 — reguły narzutów partnera
+
+Tabela `partner_narzuty` (migracja 033). Wybór: `wybierzRegule` (partnerzy/reguly-narzutow.ts) — reguły aktywne dla kraju pozycji (kraj NULL = wszystkie), malejąco po priorytecie, remis: kraj zawężony przed ogólnym, potem niższe id; pierwsza z niepustymi warunkami wygrywa, inaczej pierwsza globalna; brak = `partner_kraje.narzut_proc`. `wycenPozycje` liczy efektywny narzut per pozycja i kraj; narzut ≤ 0 → cena null + jeden błąd na kraj. API `/api/partnerzy/:id/narzuty` (walidacja: nazwa 1–80, wartość 0–1000 %, priorytet 0–1000, do 10 warunków z typów sklepu).
