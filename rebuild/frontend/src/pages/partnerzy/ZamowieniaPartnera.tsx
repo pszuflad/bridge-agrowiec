@@ -218,7 +218,7 @@ function PodgladDoSelly({ partnerId, zamowienieId }: { partnerId: number; zamowi
       {p ? (
         <div className="space-y-2 text-xs">
           <p data-testid={`podglad-zamawiajacy-${zamowienieId}`}>
-            <span className="text-muted-foreground">Zamawiający (dane do faktury): </span>
+            <span className="text-muted-foreground">Zamawiający (dane do faktury{p.zrodloFaktury === "kraj" ? `, kraj ${p.krajFaktury}` : p.zrodloFaktury === "partner" ? ", domyślne partnera" : ""}): </span>
             {[p.zamawiajacy.nazwa, p.zamawiajacy.nip && `NIP ${p.zamawiajacy.nip}`, p.zamawiajacy.ulica, [p.zamawiajacy.kod, p.zamawiajacy.miasto].filter(Boolean).join(" "), p.zamawiajacy.kraj].filter(Boolean).join(", ") || "—"}
           </p>
           <ul className="space-y-0.5">

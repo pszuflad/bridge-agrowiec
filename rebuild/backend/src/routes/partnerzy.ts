@@ -33,11 +33,13 @@ import {
   normalizujKraj,
   szczegolyPartnera,
   ustawAktywnosc,
+  ustawFakturaKraju,
   ustawKraj,
   ustawMagazyny,
   ustawWykluczenia,
   usunKraj,
   walidujListeTekstow,
+  walidujFakturaKraju,
   walidujUstawieniaKraju,
   walidujUstawieniaPartnera,
 } from "../repos/partnerzy.js";
@@ -478,6 +480,19 @@ export function trasyPartnerzy({ db, serwis, odbiorEmail, klientSelly, sellyZamo
     // Opłata paliwowa: nowy okres od dziś (historia, zmiana nie przelicza wstecz) — tylko gdy podana.
     if (paliwoProc !== null) ustawPaliwo(db, kraj, paliwoProc, new Date().toISOString().slice(0, 10));
     audytuj(req, "partner_kraj", id, { kraj, ...u });
+    res.json(szczegolyPartnera(db, id));
+  });
+
+  /** Dane do faktury dla zamówień z danym krajem dostawy (ticket 252). Puste pola = dane domyślne partnera. 404, gdy partner nie ma takiego kraju. */
+  router.put("/api/partnerzy/:id/kraje/:kraj/faktura", requireAuth, (req, res) => {
+    const id = idZParametru(req, res);
+    if (id === null) return;
+    const kraj = normalizujKraj(req.params.kraj);
+    if (kraj === null) return void res.status(400).json({ error: "Kraj musi być dwuliterowym kodem (np. FR)." });
+    const f = walidujFakturaKraju(req.body);
+    if (czyBlad(f)) return void res.status(400).json({ error: f.blad });
+    if (!ustawFakturaKraju(db, id, kraj, f)) return void res.status(404).json({ error: "Partner nie ma takiego kraju." });
+    audytuj(req, "partner_kraj_faktura", id, { kraj });
     res.json(szczegolyPartnera(db, id));
   });
 

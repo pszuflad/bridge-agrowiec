@@ -7,7 +7,7 @@
 import { and, desc, eq, isNull } from "drizzle-orm";
 
 import type { Baza } from "../db/index.js";
-import { kursyNbp, partnerZamowienia, partnerzy, products, sellyProducts } from "../db/schema.js";
+import { kursyNbp, partnerKraje, partnerZamowienia, partnerzy, products, sellyProducts } from "../db/schema.js";
 import { szczegolyZamowieniaDlaPartnera } from "../repos/partnerzy-zamowienia.js";
 import { BladSelly, type KlientSelly } from "../selly/klient.js";
 import { znajdzPozycjeKatalogu } from "./walidacja-zamowienia.js";
@@ -29,6 +29,10 @@ export type PozycjaPodgladu = {
 
 export type PodgladSelly = {
   zamawiajacy: { nazwa: string | null; nip: string | null; ulica: string | null; kod: string | null; miasto: string | null; kraj: string | null };
+  /** Skąd pochodzą dane do faktury: `kraj` (ustawione dla kraju dostawy) albo `partner` (domyślne). */
+  zrodloFaktury: "kraj" | "partner";
+  /** Kraj dostawy, dla którego wybrano dane do faktury. */
+  krajFaktury: string | null;
   dostawa: Record<string, string>;
   waluta: string | null;
   kosztDostawy: number | null;
@@ -69,10 +73,21 @@ export function podgladDlaSelly(db: Baza, partnerId: number, zamowienieId: numbe
   const z = szczegolyZamowieniaDlaPartnera(db, partnerId, zamowienieId);
   if (!z) return null;
   const p = db.select().from(partnerzy).where(eq(partnerzy.id, partnerId)).get();
-  const zamawiajacy = {
-    nazwa: p?.fakturaNazwa ?? null, nip: p?.fakturaNip ?? null, ulica: p?.fakturaUlica ?? null,
-    kod: p?.fakturaKod ?? null, miasto: p?.fakturaMiasto ?? null, kraj: p?.fakturaKraj ?? null,
-  };
+  // Dane do faktury: osobne dla kraju dostawy z zamówienia (`partner_kraje.faktura_*`, ticket 252); bez nich — domyślne partnera. Cały komplet z jednego źródła, bez mieszania pól.
+  const krajDostawy = adresDostawy(z.dostawa).kraj.toUpperCase();
+  const wierszKraju = /^[A-Z]{2}$/.test(krajDostawy)
+    ? db.select().from(partnerKraje).where(and(eq(partnerKraje.partnerId, partnerId), eq(partnerKraje.kraj, krajDostawy))).get()
+    : undefined;
+  const zKraju = !!wierszKraju?.fakturaNazwa;
+  const zamawiajacy = zKraju
+    ? {
+        nazwa: wierszKraju!.fakturaNazwa, nip: wierszKraju!.fakturaNip, ulica: wierszKraju!.fakturaUlica,
+        kod: wierszKraju!.fakturaKod, miasto: wierszKraju!.fakturaMiasto, kraj: wierszKraju!.fakturaKraj,
+      }
+    : {
+        nazwa: p?.fakturaNazwa ?? null, nip: p?.fakturaNip ?? null, ulica: p?.fakturaUlica ?? null,
+        kod: p?.fakturaKod ?? null, miasto: p?.fakturaMiasto ?? null, kraj: p?.fakturaKraj ?? null,
+      };
   const niejednoznaczne = new Set<string>();
   const pozycje: PozycjaPodgladu[] = z.pozycje.map((poz) => {
     const znaleziona = znajdzPozycjeKatalogu(db, poz.kod);
@@ -98,7 +113,7 @@ export function podgladDlaSelly(db: Baza, partnerId: number, zamowienieId: numbe
   const blokady: string[] = [];
   const ostrzezenia: string[] = [];
   const brak = BRAKUJE.filter(([k]) => !zamawiajacy[k]?.trim()).map(([, e]) => e);
-  if (brak.length) blokady.push(`Brak danych do faktury partnera: ${brak.join(", ")} (uzupełnij w ustawieniach partnera).`);
+  if (brak.length) blokady.push(`Brak danych do faktury ${zKraju ? `kraju ${krajDostawy}` : "partnera"}: ${brak.join(", ")} (uzupełnij w ustawieniach ${zKraju ? "kraju" : "partnera"}).`);
   const brakIdSelly = (
     [["sellyStatusId", "status"], ["sellyPaymentId", "płatność"], ["sellyDeliveryId", "dostawa"], ["sellyVatId", "stawka VAT 0 %"]] as const
   ).filter(([k]) => p?.[k] === null || p?.[k] === undefined).map(([, e]) => e);
@@ -163,7 +178,7 @@ export function podgladDlaSelly(db: Baza, partnerId: number, zamowienieId: numbe
       })),
     };
   }
-  return { zamawiajacy, dostawa: z.dostawa, waluta: z.waluta, kosztDostawy: z.kosztDostawy, pozycje, blokady, ostrzezenia, zadanie, tworzenieWlaczone, kurs: kursWpis };
+  return { zamawiajacy, zrodloFaktury: zKraju ? "kraj" : "partner", krajFaktury: /^[A-Z]{2}$/.test(krajDostawy) ? krajDostawy : null, dostawa: z.dostawa, waluta: z.waluta, kosztDostawy: z.kosztDostawy, pozycje, blokady, ostrzezenia, zadanie, tworzenieWlaczone, kurs: kursWpis };
 }
 
 export class BladTworzenia extends Error {

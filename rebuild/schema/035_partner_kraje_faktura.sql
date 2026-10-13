@@ -1,0 +1,11 @@
+-- Ticket 252 (252-FEATURE-partnerzy-faktura-wg-kraju): dane do faktury (zamawiający w zamówieniu Selly) osobno dla każdego kraju partnera.
+--
+-- ⚠ NOWE KOLUMNY w tabeli z migracji 024, NIE ODTWORZENIE PRODUKCJI. Wszystkie NULL.
+--   partner_kraje.faktura_nazwa/nip/ulica/kod/miasto/kraj — dane do faktury dla zamówień z TYM krajem dostawy;
+--   gdy `faktura_nazwa` jest NULL, obowiązują dane z `partnerzy.faktura_*` (domyślne partnera). Kraj dostawy = kraj z zamówienia partnera.
+-- @dodaj-kolumne-jesli-brak partner_kraje faktura_nazwa TEXT
+-- @dodaj-kolumne-jesli-brak partner_kraje faktura_nip TEXT
+-- @dodaj-kolumne-jesli-brak partner_kraje faktura_ulica TEXT
+-- @dodaj-kolumne-jesli-brak partner_kraje faktura_kod TEXT
+-- @dodaj-kolumne-jesli-brak partner_kraje faktura_miasto TEXT
+-- @dodaj-kolumne-jesli-brak partner_kraje faktura_kraj TEXT
