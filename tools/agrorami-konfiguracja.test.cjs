@@ -5,9 +5,33 @@ const { spawnSync } = require('node:child_process');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
+const vm = require('node:vm');
 const { parseCredentials, replaceEnv, validateLogin, main } = require('./agrorami-konfiguracja.cjs');
 
 const credentials = { email: 'info@agroopony.eu', password: 'test-only-placeholder' };
+function workflowPayload(password) {
+  const workflow = fs.readFileSync(path.join(__dirname, '../.github/workflows/agrorami-konfiguracja.yml'), 'utf8');
+  const producer = workflow.match(/node -e '([\s\S]*?)' \|/);
+  assert.ok(producer, 'workflow zawiera producenta JSON');
+  let output = '';
+  vm.runInNewContext(producer[1], {
+    process: { env: { AGRORAMI_PASSWORD: password }, stdout: { write: text => { output += text; } } },
+  });
+  return JSON.parse(output);
+}
+test('workflow usuwa tylko końcowe CR/LF, zachowując znaki hasła', () => {
+  for (const suffix of ['\n', '\r\n', '\n\n', '']) {
+    const password = " test'$HOME`cmd` ! ";
+    const payload = workflowPayload(password + suffix);
+    assert.equal(payload.password, password);
+    assert.deepEqual(parseCredentials(JSON.stringify(payload)), { ...credentials, password });
+  }
+});
+test('workflow nadal odrzuca złamanie linii wewnątrz i puste hasło', () => {
+  for (const password of ['first\nsecond\n', '\n', '\r\n']) {
+    assert.throws(() => parseCredentials(JSON.stringify(workflowPayload(password))));
+  }
+});
 test('payload wymaga właściwego konta i niepustego hasła', () => {
   assert.deepEqual(parseCredentials(JSON.stringify(credentials)), credentials);
   for (const text of ['bad-json', '{}', JSON.stringify({ ...credentials, email: 'other' }),
