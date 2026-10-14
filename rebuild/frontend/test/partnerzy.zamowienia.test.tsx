@@ -324,7 +324,7 @@ describe("zamówienia partnera", () => {
     await otworz();
     await uzytkownik.click(await screen.findByTestId("button-zamowienie-1"));
     await uzytkownik.click(await screen.findByTestId("button-podglad-selly-1"));
-    expect(await screen.findByTestId("podglad-kurs-1")).toHaveTextContent("4.25 PLN za 1 EUR, tabela NBP z 2026-10-12");
+    expect(await screen.findByTestId("podglad-kurs-1")).toHaveTextContent("po kursie 4.25 (tabela NBP z 2026-10-12)");
     expect(screen.getByTestId("button-selly-utworz-1")).toBeDisabled();
     await uzytkownik.click(screen.getByTestId("button-selly-zwolnij-1"));
     expect(await screen.findByText("Zamówienie zwolnione")).toBeInTheDocument();
