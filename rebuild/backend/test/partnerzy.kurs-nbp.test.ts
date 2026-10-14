@@ -40,12 +40,36 @@ describe("kurs EUR partnerów", () => {
     rmSync(katalog, { recursive: true, force: true });
   });
 
-  it("kurs ręczny nie dotyka sieci", async () => {
-    const wynik = await kursEur(db, zepsuty, { kursZrodlo: "reczny", kursReczny: 4.25 });
-    expect(wynik).toEqual({ kurs: 4.25, zrodlo: "reczny", dataTabeli: null, ostrzezenie: null });
+  it("ręczny i NBP równolegle (ticket 262): obowiązuje NIŻSZY — ręczny niższy od NBP wygrywa", async () => {
+    const wynik = await kursEur(db, dzialajacy(4.4, "2026-10-09"), { kursZrodlo: "nbp", kursReczny: 4.25 });
+    expect(wynik).toEqual({ kurs: 4.25, zrodlo: "reczny", dataTabeli: "2026-10-09", ostrzezenie: null });
   });
 
-  it("kurs ręczny bez wartości jest błędem, nie zerem", async () => {
+  it("ręczny wyższy od NBP przegrywa — NBP spadł poniżej ręcznego, kurs bierze NBP (ochrona przed stratą)", async () => {
+    const wynik = await kursEur(db, dzialajacy(4.0, "2026-10-09"), { kursZrodlo: "reczny", kursReczny: 4.5 });
+    expect(wynik).toEqual({ kurs: 4.0, zrodlo: "nbp", dataTabeli: "2026-10-09", ostrzezenie: null });
+    expect(sqlite.prepare("SELECT kurs FROM kursy_nbp").all()).toEqual([{ kurs: 4.0 }]); // NBP zapisany jako rezerwa także wtedy, gdy wygrał ręczny albo nie
+  });
+
+  it("remis kursów: obowiązuje ręczny", async () => {
+    expect((await kursEur(db, dzialajacy(4.3, "2026-10-09"), { kursZrodlo: "nbp", kursReczny: 4.3 })).zrodlo).toBe("reczny");
+  });
+
+  it("NBP nie odpowiada: ręczny porównuje się z ostatnim zapisanym; bez zapisanego wystarczy sam ręczny (z ostrzeżeniem)", async () => {
+    const sam = await kursEur(db, zepsuty, { kursZrodlo: "nbp", kursReczny: 4.25 });
+    expect(sam).toMatchObject({ kurs: 4.25, zrodlo: "reczny", dataTabeli: null });
+    expect(sam.ostrzezenie).toMatch(/samego kursu ręcznego 4.25/);
+    await kursEur(db, dzialajacy(4.1, "2026-10-08"), nbp); // zapisuje rezerwę 4,1
+    const zRezerwa = await kursEur(db, zepsuty, { kursZrodlo: "nbp", kursReczny: 4.5 });
+    expect(zRezerwa).toMatchObject({ kurs: 4.1, zrodlo: "nbp-zapisany", dataTabeli: "2026-10-08" });
+    expect(zRezerwa.ostrzezenie).toMatch(/NBP nie odpowiada/);
+  });
+
+  it("brak kursu ręcznego: dalej sam NBP; `kursZrodlo: reczny` bez wartości nie jest już błędem, tylko NBP", async () => {
+    expect((await kursEur(db, dzialajacy(4.31, "2026-10-09"), { kursZrodlo: "reczny", kursReczny: null })).kurs).toBe(4.31);
+  });
+
+  it("brak kursu ręcznego i brak NBP (bez rezerwy) nadal rzuca błąd, nie zgaduje", async () => {
     await expect(kursEur(db, zepsuty, { kursZrodlo: "reczny", kursReczny: null })).rejects.toBeInstanceOf(BrakKursuError);
   });
 

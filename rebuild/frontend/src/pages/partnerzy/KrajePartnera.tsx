@@ -11,13 +11,18 @@ import { useToast } from "@/components/ui/toast";
 import { nazwaKraju } from "@/lib/kraje";
 import { KLUCZ_PARTNERZY, kluczKursuNbp, komunikatBledu, liczbaZPola, usunKraj, zapiszKraj, type KrajPartnera, type KursNbpPodglad, type SzczegolyPartnera } from "./api";
 
-const KLASA_SELECT = "h-9 rounded-md border border-input bg-background px-2 text-sm";
 
-/** Kurs, którego system używa dla kraju: ręczny z formularza albo ostatnio użyty (NBP) w wygenerowanym pliku. */
-function opisKursu(kraj: KrajPartnera | null, zrodlo: "nbp" | "reczny", kursReczny: string, nbp: KursNbpPodglad | null | undefined): string {
-  if (zrodlo === "reczny") return kursReczny.trim() === "" ? "ręczny — brak wartości" : `${kursReczny} (ręczny)`;
-  // Kurs NBP „na teraz” (ticket 250): ten, który dostanie najbliższy generowany plik; „ostatnio w pliku” to kurs faktycznie użyty wcześniej.
+/**
+ * Kurs, którego system użyje dla kraju (ticket 262): NBP i ręczny działają RÓWNOLEGLE, obowiązuje NIŻSZY z dwóch. „NBP teraz” (ticket 250) to kurs,
+ * z którym zostanie porównany ręczny przy najbliższym generowanym pliku; „ostatnio w pliku” to kurs faktycznie użyty wcześniej.
+ */
+function opisKursu(kraj: KrajPartnera | null, kursReczny: string, nbp: KursNbpPodglad | null | undefined): string {
+  const reczny = Number(kursReczny.trim().replace(",", "."));
+  const maReczny = kursReczny.trim() !== "" && Number.isFinite(reczny) && reczny > 0;
   const teraz = nbp ? `NBP teraz: ${nbp.kurs} (tabela z ${nbp.dataTabeli ?? "?"}${nbp.zrodlo === "nbp-zapisany" ? ", zapisany — NBP nie odpowiada" : ""})` : null;
+  const obowiazuje = maReczny && nbp ? `${teraz} · ręczny: ${reczny} → obowiązuje niższy: ${Math.min(reczny, nbp.kurs)} (${reczny <= nbp.kurs ? "ręczny" : "NBP"})` : null;
+  if (obowiazuje) return obowiazuje;
+  if (maReczny) return `ręczny: ${reczny} (obowiązuje niższy z ręcznego i NBP)`;
   if (!kraj?.ostatniKurs) return teraz ? `${teraz} · jeszcze nie użyto w pliku` : "NBP — jeszcze nie użyto";
   const ostatnio = `${kraj.ostatniKurs.kurs} (${kraj.ostatniKurs.zrodlo}, ${kraj.ostatniKurs.zapisano.slice(0, 16).replace("T", " ")})`;
   return teraz ? `${teraz} · ostatnio w pliku: ${ostatnio}` : ostatnio;
@@ -28,7 +33,6 @@ function WierszKraju({ partnerId, kraj, nowy, kursNbp }: { partnerId: number; kr
   const { toast } = useToast();
   const [kod, ustawKod] = useState(kraj?.kraj ?? "");
   const [narzut, ustawNarzut] = useState(String(kraj?.narzutProc ?? 0));
-  const [zrodlo, ustawZrodlo] = useState<"nbp" | "reczny">(kraj?.kursZrodlo ?? "nbp");
   const [kurs, ustawKurs] = useState(kraj?.kursReczny === null || kraj?.kursReczny === undefined ? "" : String(kraj.kursReczny));
   const [koszty, ustawKoszty] = useState(String(kraj?.kosztyDodatkowe ?? 0));
   const [paliwo, ustawPaliwo] = useState(kraj?.paliwoProc === undefined ? "" : String(kraj.paliwoProc));
@@ -52,8 +56,8 @@ function WierszKraju({ partnerId, kraj, nowy, kursNbp }: { partnerId: number; kr
       if (Number.isNaN(my) || my < 0) throw new Error("Myto musi być liczbą ≥ 0 (EUR).");
       if (Number.isNaN(pak) || pak < 0) throw new Error("Pakowanie musi być liczbą ≥ 0 (EUR).");
       if (Number.isNaN(c) || c < 0) throw new Error("Koszty dodatkowe muszą być liczbą ≥ 0 (EUR).");
-      if (zrodlo === "reczny" && (k === null || Number.isNaN(k) || k <= 0)) throw new Error("Kurs ręczny wymaga wartości większej od zera.");
-      await zapiszKraj(partnerId, kodKraju, { narzutProc: n, kursZrodlo: zrodlo, kursReczny: zrodlo === "reczny" ? k : null, kosztyDodatkowe: c, mytoEur: my, pakowanieEur: pak, paliwoProc: pal });
+      if (k !== null && (Number.isNaN(k) || k <= 0)) throw new Error("Kurs ręczny musi być liczbą większą od zera albo pusty (wtedy tylko NBP).");
+      await zapiszKraj(partnerId, kodKraju, { narzutProc: n, kursZrodlo: "nbp", kursReczny: k, kosztyDodatkowe: c, mytoEur: my, pakowanieEur: pak, paliwoProc: pal });
     },
     onSuccess: async () => {
       toast({ title: nowy ? "Dodano kraj" : "Zapisano kraj", description: kod.trim().toUpperCase() });
@@ -65,7 +69,6 @@ function WierszKraju({ partnerId, kraj, nowy, kursNbp }: { partnerId: number; kr
         ustawPaliwo("");
         ustawMyto("0");
         ustawPakowanie("0");
-        ustawZrodlo("nbp");
       }
       await klient.invalidateQueries({ queryKey: [KLUCZ_PARTNERZY] });
     },
@@ -92,19 +95,13 @@ function WierszKraju({ partnerId, kraj, nowy, kursNbp }: { partnerId: number; kr
         ) : <span className="font-medium">{kraj!.kraj}<span className="block text-xs font-normal text-muted-foreground" data-testid={`nazwa-kraju-${kraj!.kraj}`}>{nazwaKraju(kraj!.kraj) ?? ""}</span></span>}
       </td>
       <td className="px-2 py-2"><Input className="w-24" inputMode="decimal" aria-label={`Narzut % ${testId}`} value={narzut} onChange={(e) => ustawNarzut(e.target.value)} data-testid={`input-kraj-narzut-${testId}`} /></td>
-      <td className="px-2 py-2">
-        <select className={KLASA_SELECT} aria-label={`Źródło kursu ${testId}`} value={zrodlo} onChange={(e) => ustawZrodlo(e.target.value as "nbp" | "reczny")} data-testid={`select-kraj-zrodlo-${testId}`}>
-          <option value="nbp">NBP (tabela A)</option>
-          <option value="reczny">ręczny</option>
-        </select>
-      </td>
-      <td className="px-2 py-2"><Input className="w-24" inputMode="decimal" disabled={zrodlo !== "reczny"} aria-label={`Kurs ręczny ${testId}`} value={kurs} onChange={(e) => ustawKurs(e.target.value)} data-testid={`input-kraj-kurs-${testId}`} /></td>
+      <td className="px-2 py-2"><Input className="w-24" inputMode="decimal" placeholder="tylko NBP" aria-label={`Kurs ręczny ${testId}`} value={kurs} onChange={(e) => ustawKurs(e.target.value)} data-testid={`input-kraj-kurs-${testId}`} /></td>
       <td className="px-2 py-2"><Input className="w-28" inputMode="decimal" aria-label={`Koszty dodatkowe EUR ${testId}`} value={koszty} onChange={(e) => ustawKoszty(e.target.value)} data-testid={`input-kraj-koszty-${testId}`} /></td>
 
       <td className="px-2 py-2"><Input className="w-20" inputMode="decimal" aria-label={`Paliwo % ${testId}`} value={paliwo} onChange={(e) => ustawPaliwo(e.target.value)} data-testid={`input-kraj-paliwo-${testId}`} /></td>
       <td className="px-2 py-2"><Input className="w-24" inputMode="decimal" aria-label={`Myto EUR ${testId}`} value={myto} onChange={(e) => ustawMyto(e.target.value)} data-testid={`input-kraj-myto-${testId}`} /></td>
       <td className="px-2 py-2"><Input className="w-24" inputMode="decimal" aria-label={`Pakowanie EUR ${testId}`} value={pakowanie} onChange={(e) => ustawPakowanie(e.target.value)} data-testid={`input-kraj-pakowanie-${testId}`} /></td>
-      <td className="px-2 py-2 text-xs text-muted-foreground" data-testid={`kurs-uzywany-${testId}`}>{opisKursu(kraj, zrodlo, kurs, kursNbp)}</td>
+      <td className="px-2 py-2 text-xs text-muted-foreground" data-testid={`kurs-uzywany-${testId}`}>{opisKursu(kraj, kurs, kursNbp)}</td>
       <td className="whitespace-nowrap px-2 py-2 text-right">
         <Button size="sm" variant={nowy ? "default" : "outline"} disabled={zapis.isPending} onClick={() => zapis.mutate()} data-testid={`button-kraj-zapisz-${testId}`}>{nowy ? "Dodaj kraj" : "Zapisz"}</Button>
         {!nowy ? (
@@ -134,7 +131,7 @@ export function KrajePartnera({ partner }: { partner: SzczegolyPartnera }) {
       <CardContent className="space-y-3 p-4">
         <h2 className="text-sm font-semibold">Kraje, narzuty i kursy</h2>
         <p className="text-xs text-muted-foreground">
-          Dopłata (w punktach procentowych) DO MARŻY SKLEPU na danym produkcie: cena partnera = zakup × (1 + marża sklepu + dopłata) / kurs + przesyłka + koszty; np. marża sklepu 6 % + dopłata 2 % = 8 % od zakupu, więc partner nigdy nie kupi taniej niż klient w sklepie. Koszty dodatkowe w EUR, doliczane do każdej opony. Przesyłka = stawka z tabel GEIS (waga i wymiary opony, z paliwem) + myto + pakowanie kraju. Zmiana paliwa obowiązuje od dziś i nie przelicza wstecz. Dopłata 0 % = ceny dla kraju nie są publikowane. Kurs EUR z NBP albo ręczny.
+          Dopłata (w punktach procentowych) DO MARŻY SKLEPU na danym produkcie: cena partnera = zakup × (1 + marża sklepu + dopłata) / kurs + przesyłka + koszty; np. marża sklepu 6 % + dopłata 2 % = 8 % od zakupu, więc partner nigdy nie kupi taniej niż klient w sklepie. Koszty dodatkowe w EUR, doliczane do każdej opony. Przesyłka = stawka z tabel GEIS (waga i wymiary opony, z paliwem) + myto + pakowanie kraju. Zmiana paliwa obowiązuje od dziś i nie przelicza wstecz. Dopłata 0 % = ceny dla kraju nie są publikowane. Kurs EUR: NBP i ręczny działają równolegle — gdy wpiszesz kurs ręczny, obowiązuje niższy z dwóch (niższy kurs = wyższa cena w EUR, ochrona przed stratą); puste pole = tylko NBP.
         </p>
         <div className="flex flex-wrap items-center gap-3 rounded-md bg-muted/40 px-3 py-2 text-sm" data-testid="kurs-nbp-teraz">
           {nbp.isPending ? (
@@ -156,8 +153,7 @@ export function KrajePartnera({ partner }: { partner: SzczegolyPartnera }) {
               <tr className="border-b text-left text-xs uppercase tracking-wide text-muted-foreground">
                 <th className="px-2 py-2 font-medium">Kraj</th>
                 <th className="px-2 py-2 font-medium">Dopłata % (do marży sklepu)</th>
-                <th className="px-2 py-2 font-medium">Kurs EUR</th>
-                <th className="px-2 py-2 font-medium">Kurs ręczny</th>
+                <th className="px-2 py-2 font-medium">Kurs ręczny (opcjonalny)</th>
                 <th className="px-2 py-2 font-medium">Koszty dod. EUR</th>
                 <th className="px-2 py-2 font-medium">Paliwo %</th>
                 <th className="px-2 py-2 font-medium">Myto EUR</th>
@@ -167,7 +163,7 @@ export function KrajePartnera({ partner }: { partner: SzczegolyPartnera }) {
               </tr>
             </thead>
             <tbody>
-              {partner.kraje.map((k) => <WierszKraju key={`${k.kraj}-${k.narzutProc}-${k.kursZrodlo}-${k.kursReczny}-${k.kosztyDodatkowe}`} partnerId={partner.id} kraj={k} nowy={false} kursNbp={nbp.data} />)}
+              {partner.kraje.map((k) => <WierszKraju key={`${k.kraj}-${k.narzutProc}-${k.kursReczny}-${k.kosztyDodatkowe}`} partnerId={partner.id} kraj={k} nowy={false} kursNbp={nbp.data} />)}
               <WierszKraju key={`nowy-${partner.kraje.length}`} partnerId={partner.id} kraj={null} nowy kursNbp={nbp.data} />
             </tbody>
           </table>

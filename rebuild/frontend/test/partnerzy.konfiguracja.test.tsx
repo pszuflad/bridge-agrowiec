@@ -202,11 +202,10 @@ describe("kraje", () => {
     await uzytkownik.type(screen.getByTestId("input-kraj-nowy-kod"), "de");
     await uzytkownik.clear(screen.getByTestId("input-kraj-narzut-nowy"));
     await uzytkownik.type(screen.getByTestId("input-kraj-narzut-nowy"), "10,5");
-    await uzytkownik.selectOptions(screen.getByTestId("select-kraj-zrodlo-nowy"), "reczny");
     await uzytkownik.type(screen.getByTestId("input-kraj-kurs-nowy"), "4,3");
     await uzytkownik.click(screen.getByTestId("button-kraj-zapisz-nowy"));
     await waitFor(() => expect(zadania).toHaveLength(1));
-    expect(zadania[0]).toEqual({ metoda: "PUT", sciezka: "/kraje/DE", cialo: { narzutProc: 10.5, kursZrodlo: "reczny", kursReczny: 4.3, kosztyDodatkowe: 0, mytoEur: 0, pakowanieEur: 0, paliwoProc: null } });
+    expect(zadania[0]).toEqual({ metoda: "PUT", sciezka: "/kraje/DE", cialo: { narzutProc: 10.5, kursZrodlo: "nbp", kursReczny: 4.3, kosztyDodatkowe: 0, mytoEur: 0, pakowanieEur: 0, paliwoProc: null } });
     expect(await screen.findByTestId("row-kraj-DE")).toBeInTheDocument();
   });
 
@@ -249,6 +248,19 @@ describe("kraje", () => {
     const dotad = zapytan;
     await uzytkownik.click(screen.getByTestId("button-kurs-nbp-odswiez"));
     await waitFor(() => expect(zapytan).toBe(dotad + 1));
+  });
+
+  it("kurs ręczny działa równolegle z NBP: panel pokazuje, który z dwóch obowiązuje (niższy)", async () => {
+    const uzytkownik = userEvent.setup();
+    await otworz();
+    server.use(http.get("*/api/partnerzy/kurs-nbp", () => HttpResponse.json({ kurs: 4.2, zrodlo: "nbp", dataTabeli: "2026-10-13", ostrzezenie: null })));
+    await screen.findByTestId("kurs-nbp-wartosc");
+    const pole = screen.getByTestId("input-kraj-kurs-FR");
+    await uzytkownik.type(pole, "4,5");
+    expect(screen.getByTestId("kurs-uzywany-FR")).toHaveTextContent("ręczny: 4.5 → obowiązuje niższy: 4.2 (NBP)");
+    await uzytkownik.clear(pole);
+    await uzytkownik.type(pole, "4,0");
+    expect(screen.getByTestId("kurs-uzywany-FR")).toHaveTextContent("obowiązuje niższy: 4 (ręczny)");
   });
 
   it("kurs NBP z ostrzeżeniem (NBP nie odpowiada) pokazuje je i oznacza kurs jako zapisany; błąd pobrania ma komunikat", async () => {
@@ -337,9 +349,9 @@ describe("kraje", () => {
     await uzytkownik.click(screen.getByTestId("button-kraj-zapisz-nowy"));
     expect(await screen.findByText("Kraj to dwuliterowy kod, np. FR.")).toBeInTheDocument();
     await uzytkownik.type(screen.getByTestId("input-kraj-nowy-kod"), "R");
-    await uzytkownik.selectOptions(screen.getByTestId("select-kraj-zrodlo-nowy"), "reczny");
+    await uzytkownik.type(screen.getByTestId("input-kraj-kurs-nowy"), "0");
     await uzytkownik.click(screen.getByTestId("button-kraj-zapisz-nowy"));
-    expect(await screen.findByText("Kurs ręczny wymaga wartości większej od zera.")).toBeInTheDocument();
+    expect(await screen.findByText("Kurs ręczny musi być liczbą większą od zera albo pusty (wtedy tylko NBP).")).toBeInTheDocument();
     expect(zadania).toEqual([]);
   });
 
