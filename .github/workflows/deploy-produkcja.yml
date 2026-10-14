@@ -16,6 +16,9 @@ name: Deploy produkcja
 #   PROD_SSH_USER         admin
 #   PROD_SSH_KEY          klucz PRYWATNY (ed25519) DEDYKOWANY produkcji
 #   PROD_SSH_KNOWN_HOSTS  wynik `ssh-keyscan -p <port> <host>`
+# Opcjonalny sekret (ticket 264):
+#   PROD_SMTP_HASLO       hasło skrzynki nadawczej powiadomień (info@agroopony.eu). Workflow przekazuje je na STDIN skryptu wdrożenia
+#                         (nie w poleceniu SSH), a skrypt zapisuje je w .env serwera jako SMTP_HASLO i wymusza wdrożenie. Brak sekretu = nic się nie zmienia.
 
 on:
   push:
@@ -37,13 +40,16 @@ jobs:
     environment: produkcja       # pozwala wymusić ręczne zatwierdzenie (Settings → Environments)
     steps:
       - name: Deploy przez SSH
+        env:
+          # Przez `env:`, nie przez interpolację w skrypcie — GitHub maskuje wartość w logach; printf to builtin, więc hasło nie trafia do listy procesów.
+          PROD_SMTP_HASLO: ${{ secrets.PROD_SMTP_HASLO }}
         run: |
           set -euo pipefail
           mkdir -p ~/.ssh && chmod 700 ~/.ssh
           printf '%s\n' "${{ secrets.PROD_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           printf '%s\n' "${{ secrets.PROD_SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
-          ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes \
+          printf '%s\n' "$PROD_SMTP_HASLO" | ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes \
             -p "${{ secrets.PROD_SSH_PORT }}" \
             "${{ secrets.PROD_SSH_USER }}@${{ secrets.PROD_SSH_HOST }}" \
             'bash /home/admin/domains/agroopony.eu/public_html/bridgeone/_app/repo/tools/deploy-produkcja.sh'
