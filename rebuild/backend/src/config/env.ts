@@ -192,6 +192,9 @@ const schemaEnvBazowe = z.object({
     .min(1)
     .default("/home/admin/domains/agroopony.eu/public_html/bridgeone/ex-port-files"),
   SELLY_CSV_PLIK: z.string().min(1).default("sellycsv-vDsrvHnz7jmyqlvtubo4g3JA.csv"),
+  /** Kandydat poprawki kosztów: aktywacja dopiero po raporcie i próbie Selly. */
+  SELLY_CSV_KOSZT_BRUTTO: flagaBoolDomyslnieWylaczona,
+  SELLY_KOSZT_PRODUKTU_JEDNEGO_WARIANTU: flagaBoolDomyslnieWylaczona,
   SELLY_CSV_URL: z
     .string()
     .min(1)

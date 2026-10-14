@@ -1,5 +1,14 @@
 # CHANGELOG
 
+2026-10-14 08:30
+obszar: backend
+
+pliki: rebuild/backend/src/selly/{koszt-zakupu.ts,generator-csv.ts,klient.ts,csv-cli.ts,rest/koszt-produktu.ts,rest/sync-delta.ts,rest/scheduler.ts}, src/{config/env.ts,app.ts,server.ts,routes/selly-sync.ts}; test/selly.koszt-zakupu.test.ts, test/selly.sync-delta.test.ts. Wersja bazowa Git ef23ef38; kopie lokalne /tmp/selly-purchase-bak-20261014/.
+
+zmiana: przygotowanie NIEWDROŻONEGO kandydata. CSV opcjonalnie przelicza koszt netto na brutto dla pola wariantu. Tor 1 opcjonalnie wyrównuje koszt produktu tylko przy jednej aktywnej ofercie i jednym wariancie, potwierdza GET po PUT; nie udaje wysłania zakupu przy samym PUT ceny/stanu. Dwa przełączniki domyślnie wyłączone. Test izolowany na danych MO1_15231071.
+
+powód: prośba Anny o przygotowanie poprawki obu kanałów i raport przed naprawą produkcji. Bez zmian serwera, bazy produkcyjnej, importera Selly ani cen sklepu; ten wpis jest lokalny, nie zastępuje CHANGELOG serwera przy ewentualnym wdrożeniu.
+
 2026-10-02 16:18
 obszar: backend | baza danych
 

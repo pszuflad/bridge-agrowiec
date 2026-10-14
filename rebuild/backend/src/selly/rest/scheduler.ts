@@ -102,6 +102,7 @@ export type OpcjeBiegu = {
   dryRun?: boolean;
   maxProducts?: number;
   autoCreate?: boolean;
+  kosztProduktuJednegoWariantu?: boolean;
 };
 
 /**
@@ -120,6 +121,7 @@ export async function runDeltaAll(
       const r = await syncDelta(db, discovery, s, {
         dryRun: opts.dryRun || false,
         maxProducts: opts.maxProducts || 5000,
+        kosztProduktuJednegoWariantu: opts.kosztProduktuJednegoWariantu,
       });
       results.push({ dostawca: s, ...r.stats });
       // Oryginał loguje TYLKO dostawców z realną robotą — przebieg bez zmian ma być cichy.
@@ -225,6 +227,7 @@ export type ZaleznosciHarmonogramu = {
    * i bez nadpisywania nazw/kategorii/cech w sklepie — decyzja Ani 2026-10-05.
    */
   tor2?: boolean;
+  kosztProduktuJednegoWariantu?: boolean;
   /**
    * Zegar — WYŁĄCZNIE dla testów, produkcyjnie `new Date()`. Wzorzec jak `ZegarLimitera`
    * w `limiter.ts`: bez tego testu „Tor 2 o 04:30" nie da się napisać inaczej niż czekaniem.
@@ -251,6 +254,7 @@ export function stworzHarmonogramSelly({
   usuwanie = true,
   usuwanieMaksUdzial,
   tor2 = true,
+  kosztProduktuJednegoWariantu = false,
   teraz = () => new Date(),
   interwalMs = CHECK_INTERVAL_MS,
   biegDelta,
@@ -282,7 +286,7 @@ export function stworzHarmonogramSelly({
         );
       } else {
         console.log(`[Selly Scheduler] Tor1 ${tag} ${hh}:${dwaZnaki(mm)}`);
-        (biegDelta ?? (() => runDeltaAll(db, discovery)))()
+        (biegDelta ?? (() => runDeltaAll(db, discovery, { kosztProduktuJednegoWariantu })))()
         .catch((e: unknown) => console.error("[Selly Scheduler] Tor1 err:", komunikat(e)))
         .finally(() => straznikToru1.zakoncz())
         .then(async () => {

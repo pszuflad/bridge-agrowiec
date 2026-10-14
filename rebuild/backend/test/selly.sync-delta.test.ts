@@ -120,7 +120,8 @@ describe("Tor 1 — sync_delta", () => {
       expect(mapowanie(baza.db, "798368", "MO9")).toMatchObject({
         stan_wyslany: 2,
         cena_sprzedazy_wyslana: 7252,
-        cena_zakupu_wyslana: 5562.4,
+        // Tor 1 bez włączonej poprawki nie wysłał kosztu — nie udajemy potwierdzenia.
+        cena_zakupu_wyslana: null,
         ostatni_status: "ok",
         ostatni_blad: null,
       });

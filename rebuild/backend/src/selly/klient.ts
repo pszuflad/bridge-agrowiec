@@ -87,6 +87,7 @@ export type ProduktSzczegolySelly = {
   name?: string | null;
   ean?: string | null;
   price?: number | null;
+  price_purchase?: number | null;
   variants?: WariantSelly[];
   features?: CechaProduktu[];
 };

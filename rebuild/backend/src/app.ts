@@ -240,6 +240,7 @@ export function stworzApp({
         katalog: env.SELLY_CSV_DIR,
         plik: env.SELLY_CSV_PLIK,
         url: env.SELLY_CSV_URL,
+        kosztZakupuBrutto: env.SELLY_CSV_KOSZT_BRUTTO,
       },
       usuwanie: {
         wlaczone: env.SELLY_USUWANIE,
@@ -259,6 +260,7 @@ export function stworzApp({
   app.use(
     trasySellySync({
       db,
+      kosztProduktuJednegoWariantu: env.SELLY_KOSZT_PRODUKTU_JEDNEGO_WARIANTU,
       discovery:
         discoverySelly ??
         stworzDiscovery({
