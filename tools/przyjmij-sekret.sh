@@ -6,6 +6,7 @@
 # Protokół stdin (kolejność linii jest stała):
 #   linia 1 — hasło SMTP                          → SMTP_HASLO                       (ticket 264)
 #   linia 2 — mapowanie katalogów zamówień partnerów → PARTNERZY_KATALOGI_ZAMOWIEN   (ticket 265; ścieżki serwera plików NIE są w repozytorium)
+#   linia 3 — mapowanie katalogów publikacji cenników → PARTNERZY_KATALOGI_PUBLIKACJI (ticket 271; katalogi, do których Bridge zapisuje pliki dla partnerów)
 # Puste linie i brak linii = nic nie robi (brak sekretu w GitHubie). Linii dodatkowych na końcu nie dokładamy bez zmiany tego protokołu.
 #
 # Zasady dla każdej wartości:
@@ -37,11 +38,13 @@ zapisz_wartosc_w_env() {
 }
 
 przyjmij_sekret_smtp() {
-  local plik_env="$1" haslo="" katalogi=""
+  local plik_env="$1" haslo="" katalogi="" publikacja=""
   [ -t 0 ] && return 0
   IFS= read -r -t 5 haslo || true
   IFS= read -r -t 5 katalogi || true
+  IFS= read -r -t 5 publikacja || true
   zapisz_wartosc_w_env "$plik_env" SMTP_HASLO "$haslo"
   zapisz_wartosc_w_env "$plik_env" PARTNERZY_KATALOGI_ZAMOWIEN "$katalogi"
+  zapisz_wartosc_w_env "$plik_env" PARTNERZY_KATALOGI_PUBLIKACJI "$publikacja"
   return 0
 }
