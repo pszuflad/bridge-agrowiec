@@ -7,7 +7,7 @@
 // (2026-10-13) pokazał wszystkie w całości, więc tabela jest pełna (23 kraje; wpisy dla krajów, których partner nie ma, nic nie robią — dopiero gdy kraj
 // zostanie dodany i krok zostanie uruchomiony ponownie). Nowy krok wdrożenia ponownie uruchamia tę samą idempotentną funkcję i dopełnia brakujące kraje.
 
-import { and, eq, isNull, sql } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 
 import type { Baza } from "../db/index.js";
 import { partnerKraje, partnerzy } from "../db/schema.js";
@@ -73,16 +73,4 @@ export function uzupelnijDanePartnerow(db: Baza): string {
     opisy.push(`${p.nazwa}: uzupełniono pól partnera: ${Object.keys(zmiany).length}${tw ? "" : `, krajów z danymi do faktury: ${kraje}`}`);
   }
   return opisy.length ? opisy.join("; ") : "brak partnerów TyreWorld/Adtyres — nic do uzupełnienia";
-}
-
-export const EMAIL_ZAMOWIEN_TYREWORLD = "bestellung@tyre-world.de";
-
-/** Ticket 266: adres zamawiającego TyreWorld jak w dawnej integracji (zamówienia: bestellung@), tylko gdy nadal stoi tam adres z kartoteki (księgowość). */
-export function ustawEmailZamowienTyreworld(db: Baza): string {
-  const zmiany = db
-    .update(partnerzy)
-    .set({ kontaktEmail: EMAIL_ZAMOWIEN_TYREWORLD })
-    .where(and(sql`lower(${partnerzy.nazwa}) = 'tyreworld'`, eq(partnerzy.kontaktEmail, TYREWORLD.email)))
-    .run().changes;
-  return zmiany ? "TyreWorld: e-mail zamawiającego zmieniony z adresu księgowości na adres zamówień" : "TyreWorld: e-mail zamawiającego bez zmian (brak partnera albo ustawiony ręcznie)";
 }
