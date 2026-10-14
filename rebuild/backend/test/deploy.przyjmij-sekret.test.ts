@@ -19,7 +19,7 @@ describe("przyjmij_sekret_smtp", () => {
 
   /** Uruchamia funkcję tak jak deploy-produkcja.sh (set -euo pipefail, źródłowanie, stdin z potoku) i oddaje wartości widziane PO niej. */
   const uruchom = (stdin: string) => {
-    const polecenie = `set -euo pipefail; . '${SKRYPT}'; przyjmij_sekret_smtp '${plikEnv}'; echo "FORCE=\${FORCE:-0}"; set -a; . '${plikEnv}'; set +a; printf 'HASLO<%s>' "\${SMTP_HASLO:-}"; printf 'KAT<%s>' "\${PARTNERZY_KATALOGI_ZAMOWIEN:-}"`;
+    const polecenie = `set -euo pipefail; . '${SKRYPT}'; przyjmij_sekret_smtp '${plikEnv}'; echo "FORCE=\${FORCE:-0}"; set -a; . '${plikEnv}'; set +a; printf 'HASLO<%s>' "\${SMTP_HASLO:-}"; printf 'KAT<%s>' "\${PARTNERZY_KATALOGI_ZAMOWIEN:-}"; printf 'PUB<%s>' "\${PARTNERZY_KATALOGI_PUBLIKACJI:-}"`;
     const w = spawnSync("bash", ["-c", polecenie], { input: stdin, encoding: "utf8" });
     return { kod: w.status, out: w.stdout, err: w.stderr };
   };
@@ -104,5 +104,19 @@ describe("przyjmij_sekret_smtp", () => {
     expect(w.out).toContain("FORCE=1");
     expect(w.out).toContain("KAT<Adtyres=/y/orders;TyreWorld=/z>");
     expect((readFileSync(plikEnv, "utf8").match(/PARTNERZY_KATALOGI_ZAMOWIEN=/g) ?? []).length).toBe(1);
+  });
+
+  it("trzecia linia stdin (ticket 271): katalogi publikacji trafiają do .env niezależnie od pozostałych; ta sama wartość drugi raz = bez wymuszenia", () => {
+    const pub = "Adtyres=/srv/a;TyreWorld=/srv/t";
+    const w = uruchom(`\n\n${pub}\n`);
+    expect(w.out).toContain("FORCE=1");
+    expect(w.out).toContain(`PUB<${pub}>`);
+    expect(w.out).toContain("PARTNERZY_KATALOGI_PUBLIKACJI zapisane w .env");
+    expect(readFileSync(plikEnv, "utf8")).not.toContain("SMTP_HASLO");
+    expect(readFileSync(plikEnv, "utf8")).not.toContain("PARTNERZY_KATALOGI_ZAMOWIEN");
+    const przed = readFileSync(plikEnv, "utf8");
+    const drugi = uruchom(`\n\n${pub}\n`);
+    expect(drugi.out).toContain("FORCE=0");
+    expect(readFileSync(plikEnv, "utf8")).toBe(przed);
   });
 });

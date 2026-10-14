@@ -1,4 +1,6 @@
-import { isNotNull } from "drizzle-orm";
+import { existsSync } from "node:fs";
+
+import { eq, isNotNull } from "drizzle-orm";
 
 import { dodajUzytkownika } from "../auth/dodaj-uzytkownika.js";
 import { ustawHasloTymczasowe } from "../auth/reset-hasla.js";
@@ -13,9 +15,10 @@ import { wyprowadzKatalogiTrackingu } from "../partnerzy/katalogi-trackingu.js";
 import { ustawPlatnoscIDostaweSelly, uzupelnijDanePartnerow } from "../partnerzy/dane-partnerow.js";
 import { zalozZamowienieTestowe } from "../partnerzy/zamowienie-testowe.js";
 import { ustawNarzutyStartowe } from "../partnerzy/narzuty-startowe.js";
+import { parsujKatalogiPublikacji } from "../partnerzy/publikacja.js";
 import { konfiguracjaSmtp, nadawcaSmtp, parsujAdresy } from "../poczta/nadawca.js";
 import { naprawMagazynyDostawcow, ustawKonfiguracjeStartowa } from "../partnerzy/konfiguracja-startowa.js";
-import { partnerKraje } from "../db/schema.js";
+import { partnerKraje, partnerzy } from "../db/schema.js";
 import { dodajPartnera } from "../repos/partnerzy.js";
 import { ustawWEnvPliku } from "./env-plik.js";
 import type { Krok } from "./runner.js";
@@ -266,6 +269,30 @@ export const KROKI_WDROZENIA: Krok[] = [
     opis: "partnerzy B2B: ID płatności (przelew = 1) i dostawy (kurierska = 209) w Selly dla TyreWorld i Adtyres — uzupełnia puste pola i zastępuje tylko znane błędne wartości (10, 101)",
     async uruchom({ db }) {
       return ustawPlatnoscIDostaweSelly(db, 1, 209);
+    },
+  },
+  {
+    id: "2026-10-14-partnerzy-publikacja-wlaczona",
+    tylkoProdukcja: true, // środowisko testowe nie pisze do katalogów partnerów
+    opis: "partnerzy B2B: włączenie harmonogramu cenników — PARTNERZY_SCHEDULER=true, TyreWorld i Adtyres bez harmonogramu dostają co 60 minut; ruszy dopiero, gdy jest mapowanie katalogów publikacji (PARTNERZY_KATALOGI_PUBLIKACJI) i wszystkie wskazane katalogi istnieją na serwerze",
+    wymagaEnv: ["PARTNERZY_KATALOGI_PUBLIKACJI"],
+    async uruchom({ db, env }) {
+      const dbPath = env.DB_PATH as string | undefined;
+      const sciezka = (env.PLIK_ENV as string | undefined) || (dbPath ? join(dirname(dbPath), "..", ".env") : "");
+      if (!sciezka) return { odloz: "brak DB_PATH — nie wiem, gdzie jest .env" };
+      // Katalogi muszą istnieć (publikacja do nieistniejącego katalogu kończy się błędem w logu partnera); w logu tylko nazwy partnerów, bez ścieżek.
+      const katalogi = parsujKatalogiPublikacji(env.PARTNERZY_KATALOGI_PUBLIKACJI, "PARTNERZY_KATALOGI_PUBLIKACJI");
+      const brak = [...katalogi.entries()].filter(([, sc]) => !existsSync(sc)).map(([nazwa]) => nazwa);
+      if (brak.length) return { odloz: `katalog publikacji nie istnieje na serwerze dla: ${brak.join(", ")}` };
+      const opis = ustawWEnvPliku(sciezka, { PARTNERZY_SCHEDULER: "true" });
+      if (!opis) return { odloz: `brak pliku ${sciezka}` };
+      const ustawione: string[] = [];
+      for (const p of db.select().from(partnerzy).all()) {
+        if (!["tyreworld", "adtyres"].includes(p.nazwa.toLowerCase()) || p.harmonogramMinuty !== null) continue;
+        db.update(partnerzy).set({ harmonogramMinuty: 60, zmieniono: new Date().toISOString() }).where(eq(partnerzy.id, p.id)).run();
+        ustawione.push(p.nazwa);
+      }
+      return `${opis.join("; ")}; harmonogram 60 min ustawiony dla: ${ustawione.length ? ustawione.join(", ") : "nikogo (już ustawiony)"} — zacznie działać po restarcie backendu (wdrożenie wczytuje .env po krokach)`;
     },
   },
 ];
