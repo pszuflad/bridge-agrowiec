@@ -326,7 +326,7 @@ jedno polecenie: `tools/deploy-produkcja.sh`), więc **jedyna droga** to ten skr
    a nowe nazwy/pola produktu przejdź przez regułę `nazwa_pamiec`/`manual_overrides` wyżej.
 2. **Nie kończ zadania zdaniem „uruchom to na serwerze".** Jeśli skrypt wymaga ręcznego startu,
    zadanie jest niedokończone: dopisz krok do wdrożenia. Ręcznie zostaje wyłącznie wpisanie
-   SEKRETU do `$PROD_ROOT/.env` na serwerze (raz) — albo, dla hasła SMTP, sekret GitHub `PROD_SMTP_HASLO`, który workflow przekazuje na stdin skryptu wdrożenia (ticket 264, `tools/przyjmij-sekret.sh`) — plik jest poza repo, a `deploy-produkcja.sh`
+   SEKRETU do `$PROD_ROOT/.env` na serwerze (raz) — albo, dla hasła SMTP, sekret GitHub `SMTP_MAIL_INFO_PASSWORD`, który workflow przekazuje na stdin skryptu wdrożenia (ticket 264, `tools/przyjmij-sekret.sh`) — plik jest poza repo, a `deploy-produkcja.sh`
    ładuje go sam. Krok zależny od sekretu ma się POMIJAĆ (z wpisem w logu), gdy zmiennej brak,
    a nie wywalać wdrożenia.
 3. **Sekretów (haseł, tokenów) nie wpisuj do repozytorium** — jest publiczne. Skrypty biorą je
