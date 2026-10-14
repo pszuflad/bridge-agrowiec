@@ -73,6 +73,14 @@ describe("odbiór zamówień z plików", () => {
     expect(readdirSync(orders).sort()).toEqual(["notatka.txt", "swiezy.xml"]);
   });
 
+  it("pomija pliki starsze niż 30 dni (relikty dawnego obiegu) — zostają nietknięte, nie są nowym zamówieniem (ticket 267)", () => {
+    plik("2022-101179569.xml", XML_PRZYKLAD, 40 * 86_400_000);
+    plik("nowy.xml", XML_PRZYKLAD, 60_000);
+    const w = odbierzZamowieniaZPlikow(db, partnerId, orders, TERAZ);
+    expect(w).toMatchObject({ plikow: 1, nowe: 1, pominiete: 1 });
+    expect(readdirSync(orders).sort()).toEqual(["2022-101179569.xml", "done"]);
+  });
+
   it("plik ponad limit rozmiaru nie jest czytany — trafia do done/ jako BLAD_", () => {
     plik("duzy.xml", "x".repeat(2_100_000));
     expect(odbierzZamowieniaZPlikow(db, partnerId, orders, TERAZ)).toMatchObject({ plikow: 1, bledy: 1 });

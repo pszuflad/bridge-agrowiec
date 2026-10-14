@@ -23,6 +23,8 @@ import { BladZamowienia, MAKS_ROZMIAR_XML } from "./zamowienie-xml.js";
 export const OPERACJA_ODBIOR_PLIKOW = "odbior-zamowien-pliki";
 /** Plik młodszy niż to (od ostatniej modyfikacji) może być jeszcze wgrywany przez FTP. */
 export const MIN_WIEK_PLIKU_MS = 30_000;
+/** Plik starszy niż to (od ostatniej modyfikacji) to relikt dawnego obiegu (np. stare zamówienia w `orders`) — nie jest nowym zamówieniem i zostaje nietknięty (ticket 267). */
+export const MAKS_WIEK_PLIKU_MS = 30 * 86_400_000;
 
 export type WynikOdbioruPlikow = { plikow: number; nowe: number; duplikaty: number; bledy: number; pominiete: number };
 
@@ -63,7 +65,7 @@ export function odbierzZamowieniaZPlikow(db: Baza, partnerId: number, katalog: s
     try {
       const st = lstatSync(sciezka); // lstat: symlink nie jest zwykłym plikiem — nie czytamy cudzych plików przez dowiązanie
       if (!st.isFile()) continue;
-      if (teraz.getTime() - st.mtimeMs < MIN_WIEK_PLIKU_MS) {
+      if (teraz.getTime() - st.mtimeMs < MIN_WIEK_PLIKU_MS || teraz.getTime() - st.mtimeMs > MAKS_WIEK_PLIKU_MS) {
         wynik.pominiete++;
         continue;
       }
