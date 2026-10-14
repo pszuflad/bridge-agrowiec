@@ -38,11 +38,9 @@ describe("ticket 235 — walidacja i szczegóły", () => {
     for (const zle of [{ mytoEur: -1 }, { pakowanieEur: "5" }, { paliwoProc: -1 }, { paliwoProc: 1001 }]) expect(czyBlad(walidujUstawieniaKraju(zle))).toBe(true);
   });
 
-  it("przesylkaStalaEur: liczba ≥ 0 albo null (domyślnie null)", () => {
-    expect(walidujUstawieniaKraju({})).toMatchObject({ przesylkaStalaEur: null });
-    expect(walidujUstawieniaKraju({ przesylkaStalaEur: 15 })).toMatchObject({ przesylkaStalaEur: 15 });
-    expect(czyBlad(walidujUstawieniaKraju({ przesylkaStalaEur: -1 }))).toBe(true);
-    expect(czyBlad(walidujUstawieniaKraju({ przesylkaStalaEur: "15" }))).toBe(true);
+  it("przesylkaStalaEur jest wycofane (ticket 259): pole z żądania jest ignorowane i nie wychodzi z walidacji", () => {
+    expect(walidujUstawieniaKraju({ przesylkaStalaEur: 15 })).not.toHaveProperty("przesylkaStalaEur");
+    expect(czyBlad(walidujUstawieniaKraju({ przesylkaStalaEur: -1 }))).toBe(false);
   });
 
   describe("z bazą", () => {
@@ -71,7 +69,7 @@ describe("ticket 235 — walidacja i szczegóły", () => {
 
     it("PUT kraju zapisuje paliwo w historii, a szczegóły partnera oddają bieżące paliwo kraju", () => {
       const id = Number(sqlite.prepare("INSERT INTO partnerzy (nazwa, utworzono, zmieniono) VALUES ('P2', 'x', 'x')").run().lastInsertRowid);
-      ustawKraj(db, id, "FR", { narzutProc: 12, kursZrodlo: "nbp", kursReczny: null, kosztyDodatkowe: 0, przesylkaStalaEur: 50, mytoEur: 9.92, pakowanieEur: 15 });
+      ustawKraj(db, id, "FR", { narzutProc: 12, kursZrodlo: "nbp", kursReczny: null, kosztyDodatkowe: 0, mytoEur: 9.92, pakowanieEur: 15 });
       ustawPaliwo(db, "FR", 44, "2026-01-01");
       const fr = szczegolyPartnera(db, id)!.kraje.find((k) => k.kraj === "FR")!;
       expect(fr).toMatchObject({ paliwoProc: 44, mytoEur: 9.92, pakowanieEur: 15 });

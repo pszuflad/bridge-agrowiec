@@ -57,9 +57,7 @@ export type UstawieniaKraju = {
   kursReczny: number | null;
   /** Koszty dodatkowe w EUR (od ticketu 235; wcześniej PLN). */
   kosztyDodatkowe: number;
-  /** Stały koszt przesyłki w EUR; `null` = tabele GEIS. */
-  przesylkaStalaEur: number | null;
-  /** Opłata drogowa i koszt pakowania w EUR (dodawane do kosztu przesyłki ze stałej bazy kraju). */
+  /** Opłata drogowa i koszt pakowania w EUR (dodawane do kosztu przesyłki z tabel GEIS). */
   mytoEur: number;
   pakowanieEur: number;
 };
@@ -187,9 +185,6 @@ export function walidujUstawieniaKraju(cialo: unknown): UstawieniaKrajuZPaliwem 
   if (kursReczny !== null && !liczbaSkonczona(kursReczny)) return { blad: "Pole `kursReczny` musi być liczbą albo null." };
   const kosztyDodatkowe = cialo.kosztyDodatkowe ?? 0;
   if (!liczbaSkonczona(kosztyDodatkowe) || kosztyDodatkowe < 0) return { blad: "Pole `kosztyDodatkowe` musi być liczbą ≥ 0." };
-  const przesylkaStalaEur = cialo.przesylkaStalaEur ?? null;
-  if (przesylkaStalaEur !== null && (!liczbaSkonczona(przesylkaStalaEur) || przesylkaStalaEur < 0))
-    return { blad: "Pole `przesylkaStalaEur` musi być liczbą ≥ 0 albo null." };
   const mytoEur = cialo.mytoEur ?? 0;
   if (!liczbaSkonczona(mytoEur) || mytoEur < 0) return { blad: "Pole `mytoEur` musi być liczbą ≥ 0." };
   const pakowanieEur = cialo.pakowanieEur ?? 0;
@@ -198,7 +193,6 @@ export function walidujUstawieniaKraju(cialo: unknown): UstawieniaKrajuZPaliwem 
   if (paliwoProc !== null && (!liczbaSkonczona(paliwoProc) || paliwoProc < 0 || paliwoProc > 1000)) return { blad: "Pole `paliwoProc` musi być liczbą od 0 do 1000 albo null." };
   return {
     narzutProc,
-    przesylkaStalaEur,
     mytoEur,
     pakowanieEur,
     paliwoProc,

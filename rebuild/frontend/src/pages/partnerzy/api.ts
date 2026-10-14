@@ -70,7 +70,6 @@ export type KrajPartnera = {
   /** EUR (od ticketu 235; wcześniej PLN). */
   kosztyDodatkowe: number;
   /** Stały koszt przesyłki w EUR; null = tabele GEIS. */
-  przesylkaStalaEur: number | null;
   /** Opłata drogowa i pakowanie w EUR; bieżąca opłata paliwowa kraju [%] (z historii). Opcjonalne w typie — backend zawsze je zwraca. */
   mytoEur?: number;
   pakowanieEur?: number;
@@ -179,7 +178,7 @@ export type UstawieniaDoZapisu = Pick<
   SzczegolyPartnera,
   "nazwa" | "stanMin" | "zaokraglanie" | "harmonogramMinuty" | "tolerancjaCenyProc" | "formatPliku" | "csvSeparator" | "kanalFtp" | "kanalEmail" | "emailSkrzynka" | "nazwaPliku" | "fakturaNazwa" | "fakturaNip" | "fakturaUlica" | "fakturaKod" | "fakturaMiasto" | "fakturaKraj" | "sellyStatusId" | "kontaktEmail" | "kontaktTelefon"
 >;
-export type UstawieniaKraju = Pick<KrajPartnera, "narzutProc" | "kursZrodlo" | "kursReczny" | "kosztyDodatkowe" | "przesylkaStalaEur" | "mytoEur" | "pakowanieEur"> & { paliwoProc?: number | null };
+export type UstawieniaKraju = Pick<KrajPartnera, "narzutProc" | "kursZrodlo" | "kursReczny" | "kosztyDodatkowe" | "mytoEur" | "pakowanieEur"> & { paliwoProc?: number | null };
 export type MagazynKatalogu = { magazyn: string; liczbaPozycji: number };
 
 export const ZAOKRAGLANIA: { wartosc: string; etykieta: string }[] = [
