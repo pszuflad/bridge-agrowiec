@@ -55,7 +55,7 @@ export SELLY_CSV_DIR="${SELLY_CSV_DIR:-$DOCROOT/ex-port-files}"
 # Sekrety środowiska — plik POZA repo, tworzony raz ręcznie (układ: docs/tickets/188-CHORE-deploy-agroopony/plan.md).
 if [ -f "$PROD_ROOT/.env" ]; then set -a; . "$PROD_ROOT/.env"; set +a; fi
 
-# Ticket 264: hasło SMTP z sekretu GitHub (PROD_SMTP_HASLO) przychodzi na STDIN z workflow; funkcja zapisuje je w .env i wymusza wdrożenie (FORCE=1).
+# Ticket 264: hasło SMTP z sekretu GitHub (SMTP_MAIL_INFO_PASSWORD) przychodzi na STDIN z workflow; funkcja zapisuje je w .env i wymusza wdrożenie (FORCE=1).
 # Bez sekretu albo przy uruchomieniu ręcznym z terminala nic nie robi. ⚠ Działa dopiero od DRUGIEGO wdrożenia po merge'u tej zmiany (skrypt aktualizuje się w trakcie).
 [ -f "$(dirname "$0")/przyjmij-sekret.sh" ] && . "$(dirname "$0")/przyjmij-sekret.sh" && przyjmij_sekret_smtp "$PROD_ROOT/.env"
 
