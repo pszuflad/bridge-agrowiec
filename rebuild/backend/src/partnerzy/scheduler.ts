@@ -14,7 +14,7 @@ import { join } from "node:path";
 import type { Baza } from "../db/index.js";
 import { partnerLogi, partnerzy } from "../db/schema.js";
 import { publikujPliki, type KatalogiPublikacji } from "./publikacja.js";
-import { generujPlikiPartnera, podgladPartnera, type WynikGenerowania, type WynikPodgladu } from "./generator.js";
+import { generujPlikiPartnera, pelnyPlikPartnera, podgladPartnera, type WynikGenerowania, type WynikPodgladu } from "./generator.js";
 import type { KlientNbp } from "./kurs-nbp.js";
 import { zapiszBlad, zapiszOperacje, zapiszWynikGenerowania } from "./logi.js";
 
@@ -32,6 +32,8 @@ export interface SerwisPartnerow {
   generujTeraz(partnerId: number): Promise<WynikGenerowania>;
   /** Podgląd bez zapisu (pierwsze pozycje, tekst plików) — nie dotyka dysku, logów ani `partner_kursy`. */
   podglad(partnerId: number): Promise<WynikPodgladu>;
+  /** Pełny plik partnera do pobrania (wszystkie pozycje, bez zapisu na dysk); `null` = brak pliku o tej nazwie. */
+  pelnyPlik(partnerId: number, nazwa: string): Promise<{ nazwa: string; tekst: string } | null>;
   /** Jeden tick harmonogramu (wołany timerem; wystawiony dla testów). Zwraca ids partnerów, dla których uruchomiono generowanie. */
   tick(): Promise<number[]>;
   uruchom(): void;
@@ -121,6 +123,7 @@ export function stworzSerwisPartnerow(opcje: {
   return {
     generujTeraz,
     podglad: (partnerId) => podgladPartnera(db, klientNbp, partnerId, { teraz }),
+    pelnyPlik: (partnerId, nazwa) => pelnyPlikPartnera(db, klientNbp, partnerId, nazwa, { teraz }),
     tick,
     uruchom() {
       if (timer) return;

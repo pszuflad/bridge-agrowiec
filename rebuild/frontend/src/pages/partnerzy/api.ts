@@ -4,7 +4,7 @@
  * ⚠ NOWA funkcjonalność, trasy backendu poza `contract/openapi.yaml` (jak `/api/ean-pary`): kształty poniżej pochodzą z kodu
  * `rebuild/backend/src/repos/partnerzy.ts` i `partnerzy/logi.ts`, nie z nagrań fixtures.
  */
-import { zadanie } from "@/lib/api";
+import { BAZA_API, naglowki, rzucGdyBlad, zadanie } from "@/lib/api";
 
 export type PartnerNaLiscie = {
   id: number;
@@ -123,6 +123,23 @@ export const zapiszPola = async (id: number, pola: PoleDoZapisu[]): Promise<void
 export const zapiszKolumny = async (id: number, kolumny: KolumnaDoZapisu[]): Promise<void> => void (await zadanie("PUT", `${KLUCZ_PARTNERZY}/${id}/kolumny`, { kolumny }));
 export async function pobierzPodglad(id: number): Promise<WynikPodgladu> {
   return (await (await zadanie("POST", `${KLUCZ_PARTNERZY}/${id}/podglad`, {})).json()) as WynikPodgladu;
+}
+
+/**
+ * Pobranie PEŁNEGO pliku partnera z podglądu (ticket 260): `GET …/podglad/plik?nazwa=`. Pobieramy `fetch`em z nagłówkiem autoryzacji (zwykły link nie niesie tokenu),
+ * a plik zapisujemy przez tymczasową kotwicę — jak archiwum importów i CSV usuniętych Selly. Nic nie jest zapisywane ani wysyłane do partnera.
+ */
+export async function pobierzPlikPartnera(id: number, nazwa: string): Promise<void> {
+  const odpowiedz = await fetch(`${BAZA_API}${KLUCZ_PARTNERZY}/${id}/podglad/plik?nazwa=${encodeURIComponent(nazwa)}`, { headers: naglowki(false), credentials: "include" });
+  await rzucGdyBlad(odpowiedz);
+  const adres = URL.createObjectURL(await odpowiedz.blob());
+  const kotwica = document.createElement("a");
+  kotwica.href = adres;
+  kotwica.download = nazwa;
+  document.body.appendChild(kotwica);
+  kotwica.click();
+  kotwica.remove();
+  setTimeout(() => URL.revokeObjectURL(adres), 5000);
 }
 
 /** Błędy formuł z odpowiedzi 400 (`bledy[]`), albo pusta lista, gdy to inny błąd. */

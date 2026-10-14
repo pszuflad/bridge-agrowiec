@@ -113,6 +113,7 @@ describe("POST /api/partnerzy/:id/generuj", () => {
       return { pliki: [], bledy: ["jakiś błąd"], ostrzezenia: [], kursy: {}, pozycjeWybrane: 0, usunieteZArchiwum: 0 };
     },
     podglad: async () => ({ pliki: [], bledy: [], ostrzezenia: [], pozycjeWybrane: 0 }),
+    pelnyPlik: async () => null,
     tick: async () => [],
     uruchom: () => undefined,
     zatrzymaj: () => undefined,
@@ -141,5 +142,27 @@ describe("POST /api/partnerzy/:id/generuj", () => {
     expect(ok.status).toBe(200);
     expect(ok.body).toMatchObject({ bledy: ["jakiś błąd"], pozycjeWybrane: 0 });
     expect((await post("/api/partnerzy/2/generuj")).status).toBe(409);
+  });
+
+  it("pobranie pełnego pliku (ticket 260): załącznik z treścią; zła nazwa 400; brak pliku 404; bez serwisu 503; wymaga logowania", async () => {
+    const z: SerwisPartnerow = { ...wstrzykniety, pelnyPlik: async (_id, nazwa) => (nazwa === "plik.csv" ? { nazwa, tekst: "Kod;Cena\nA;1.00\n" } : null) };
+    await wejdz(z);
+    const token = ((await request(s!.app).post("/api/login").send({ email: s!.dane.email, password: s!.dane.haslo })).body as { token: string }).token;
+    const get = (u: string) => request(s!.app).get(u).set("Authorization", `Bearer ${token}`);
+    await request(s!.app).post("/api/partnerzy").set("Authorization", `Bearer ${token}`).send({ nazwa: "P" });
+    expect((await request(s!.app).get("/api/partnerzy/1/podglad/plik?nazwa=plik.csv")).status).toBe(401);
+    const ok = await get("/api/partnerzy/1/podglad/plik?nazwa=plik.csv");
+    expect(ok.status).toBe(200);
+    expect(ok.headers["content-disposition"]).toBe('attachment; filename="plik.csv"');
+    expect(ok.headers["content-type"]).toMatch(/text\/csv/);
+    expect(ok.text).toBe("Kod;Cena\nA;1.00\n");
+    expect((await get("/api/partnerzy/1/podglad/plik?nazwa=../etc/passwd")).status).toBe(400);
+    expect((await get("/api/partnerzy/1/podglad/plik")).status).toBe(400);
+    expect((await get("/api/partnerzy/1/podglad/plik?nazwa=inny.csv")).status).toBe(404);
+    s!.posprzataj();
+    s = await stworzSrodowiskoTestowe(undefined, { serwisPartnerow: undefined });
+    const t2 = ((await request(s.app).post("/api/login").send({ email: s.dane.email, password: s.dane.haslo })).body as { token: string }).token;
+    await request(s.app).post("/api/partnerzy").set("Authorization", `Bearer ${t2}`).send({ nazwa: "P" });
+    expect((await request(s.app).get("/api/partnerzy/1/podglad/plik?nazwa=plik.csv").set("Authorization", `Bearer ${t2}`)).status).toBe(503);
   });
 });
