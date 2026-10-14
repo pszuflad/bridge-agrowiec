@@ -10,3 +10,7 @@ Zmiana ścieżki produkcyjnej (`deploy-produkcja.sh` + workflow): ⚠ **działa 
 Wymaga od użytkowniczki: dodać sekret `SMTP_MAIL_INFO_PASSWORD` w GitHubie (Settings → Secrets and variables → Actions; jeśli środowisko `produkcja` ma własne sekrety — tam). Hasło ręcznie wpisane w `.env` zostanie zastąpione wartością z GitHuba przy pierwszym wdrożeniu z sekretem. `deploy-staging.sh` bez zmian — środowisko testowe nie wysyła poczty.
 
 Nazwa sekretu: użytkowniczka dodała w GitHubie sekret `SMTP_MAIL_INFO_PASSWORD` (2026-10-14), więc workflow i dokumentacja używają TEJ nazwy (pierwotnie planowane `PROD_SMTP_HASLO`).
+
+Uzupełnienie 2026-10-14 (decyzja użytkowniczki: „adres Marty to info”, „rób na main od razu z testem wysyłki”):
+- Krok `2026-10-14-partnerzy-smtp-ustawienia` dopisuje też `POWIADOMIENIA_PARTNERZY_DO=info@agroopony.eu` (ogólna skrzynka firmowa; tylko gdy brak).
+- Krok `2026-10-14-partnerzy-powiadomienia-test-wysylki` (tylko produkcja, `wymagaEnv`: wszystkie SMTP_* + hasło + odbiorca) wysyła jednorazowo wiadomość próbną na adres powiadomień przy wdrożeniu, które ma hasło w środowisku (drugie wdrożenie po release'ie). Błąd SMTP NIE przerywa wdrożenia — krok jest odkładany i ponawia się; log nie zawiera hasła ani adresów.
