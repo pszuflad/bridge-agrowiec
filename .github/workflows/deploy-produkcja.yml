@@ -20,6 +20,7 @@ name: Deploy produkcja
 #   SMTP_MAIL_INFO_PASSWORD       hasło skrzynki nadawczej powiadomień (info@agroopony.eu). Workflow przekazuje je na STDIN skryptu wdrożenia
 #                         (nie w poleceniu SSH), a skrypt zapisuje je w .env serwera jako SMTP_HASLO i wymusza wdrożenie. Brak sekretu = nic się nie zmienia.
 #   PARTNERZY_KATALOGI_ZAMOWIEN  (ticket 265) mapowanie katalogów zamówień partnerów `Nazwa=/ścieżka;…` — druga linia stdin, zapis do .env tak samo jak hasło.
+#   PARTNERZY_KATALOGI_PUBLIKACJI (ticket 271) mapowanie katalogów publikacji cenników `Nazwa=/ścieżka;…` — trzecia linia stdin, zapis do .env tak samo.
 
 on:
   push:
@@ -46,13 +47,15 @@ jobs:
           SMTP_MAIL_INFO_PASSWORD: ${{ secrets.SMTP_MAIL_INFO_PASSWORD }}
           # Ticket 265: mapowanie katalogów zamówień partnerów (`Nazwa=/ścieżka;…`) — ścieżki serwera plików nie są w repozytorium.
           PARTNERZY_KATALOGI_ZAMOWIEN: ${{ secrets.PARTNERZY_KATALOGI_ZAMOWIEN }}
+          # Ticket 271: katalogi, do których Bridge publikuje cenniki partnerów (`Nazwa=/ścieżka;…`) — także poza repozytorium.
+          PARTNERZY_KATALOGI_PUBLIKACJI: ${{ secrets.PARTNERZY_KATALOGI_PUBLIKACJI }}
         run: |
           set -euo pipefail
           mkdir -p ~/.ssh && chmod 700 ~/.ssh
           printf '%s\n' "${{ secrets.PROD_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           printf '%s\n' "${{ secrets.PROD_SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
-          printf '%s\n%s\n' "$SMTP_MAIL_INFO_PASSWORD" "$PARTNERZY_KATALOGI_ZAMOWIEN" | ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes \
+          printf '%s\n%s\n%s\n' "$SMTP_MAIL_INFO_PASSWORD" "$PARTNERZY_KATALOGI_ZAMOWIEN" "$PARTNERZY_KATALOGI_PUBLIKACJI" | ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes \
             -p "${{ secrets.PROD_SSH_PORT }}" \
             "${{ secrets.PROD_SSH_USER }}@${{ secrets.PROD_SSH_HOST }}" \
             'bash /home/admin/domains/agroopony.eu/public_html/bridgeone/_app/repo/tools/deploy-produkcja.sh'
