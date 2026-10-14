@@ -74,7 +74,7 @@ describe("API GEIS", () => {
     expect((await request(s.app).post("/api/partnerzy/geis/import").set(auth).attach("plik", Buffer.from("nie excel"), "x.xlsx")).status).toBe(400);
   });
 
-  it("podgląd kosztu przesyłki: rozbicie GEIS (waga rozliczeniowa, stawka, paliwo, myto, pakowanie) i stała baza kraju; błędy 400/404", async () => {
+  it("podgląd kosztu przesyłki: rozbicie GEIS (waga rozliczeniowa, stawka, paliwo, myto, pakowanie); błędy 400/404", async () => {
     s = await stworzSrodowiskoTestowe();
     const auth = { Authorization: `Bearer ${await token()}` };
     await request(s.app).post("/api/partnerzy/geis/import").set(auth).attach("plik", xlsx({ Francja: arkusz(250, "0 × 0 × 0", [[50, 100], [100, 150], [200, 260]]) }), "g.xlsx");
@@ -91,11 +91,6 @@ describe("API GEIS", () => {
     expect(ok.status).toBe(200);
     expect(ok.body).toMatchObject({ zrodlo: "geis", wagaRozliczeniowa: 100, progKg: 100, baza: 150, paliwoProc: 44, mytoEur: 9.92, pakowanieKrajuEur: 15 });
     expect(ok.body.razemEur).toBeCloseTo(150 * 1.44 + 2 + 9.92 + 15, 6); // pakowanie GEIS (2) z arkusza testowego
-
-    await request(s.app).put(`/api/partnerzy/${id}/kraje/FR`).set(auth).send({ narzutProc: 10, przesylkaStalaEur: 20, mytoEur: 1, pakowanieEur: 2, paliwoProc: 10 });
-    const stala = await request(s.app).post("/api/partnerzy/geis/podglad-kosztu").set(auth).send(paczka);
-    expect(stala.body).toMatchObject({ zrodlo: "stala-baza", baza: 20, paliwoProc: 10 });
-    expect(stala.body.razemEur).toBeCloseTo(20 * 1.1 + 1 + 2, 6);
 
     expect((await request(s.app).post("/api/partnerzy/geis/podglad-kosztu").set(auth).send({ ...paczka, kraj: "DE" })).status).toBe(400);
     expect((await request(s.app).post("/api/partnerzy/geis/podglad-kosztu").set(auth).send({ ...paczka, partnerId: 999 })).status).toBe(404);

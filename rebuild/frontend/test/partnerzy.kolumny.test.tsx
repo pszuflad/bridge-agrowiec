@@ -2,7 +2,7 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { App } from "@/App";
 import { KLUCZE_STORAGE } from "@/lib/api";
@@ -15,7 +15,7 @@ import { TOKEN_TESTOWY, uzytkownikZFixtura } from "./msw/kontrakt";
 const startowy = (): SzczegolyPartnera => ({
   id: 1, nazwa: "TyreWorld", aktywny: false, stanMin: 2, zaokraglanie: "grosz", harmonogramMinuty: null, tolerancjaCenyProc: null, formatPliku: "csv", csvSeparator: ";",
   kanalFtp: false, kanalEmail: false, emailSkrzynka: null,nazwaPliku: null, zmieniono: "2026-10-10T10:00:00.000Z", magazyny: [], wykluczenia: [],
-  kraje: [{ id: 1, partnerId: 1, kraj: "FR", narzutProc: 12, kursZrodlo: "nbp", kursReczny: null, kosztyDodatkowe: 0, przesylkaStalaEur: null, ostatniKurs: null }, { id: 2, partnerId: 1, kraj: "DE", narzutProc: 10, kursZrodlo: "nbp", kursReczny: null, kosztyDodatkowe: 0, przesylkaStalaEur: null, ostatniKurs: null }],
+  kraje: [{ id: 1, partnerId: 1, kraj: "FR", narzutProc: 12, kursZrodlo: "nbp", kursReczny: null, kosztyDodatkowe: 0, ostatniKurs: null }, { id: 2, partnerId: 1, kraj: "DE", narzutProc: 10, kursZrodlo: "nbp", kursReczny: null, kosztyDodatkowe: 0, ostatniKurs: null }],
   kolumny: [{ id: 1, partnerId: 1, pozycja: 1, nazwaWPliku: "CatNumber", zrodloTyp: "katalog", zrodlo: "kod" }, { id: 2, partnerId: 1, pozycja: 2, nazwaWPliku: "FR euro nett", zrodloTyp: "cena", zrodlo: "FR" }],
   polaObliczeniowe: [{ id: 1, partnerId: 1, nazwa: "DAP", formula: "cena_FR + 10" }],
 });
@@ -44,6 +44,11 @@ function zamockujApi() {
       zadania.push({ metoda: "PUT", sciezka: "/kolumny", cialo });
       partner = { ...partner, zmieniono: new Date().toISOString(), kolumny: cialo.kolumny.map((k, i) => ({ id: i + 1, partnerId: 1, pozycja: i + 1, ...k })) };
       return HttpResponse.json(partner);
+    }),
+    http.get("*/api/partnerzy/:id/podglad/plik", ({ request }) => {
+      const nazwa = new URL(request.url).searchParams.get("nazwa");
+      zadania.push({ metoda: "GET", sciezka: `/podglad/plik?nazwa=${nazwa}`, cialo: null });
+      return nazwa === "zepsuty.csv" ? HttpResponse.json({ error: "Pobranie pliku nie powiodło się." }, { status: 500 }) : new HttpResponse("CatNumber;FR euro nett\nA;100.00\nB;200.00\n", { headers: { "Content-Type": "text/csv; charset=utf-8" } });
     }),
     http.post("*/api/partnerzy/:id/podglad", () => {
       zadania.push({ metoda: "POST", sciezka: "/podglad", cialo: null });
@@ -189,6 +194,38 @@ describe("podgląd", () => {
     expect(screen.getByText("Pozycji do eksportu: 3000.")).toBeInTheDocument();
     expect(screen.getByTestId("lista-podglad-bledy")).toHaveTextContent("Brak wagi pozycji");
     expect(screen.getByTestId("lista-podglad-ostrzezenia")).toHaveTextContent("waga szacowana");
+  });
+
+  it("„Pobierz cały plik” pobiera kompletny plik z serwera przez kotwicę z nazwą pliku (ticket 260)", async () => {
+    podglad = { status: 200, cialo: WYNIK };
+    const utworzone: Blob[] = [];
+    const stary = { u: URL.createObjectURL, r: URL.revokeObjectURL };
+    URL.createObjectURL = (b: Blob | MediaSource) => (utworzone.push(b as Blob), "blob:test");
+    URL.revokeObjectURL = () => undefined;
+    const nazwy: string[] = [];
+    const klik = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(function (this: HTMLAnchorElement) { nazwy.push(this.download); });
+    try {
+      const uzytkownik = userEvent.setup();
+      await otworz();
+      await uzytkownik.click(screen.getByTestId("button-podglad"));
+      await uzytkownik.click(await screen.findByTestId("button-pobierz-tyreworld.csv"));
+      await waitFor(() => expect(nazwy).toEqual(["tyreworld.csv"]));
+      expect(zadania.some((z) => z.sciezka === "/podglad/plik?nazwa=tyreworld.csv")).toBe(true);
+      expect(await utworzone[0]!.text()).toBe("CatNumber;FR euro nett\nA;100.00\nB;200.00\n");
+    } finally {
+      klik.mockRestore();
+      URL.createObjectURL = stary.u;
+      URL.revokeObjectURL = stary.r;
+    }
+  });
+
+  it("błąd pobrania pliku pokazuje komunikat", async () => {
+    podglad = { status: 200, cialo: { ...WYNIK, pliki: [{ nazwa: "zepsuty.csv", kraj: null, tekst: "x", liczbaWierszy: 1 }] } };
+    const uzytkownik = userEvent.setup();
+    await otworz();
+    await uzytkownik.click(screen.getByTestId("button-podglad"));
+    await uzytkownik.click(await screen.findByTestId("button-pobierz-zepsuty.csv"));
+    expect(await screen.findByTestId("text-pobierz-blad")).toHaveTextContent("Pobranie pliku nie powiodło się.");
   });
 
   it("bez plików (błąd konfiguracji) pokazuje wyjaśnienie i błędy", async () => {

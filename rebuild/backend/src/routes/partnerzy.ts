@@ -537,6 +537,25 @@ export function trasyPartnerzy({ db, serwis, odbiorEmail, klientSelly, sellyZamo
     }
   });
 
+  /** Pobranie PEŁNEGO pliku partnera z podglądu (ticket 260): `?nazwa=<plik z podglądu>`; bez zapisu na dysk i bez wysyłki. */
+  router.get("/api/partnerzy/:id/podglad/plik", requireAuth, async (req, res) => {
+    const id = idZParametru(req, res);
+    if (id === null) return;
+    if (!serwis) return void res.status(503).json({ error: "Podgląd plików partnerów nie jest skonfigurowany na tym serwerze." });
+    const nazwa = typeof req.query.nazwa === "string" ? req.query.nazwa : "";
+    if (!/^[A-Za-z0-9._-]{1,120}$/.test(nazwa)) return void res.status(400).json({ error: "Brak poprawnej nazwy pliku (`nazwa`)." });
+    try {
+      const plik = await serwis.pelnyPlik(id, nazwa);
+      if (!plik) return void res.status(404).json({ error: "Partner nie ma takiego pliku (sprawdź nazwę w podglądzie)." });
+      res.setHeader("Content-Type", plik.nazwa.endsWith(".xml") ? "application/xml; charset=utf-8" : "text/csv; charset=utf-8");
+      res.setHeader("Content-Disposition", `attachment; filename="${plik.nazwa}"`);
+      res.send(plik.tekst);
+    } catch (e) {
+      console.error("[partnerzy] pobranie pliku nie powiodło się:", e instanceof Error ? e.message : e);
+      res.status(500).json({ error: "Pobranie pliku nie powiodło się." });
+    }
+  });
+
   router.put("/api/partnerzy/:id/kraje/:kraj", requireAuth, (req, res) => {
     const id = idZParametru(req, res);
     if (id === null) return;

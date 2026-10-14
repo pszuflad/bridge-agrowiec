@@ -91,8 +91,8 @@ describe("narzuty startowe partnerów (ticket 258)", () => {
   });
 
   it("jest w rejestrze kroków na końcu i zapisuje wynik", async () => {
-    expect(KROKI_WDROZENIA[KROKI_WDROZENIA.length - 1]!.id).toBe("2026-10-13-partnerzy-narzuty-startowe");
-    const krok = KROKI_WDROZENIA[KROKI_WDROZENIA.length - 1]!;
+    const krok = KROKI_WDROZENIA.find((k) => k.id === "2026-10-13-partnerzy-narzuty-startowe")!;
+    expect(krok).toBeDefined();
     expect((await uruchomKroki(sqlite, db, [krok], {})).wykonane).toEqual([krok.id]);
     expect((await uruchomKroki(sqlite, db, [krok], {})).wykonane).toEqual([]);
     expect(reguly("TyreWorld")).toHaveLength(4);

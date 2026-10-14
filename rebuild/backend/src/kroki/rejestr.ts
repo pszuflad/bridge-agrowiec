@@ -1,3 +1,5 @@
+import { isNotNull } from "drizzle-orm";
+
 import { dodajUzytkownika } from "../auth/dodaj-uzytkownika.js";
 import { ustawHasloTymczasowe } from "../auth/reset-hasla.js";
 import {
@@ -11,6 +13,7 @@ import { wyprowadzKatalogiTrackingu } from "../partnerzy/katalogi-trackingu.js";
 import { uzupelnijDanePartnerow } from "../partnerzy/dane-partnerow.js";
 import { ustawNarzutyStartowe } from "../partnerzy/narzuty-startowe.js";
 import { naprawMagazynyDostawcow, ustawKonfiguracjeStartowa } from "../partnerzy/konfiguracja-startowa.js";
+import { partnerKraje } from "../db/schema.js";
 import { dodajPartnera } from "../repos/partnerzy.js";
 import { ustawWEnvPliku } from "./env-plik.js";
 import type { Krok } from "./runner.js";
@@ -157,6 +160,14 @@ export const KROKI_WDROZENIA: Krok[] = [
     opis: "partnerzy B2B: narzuty startowe wg starego panelu — dopłata 5 % w krajach partnera, które mają jeszcze 0 %, oraz 7 reguł marek (Niemcy, Rolnicze: Alliance/CEAT 2 %, Vredestein 3 %); tylko uzupełnia, niczego nie nadpisuje; odkłada się, gdy nie rozpozna dostawcy w tabeli dostawców",
     async uruchom({ db }) {
       return ustawNarzutyStartowe(db);
+    },
+  },
+  {
+    id: "2026-10-14-partnerzy-zdjecie-przesylki-bazowej",
+    opis: "partnerzy B2B: przesyłka liczy się wyłącznie z tabel GEIS — czyści stare wartości „przesyłki bazowej” (np. 15 EUR z konfiguracji startowej) w krajach partnerów; pole nie jest już używane w wycenie",
+    async uruchom({ db }) {
+      const n = db.update(partnerKraje).set({ przesylkaStalaEur: null }).where(isNotNull(partnerKraje.przesylkaStalaEur)).run().changes;
+      return `wyczyszczono przesyłkę bazową w krajach: ${n}`;
     },
   },
 ];

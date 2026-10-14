@@ -11,6 +11,7 @@ import type { KlientNbp } from "../src/partnerzy/kurs-nbp.js";
 import { pobierzBledy } from "../src/partnerzy/logi.js";
 import { parsujKatalogiPublikacji, publikujPliki } from "../src/partnerzy/publikacja.js";
 import { stworzSerwisPartnerow } from "../src/partnerzy/scheduler.js";
+import { importujTabeleGeis } from "../src/partnerzy/transport.js";
 import { KATALOG_SCHEMATU } from "./gate/repo.js";
 
 const NBP: KlientNbp = { pobierzKursEur: async () => ({ kurs: 4.3, data: "2026-10-09" }) };
@@ -34,6 +35,7 @@ describe("publikacja do katalogu partnera", () => {
     katalog = mkdtempSync(join(tmpdir(), "bridge-238-"));
     ({ sqlite, db } = otworzBaze(join(katalog, "t.db")));
     zastosujMigracje(sqlite, KATALOG_SCHEMATU());
+    importujTabeleGeis(db, { AT: { wspGabarytowy: 250, stawki: [[100, 15]] } });
     db.insert(products).values({
       kod: "A", nazwa: "Opona", marka: "M", kategoria: "Rolnicze", dostawca: "MO1", magazyn: "MO1", stan: 5, cenaZakupu: 1000, cenaSprzedazy: 1500, marzaPct: 50,
       dataAktualizacji: "2026-10-10T00:00:00.000Z", ean: "5901", waga: 40, dlugosc: 70, szerokoscPaczki: 50, wysokosc: 70,
@@ -61,7 +63,7 @@ describe("publikacja do katalogu partnera", () => {
   const partner = (nazwa: string, narzut: number) => {
     const id = Number(sqlite.prepare("INSERT INTO partnerzy (nazwa, nazwa_pliku, utworzono, zmieniono) VALUES (?, 'plik', 'x', 'x')").run(nazwa).lastInsertRowid);
     sqlite.prepare("INSERT INTO partner_magazyny VALUES (?, 'MO1')").run(id);
-    sqlite.prepare("INSERT INTO partner_kraje (partner_id, kraj, narzut_proc, przesylka_stala_eur) VALUES (?, 'AT', ?, 15)").run(id, narzut);
+    sqlite.prepare("INSERT INTO partner_kraje (partner_id, kraj, narzut_proc) VALUES (?, 'AT', ?)").run(id, narzut);
     sqlite.prepare("INSERT INTO partner_kolumny (partner_id, pozycja, nazwa_w_pliku, zrodlo_typ, zrodlo) VALUES (?, 1, 'CatNumber', 'katalog', 'numerPartnera'), (?, 2, 'Cena', 'cena', 'AT')").run(id, id);
     return id;
   };
