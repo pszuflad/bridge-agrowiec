@@ -61,6 +61,7 @@ export type ZaleznosciSellySync = {
    * miałaby własny, zimny cache (`docs/karty/I15.8/wejscie-108.md`).
    */
   discovery: Discovery;
+  kosztProduktuJednegoWariantu?: boolean;
 };
 
 /** Komunikat błędu w kształcie, w jakim oddaje go oryginał (`e.message`, bez opakowania). */
@@ -73,7 +74,7 @@ function znanyDostawca(kod: unknown): kod is string {
   return typeof kod === "string" && (ACTIVE_SUPPLIERS as readonly string[]).includes(kod);
 }
 
-export function trasySellySync({ db, discovery }: ZaleznosciSellySync): Router {
+export function trasySellySync({ db, discovery, kosztProduktuJednegoWariantu = false }: ZaleznosciSellySync): Router {
   const router = Router();
 
   /**
@@ -112,7 +113,7 @@ export function trasySellySync({ db, discovery }: ZaleznosciSellySync): Router {
         return;
       }
       try {
-        res.json(await syncDelta(db, discovery, dostawca));
+        res.json(await syncDelta(db, discovery, dostawca, { kosztProduktuJednegoWariantu }));
       } catch (e) {
         res.status(500).json({ ok: false, error: komunikat(e) });
       }
@@ -122,7 +123,7 @@ export function trasySellySync({ db, discovery }: ZaleznosciSellySync): Router {
   /** Tor 1 dla wszystkich (`:55-62`). */
   router.post("/api/selly/sync-delta-all", requireAuth, async (_req: Request, res: Response) => {
     try {
-      res.json({ ok: true, results: await runDeltaAll(db, discovery) });
+      res.json({ ok: true, results: await runDeltaAll(db, discovery, { kosztProduktuJednegoWariantu }) });
     } catch (e) {
       res.status(500).json({ ok: false, error: komunikat(e) });
     }

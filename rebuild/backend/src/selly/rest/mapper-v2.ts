@@ -78,7 +78,7 @@ export type PayloadV2 = {
   name: string | null | undefined;
   weight: number;
   provider_code: string | null;
-  price_purchase: number;
+  price_purchase?: number;
   visible: boolean;
   ean?: string;
   features?: CechaSelly[];

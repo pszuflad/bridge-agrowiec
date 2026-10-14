@@ -35,6 +35,7 @@ import { asc, eq, getTableColumns, type SQL, sql } from "drizzle-orm";
 import type { Baza } from "../db/index.js";
 import { products } from "../db/schema.js";
 import type { ProduktWewnetrzny } from "../repos/products.js";
+import { kosztZakupuBrutto } from "./koszt-zakupu.js";
 
 /** BOM — bez niego Excel czyta plik jako windows-1250 i zamienia „ą" w krzaki. */
 const BOM = "﻿";
@@ -282,14 +283,19 @@ function esc(wartosc: unknown): string {
  * Buduje treść pliku — port pętli głównej (`generate_selly_export.cjs:87-114`).
  * Tylko produkty `status='aktywny'`, kolejność po `id`. Plik kończy się `\r\n`.
  */
-export function zbudujCsvSelly(db: Baza): { tresc: string; wiersze: number } {
+export function zbudujCsvSelly(
+  db: Baza,
+  opcje: { kosztZakupuBrutto?: boolean; kodProduktu?: string } = {},
+): { tresc: string; wiersze: number } {
   const aktywne = db
     // Projekcja: całość modelu, ale dziesięć flag SUROWO — patrz komentarz `FLAGI_SUROWE`.
     // Bez tego mapper boolean drizzle zamienia napis `'Tak'` z bazy na `false` i flaga
     // wypada z pliku (wpis backlogu #153.1, 899 z 5396 wierszy).
     .select({ ...getTableColumns(products), ...FLAGI_SUROWE })
     .from(products)
-    .where(eq(products.status, "aktywny"))
+    .where(opcje.kodProduktu
+      ? sql`${products.status} = 'aktywny' AND ${products.kod} = ${opcje.kodProduktu}`
+      : eq(products.status, "aktywny"))
     .orderBy(asc(products.id))
     .all();
 
@@ -300,6 +306,10 @@ export function zbudujCsvSelly(db: Baza): { tresc: string; wiersze: number } {
       KOLUMNY.map(([naglowek, pole]) => {
         if (!pole) return "";
         let wartosc: unknown = produkt[pole];
+        if (naglowek === "Cena-zakupu" && opcje.kosztZakupuBrutto) {
+          const brutto = kosztZakupuBrutto(produkt.cenaZakupu, produkt.vat);
+          wartosc = brutto === null ? "" : brutto.toFixed(2);
+        }
 
         if (KOLUMNY_BOOL.has(pole)) wartosc = wartosc ? "Tak" : "";
         if (naglowek === "Kod-dostawcy" && typeof wartosc === "string") {
@@ -327,6 +337,8 @@ export type SciezkiCsvSelly = {
   katalog: string;
   plik: string;
   url: string;
+  /** Wyłączone do zatwierdzenia raportu i próby jednego wariantu. */
+  kosztZakupuBrutto?: boolean;
 };
 
 /** Pełna ścieżka pliku — jedno miejsce, zamiast dwóch zahardkodowanych stałych oryginału. */
@@ -468,7 +480,7 @@ export function wygenerujCsvSelly(db: Baza, sciezki: SciezkiCsvSelly): WynikGene
   const pelna = sciezkaPliku(sciezki);
 
   mkdirSync(sciezki.katalog, { recursive: true });
-  const { tresc, wiersze } = zbudujCsvSelly(db);
+  const { tresc, wiersze } = zbudujCsvSelly(db, { kosztZakupuBrutto: sciezki.kosztZakupuBrutto });
   zapiszAtomowo(pelna, tresc);
 
   const st = statSync(pelna);

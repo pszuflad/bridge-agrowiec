@@ -21,6 +21,7 @@ import { opakujKlientaTrybem } from "./selly/tryb.js";
 import { stworzDiscovery } from "./selly/rest/discovery.js";
 import { budujPayloadProduktuV2 } from "./selly/rest/mapper-v2.js";
 import { stworzHarmonogramSelly } from "./selly/rest/scheduler.js";
+import { syncDelta } from "./selly/rest/sync-delta.js";
 
 const env = wczytajEnv();
 const { sqlite, db } = otworzBaze(env.DB_PATH);
@@ -71,6 +72,7 @@ const harmonogramSelly = stworzHarmonogramSelly({
   usuwanie: env.SELLY_USUWANIE,
   usuwanieMaksUdzial: env.SELLY_USUWANIE_MAKS_UDZIAL,
   tor2: env.SELLY_TOR2,
+  kosztProduktuJednegoWariantu: env.SELLY_KOSZT_PRODUKTU_JEDNEGO_WARIANTU,
 });
 
 // Odświeżanie dostępności (karta I15.10b). Wpięcie modułu `selly/dostepnosc.ts` z I15.10:
@@ -111,7 +113,12 @@ if (env.SELLY_TRYB === "wylaczony") {
         katalog: env.SELLY_CSV_DIR,
         plik: env.SELLY_CSV_PLIK,
         url: env.SELLY_CSV_URL,
+        kosztZakupuBrutto: env.SELLY_CSV_KOSZT_BRUTTO,
       },
+      synchronizujDelte: (db, discovery, dostawca) =>
+        syncDelta(db, discovery, dostawca, {
+          kosztProduktuJednegoWariantu: env.SELLY_KOSZT_PRODUKTU_JEDNEGO_WARIANTU,
+        }),
     }),
   );
 }
