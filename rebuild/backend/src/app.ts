@@ -34,6 +34,7 @@ import { trasySpedycji } from "./routes/spedycja.js";
 import { trasyWagiGabarytowej } from "./routes/waga-gabarytowa.js";
 import { trasyEanPary } from "./routes/ean-pary.js";
 import type { OdbiorEmail } from "./partnerzy/odbior-email.js";
+import type { NadawcaEmail } from "./poczta/nadawca.js";
 import { trasyPartnerzy } from "./routes/partnerzy.js";
 import type { KlientNbp } from "./partnerzy/kurs-nbp.js";
 import type { SerwisPartnerow } from "./partnerzy/scheduler.js";
@@ -95,6 +96,8 @@ export type ZaleznosciApp = {
   sellyZamowienia?: boolean;
   /** Ticket 250: klient NBP do podglądu aktualnego kursu w panelu partnerów. Bez niego `GET /api/partnerzy/kurs-nbp` odpowiada 503. */
   klientNbp?: KlientNbp;
+  /** Powiadomienia e-mail o błędach zamówień (ticket 263); brak = wyłączone. */
+  powiadomienia?: { nadawca: NadawcaEmail; odbiorcy: string[] };
   /** Ticket 256: partner (nazwa małymi literami) → katalog, do którego Bridge zapisuje pliki trackingu. Brak = plik do pobrania w panelu. */
   katalogiTrackingu?: ReadonlyMap<string, string>;
 };
@@ -115,6 +118,7 @@ export function stworzApp({
   odbiorEmail,
   sellyZamowienia,
   klientNbp,
+  powiadomienia,
   katalogiTrackingu,
 }: ZaleznosciApp): Express {
   const app = express();
@@ -270,7 +274,7 @@ export function stworzApp({
   app.use(trasyEksportuShoper({ db }));
   app.use(trasyWagiGabarytowej({ db }));
   app.use(trasyEanPary({ db }));
-  app.use(trasyPartnerzy({ db, serwis: serwisPartnerow, odbiorEmail, klientSelly: klientSellyDoUzycia, sellyZamowienia, klientNbp, katalogiTrackingu }));
+  app.use(trasyPartnerzy({ db, serwis: serwisPartnerow, odbiorEmail, klientSelly: klientSellyDoUzycia, sellyZamowienia, klientNbp, katalogiTrackingu, powiadomienia }));
   app.use(trasyNieobecne({ db }));
   app.use(trasyAtrybutow({ db }));
 

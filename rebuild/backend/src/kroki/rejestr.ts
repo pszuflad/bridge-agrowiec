@@ -184,4 +184,26 @@ export const KROKI_WDROZENIA: Krok[] = [
       return `${opis.join("; ")} — zacznie działać po restarcie backendu (wdrożenie wczytuje .env po krokach)${tryb}`;
     },
   },
+  {
+    id: "2026-10-14-partnerzy-smtp-ustawienia",
+    tylkoProdukcja: true, // środowisko testowe nie wysyła poczty do prawdziwych adresów
+    opis: "partnerzy B2B: ustawienia SMTP skrzynki nadawczej powiadomień (serwer, port, użytkownik, adres i nazwa nadawcy — dane skrzynki firmowej) w .env produkcji; dopisuje TYLKO brakujące klucze, nie ustawia hasła (SMTP_HASLO wpisuje użytkowniczka sama) ani adresów odbiorców (POWIADOMIENIA_PARTNERZY_DO)",
+    async uruchom({ env }) {
+      const dbPath = env.DB_PATH as string | undefined;
+      const sciezka = (env.PLIK_ENV as string | undefined) || (dbPath ? join(dirname(dbPath), "..", ".env") : "");
+      if (!sciezka) return { odloz: "brak DB_PATH — nie wiem, gdzie jest .env" };
+      const domyslne: Record<string, string> = {
+        SMTP_HOST: "vpshd86.cyber-folks.pl",
+        SMTP_PORT: "465",
+        SMTP_USER: "info@agroopony.eu",
+        SMTP_OD: "info@agroopony.eu",
+        SMTP_OD_NAZWA: "AGROOPONY",
+      };
+      const brakujace = Object.fromEntries(Object.entries(domyslne).filter(([klucz]) => !env[klucz]?.trim()));
+      if (Object.keys(brakujace).length === 0) return "ustawienia SMTP już są w .env — bez zmian";
+      const opis = ustawWEnvPliku(sciezka, brakujace);
+      if (!opis) return { odloz: `brak pliku ${sciezka}` };
+      return `${opis.join("; ")} — hasło (SMTP_HASLO) i odbiorcy (POWIADOMIENIA_PARTNERZY_DO) użytkowniczka wpisuje sama w .env`;
+    },
+  },
 ];
