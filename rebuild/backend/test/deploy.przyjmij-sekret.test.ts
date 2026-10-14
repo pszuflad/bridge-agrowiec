@@ -19,7 +19,7 @@ describe("przyjmij_sekret_smtp", () => {
 
   /** Uruchamia funkcję tak jak deploy-produkcja.sh (set -euo pipefail, źródłowanie, stdin z potoku) i oddaje wartości widziane PO niej. */
   const uruchom = (stdin: string) => {
-    const polecenie = `set -euo pipefail; . '${SKRYPT}'; przyjmij_sekret_smtp '${plikEnv}'; echo "FORCE=\${FORCE:-0}"; set -a; . '${plikEnv}'; set +a; printf 'HASLO<%s>' "\${SMTP_HASLO:-}"`;
+    const polecenie = `set -euo pipefail; . '${SKRYPT}'; przyjmij_sekret_smtp '${plikEnv}'; echo "FORCE=\${FORCE:-0}"; set -a; . '${plikEnv}'; set +a; printf 'HASLO<%s>' "\${SMTP_HASLO:-}"; printf 'KAT<%s>' "\${PARTNERZY_KATALOGI_ZAMOWIEN:-}"`;
     const w = spawnSync("bash", ["-c", polecenie], { input: stdin, encoding: "utf8" });
     return { kod: w.status, out: w.stdout, err: w.stderr };
   };
@@ -73,5 +73,36 @@ describe("przyjmij_sekret_smtp", () => {
     expect((env.match(/SMTP_HASLO=/g) ?? []).length).toBe(1);
     rmSync(plikEnv);
     expect(uruchom("nowy-plik\n").out).toContain("HASLO<nowy-plik>");
+  });
+
+  it("druga linia stdin (ticket 265): mapowanie katalogów ze średnikami trafia do .env w całości; hasło i mapowanie zapisują się niezależnie", () => {
+    const mapowanie = "Adtyres=/srv/a/customer/orders;TyreWorld=/srv/t/orders";
+    const w = uruchom(`haslo-smtp\n${mapowanie}\n`);
+    expect(w.out).toContain("FORCE=1");
+    expect(w.out).toContain(`KAT<${mapowanie}>`); // po `source` .env (średnik nie rozbija linii)
+    expect(w.out).toContain("HASLO<haslo-smtp>");
+    expect(w.out.replace(`KAT<${mapowanie}>`, "")).not.toContain("/srv/a"); // ścieżki poza tym jedynym miejscem nie wyciekają (np. do komunikatów skryptu)
+    expect(w.out).toContain("PARTNERZY_KATALOGI_ZAMOWIEN zapisane w .env");
+    const env = readFileSync(plikEnv, "utf8");
+    expect(env.startsWith("JWT_SECRET=tajny\nSELLY_TRYB=pelny\n")).toBe(true);
+    expect((env.match(/PARTNERZY_KATALOGI_ZAMOWIEN=/g) ?? []).length).toBe(1);
+  });
+
+  it("samo mapowanie (pusta linia hasła) zapisuje tylko mapowanie; to samo mapowanie drugi raz = bez zmian i bez wymuszenia", () => {
+    uruchom("\nAdtyres=/x/orders\n");
+    expect(readFileSync(plikEnv, "utf8")).not.toContain("SMTP_HASLO");
+    expect(readFileSync(plikEnv, "utf8")).toContain("PARTNERZY_KATALOGI_ZAMOWIEN=");
+    const przed = readFileSync(plikEnv, "utf8");
+    const w = uruchom("\nAdtyres=/x/orders\n");
+    expect(w.out).toContain("FORCE=0");
+    expect(readFileSync(plikEnv, "utf8")).toBe(przed);
+  });
+
+  it("zmiana mapowania zastępuje stare (jedna linia) i wymusza wdrożenie", () => {
+    uruchom("\nAdtyres=/x/orders\n");
+    const w = uruchom("\nAdtyres=/y/orders;TyreWorld=/z\n");
+    expect(w.out).toContain("FORCE=1");
+    expect(w.out).toContain("KAT<Adtyres=/y/orders;TyreWorld=/z>");
+    expect((readFileSync(plikEnv, "utf8").match(/PARTNERZY_KATALOGI_ZAMOWIEN=/g) ?? []).length).toBe(1);
   });
 });
