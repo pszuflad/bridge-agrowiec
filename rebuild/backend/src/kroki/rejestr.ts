@@ -13,7 +13,7 @@ import { dirname, join } from "node:path";
 import { usunWszystkieKartyAuto } from "../import/migracje/scal-karty-auto.js";
 import { wyprowadzKatalogiTrackingu } from "../partnerzy/katalogi-trackingu.js";
 import { ustawPlatnoscIDostaweSelly, uzupelnijDanePartnerow } from "../partnerzy/dane-partnerow.js";
-import { zalozZamowienieTestowe } from "../partnerzy/zamowienie-testowe.js";
+import { zalozZamowieniaSymulacyjne, zalozZamowienieTestowe } from "../partnerzy/zamowienie-testowe.js";
 import { ustawNarzutyStartowe } from "../partnerzy/narzuty-startowe.js";
 import { parsujKatalogiPublikacji } from "../partnerzy/publikacja.js";
 import { konfiguracjaSmtp, nadawcaSmtp, parsujAdresy } from "../poczta/nadawca.js";
@@ -293,6 +293,14 @@ export const KROKI_WDROZENIA: Krok[] = [
         ustawione.push(p.nazwa);
       }
       return `${opis.join("; ")}; harmonogram 60 min ustawiony dla: ${ustawione.length ? ustawione.join(", ") : "nikogo (już ustawiony)"} — zacznie działać po restarcie backendu (wdrożenie wczytuje .env po krokach)`;
+    },
+  },
+  {
+    id: "2026-10-14-partnerzy-symulacja-zamowien",
+    tylkoProdukcja: true,
+    opis: "partnerzy B2B: dwa zamówienia symulacyjne w panelu (Adtyres → FR w formacie DOCUMENTORDER, TyreWorld → DE w formacie bestellung) z pełnym adresem dostawy, do sprawdzenia przepływu i „Utwórz w Selly”; odłożone, gdy brak 4 produktów z powiązaniem Selly",
+    async uruchom({ db }) {
+      return zalozZamowieniaSymulacyjne(db);
     },
   },
 ];
