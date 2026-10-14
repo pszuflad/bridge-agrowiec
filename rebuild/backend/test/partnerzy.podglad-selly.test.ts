@@ -59,7 +59,7 @@ describe("zamówienie partnera → Selly", () => {
       expect(p.pozycje[0]!.dopasowanie).toMatchObject({ kod: "011200284", dostawca: "MO1", sellyProductId: 501, sellyVariantId: 601 });
       expect(p.ostrzezenia).toEqual([expect.stringMatching(/pełnego adresu dostawy.*ulica, kod pocztowy, miasto/)]);
       expect(p.zadanie).toMatchObject({
-        status_id: 3, payment_id: 10, delivery_id: 10, email: "bill@partner.example", phone: "+376 111 222",
+        status_id: 3, payment_id: 1, delivery_id: 209, email: "bill@partner.example", phone: "+376 111 222",
         invoice_company: "Adtyres SL", invoice_nip: "ATU1", invoice_postcode: "AD500", ship_company: "Jan Kowalski", delivery_country_iso2: "AT",
       });
       expect(p.zadanie).not.toHaveProperty("currency");

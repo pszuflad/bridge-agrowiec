@@ -10,7 +10,7 @@ import {
 import { dirname, join } from "node:path";
 import { usunWszystkieKartyAuto } from "../import/migracje/scal-karty-auto.js";
 import { wyprowadzKatalogiTrackingu } from "../partnerzy/katalogi-trackingu.js";
-import { uzupelnijDanePartnerow } from "../partnerzy/dane-partnerow.js";
+import { ustawPlatnoscIDostaweSelly, uzupelnijDanePartnerow } from "../partnerzy/dane-partnerow.js";
 import { zalozZamowienieTestowe } from "../partnerzy/zamowienie-testowe.js";
 import { ustawNarzutyStartowe } from "../partnerzy/narzuty-startowe.js";
 import { konfiguracjaSmtp, nadawcaSmtp, parsujAdresy } from "../poczta/nadawca.js";
@@ -259,6 +259,13 @@ export const KROKI_WDROZENIA: Krok[] = [
     opis: "partnerzy B2B: jedno zamówienie testowe (TEST-SELLY-…, 1 szt. produktu z powiązaniem Selly, 10 EUR) w panelu Adtyres — do sprawdzenia „Utwórz w Selly”; po teście usuwa się je w Selly ręcznie; brak pasującego produktu → krok odłożony",
     async uruchom({ db }) {
       return zalozZamowienieTestowe(db, "Adtyres");
+    },
+  },
+  {
+    id: "2026-10-14-partnerzy-selly-platnosc-dostawa",
+    opis: "partnerzy B2B: ID płatności (przelew = 1) i dostawy (kurierska = 209) w Selly dla TyreWorld i Adtyres — uzupełnia puste pola i zastępuje tylko znane błędne wartości (10, 101)",
+    async uruchom({ db }) {
+      return ustawPlatnoscIDostaweSelly(db, 1, 209);
     },
   },
 ];
