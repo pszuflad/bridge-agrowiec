@@ -170,4 +170,18 @@ export const KROKI_WDROZENIA: Krok[] = [
       return `wyczyszczono przesyłkę bazową w krajach: ${n}`;
     },
   },
+  {
+    id: "2026-10-14-partnerzy-selly-zamowienia-wlaczone",
+    tylkoProdukcja: true, // środowisko testowe nie może dostać zapisu do sklepu Selly
+    opis: "partnerzy B2B: włączenie „Utwórz w Selly” — PARTNERZY_SELLY_ZAMOWIENIA=true w .env produkcji (decyzja użytkowniczki 2026-10-14); zamówienie powstaje w sklepie dopiero po ręcznym kliknięciu, z podglądem; działa tylko przy SELLY_TRYB=pelny",
+    async uruchom({ env }) {
+      const dbPath = env.DB_PATH as string | undefined;
+      const sciezka = (env.PLIK_ENV as string | undefined) || (dbPath ? join(dirname(dbPath), "..", ".env") : "");
+      if (!sciezka) return { odloz: "brak DB_PATH — nie wiem, gdzie jest .env" };
+      const opis = ustawWEnvPliku(sciezka, { PARTNERZY_SELLY_ZAMOWIENIA: "true" });
+      if (!opis) return { odloz: `brak pliku ${sciezka}` };
+      const tryb = env.SELLY_TRYB === "pelny" ? "" : ` — UWAGA: SELLY_TRYB=${env.SELLY_TRYB ?? "(brak)"}, flaga zadziała dopiero przy SELLY_TRYB=pelny`;
+      return `${opis.join("; ")} — zacznie działać po restarcie backendu (wdrożenie wczytuje .env po krokach)${tryb}`;
+    },
+  },
 ];
