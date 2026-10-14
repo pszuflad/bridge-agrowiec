@@ -32,6 +32,8 @@ import { globalnyLimiter } from "./limiter.js";
 import { toSellyPayloadV2, type PayloadV2, type WierszMapperaV2 } from "./mapper-v2.js";
 import { cenaBazowaJednegoWariantu, sprawdzCelSelly } from "./bezpieczenstwo.js";
 import { szczegolyDoZapisu } from "./log-szczegoly.js";
+import { kosztNettoJedynejOferty, potwierdzZapisKosztu } from "./koszt-produktu.js";
+import type { WariantSelly } from "../klient.js";
 
 /** Wiersz `collectFullSyncItems` — kolumny SQL-a, dlatego `snake_case`. */
 export type WierszFull = WierszBridge &
@@ -179,15 +181,22 @@ function logSyncEnd(
 }
 
 /** `markProductSynced` (`:118-125`) — cena i stan to domena Toru 1, tu tylko `cena_zakupu_wyslana`. */
-function markProductSynced(db: Baza, row: WierszFull): void {
+function markProductSynced(db: Baza, row: WierszFull, potwierdzonyKoszt?: number): void {
   db.$client
     .prepare(
       `UPDATE selly_products
     SET ostatnia_sync = datetime('now'), ostatni_status = 'ok', ostatni_blad = NULL,
-        cena_zakupu_wyslana = ?
+        cena_zakupu_wyslana = COALESCE(?, cena_zakupu_wyslana)
     WHERE kod_importu = ? AND dostawca = ?`,
     )
-    .run(Number(row.cena_zakupu) || 0, row.kod_importu, row.dostawca);
+    .run(potwierdzonyKoszt ?? null, row.kod_importu, row.dostawca);
+}
+
+/** Nie wybieramy kosztu ostatniego dostawcy jako wspólnego kosztu wielomagazynowej karty. */
+function zabezpieczKosztProduktu(db: Baza, row: WierszFull, payload: PayloadV2, warianty?: WariantSelly[]): void {
+  const netto = kosztNettoJedynejOferty(db, row.kod_importu, row.bridge_product_id);
+  if (warianty?.length !== 1 || netto === undefined) delete payload.price_purchase;
+  else payload.price_purchase = netto;
 }
 
 /**
@@ -312,6 +321,7 @@ async function updateExistingVariant(
     const base = cenaBazowaJednegoWariantu(target.variants);
     if (base !== undefined) productPayload.price = base;
   }
+  zabezpieczKosztProduktu(db, row, productPayload, target?.variants);
 
   if (dryRun) {
     return { action: "dry_A", metadata_owner: metadataOwner, payload_product: productPayload };
@@ -322,7 +332,9 @@ async function updateExistingVariant(
     throw new Error(`PUT product HTTP ${putProduct.status}: ${JSON.stringify(putProduct.data).slice(0, 300)}`);
   }
 
-  markProductSynced(db, row);
+  if (productPayload.price_purchase !== undefined)
+    await potwierdzZapisKosztu(discovery, productId, productPayload.price_purchase);
+  markProductSynced(db, row, productPayload.price_purchase);
   return { action: "updated_A", product_id: productId, variant_id: variantId };
 }
 
@@ -350,7 +362,9 @@ async function ensureAndUpdate(
 
   if (dryRun) {
     const hasEan = !!row.ean;
-    return { action: "dry_BorC", hasEan, sample_payload: toSellyPayloadV2(row, { includeFeatures: true }) };
+    const payload = toSellyPayloadV2(row, { includeFeatures: true });
+    zabezpieczKosztProduktu(db, row, payload);
+    return { action: "dry_BorC", hasEan, sample_payload: payload };
   }
 
   const mapping = await discovery.ensureMapping(db, row, dictMaps);
@@ -363,6 +377,7 @@ async function ensureAndUpdate(
   const productPayload = toSellyPayloadV2(row, { includeFeatures: false });
   const base = cenaBazowaJednegoWariantu(target.variants);
   if (base !== undefined) productPayload.price = base;
+  zabezpieczKosztProduktu(db, row, productPayload, target.variants);
   const putProduct = await wyslijProdukt(discovery, productId, productPayload);
   if (putProduct.status < 200 || putProduct.status >= 300) {
     throw new Error(
@@ -370,7 +385,9 @@ async function ensureAndUpdate(
     );
   }
 
-  markProductSynced(db, row);
+  if (productPayload.price_purchase !== undefined)
+    await potwierdzZapisKosztu(discovery, productId, productPayload.price_purchase);
+  markProductSynced(db, row, productPayload.price_purchase);
   return {
     action: mapping.action === "created_product" ? "created_C" : "created_variant_B",
     product_id: mapping.product_id,

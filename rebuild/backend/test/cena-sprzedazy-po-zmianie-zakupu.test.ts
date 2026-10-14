@@ -4,13 +4,14 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { manualOverrides, markups, products, stagingItems } from "../src/db/schema.js";
 import { odrzucZmianeKarty } from "../src/import/polityka/odrzucenie-zmiany.js";
 import { silnikStagingu } from "../src/import/tk.js";
 import type { RekordSurowy } from "../src/import/typy.js";
 import { cenaSprzedazyPoZmianieZakupu } from "../src/repos/ceny.js";
+import { stworzPolitykeStagingu } from "../src/import/polityka/fabryka.js";
 import { stworzTestowaBaze, type TestowaBaza } from "./gate/baza.js";
 
 const KOD = "MO5_BFPR240460708DUT1";
@@ -59,6 +60,28 @@ describe("cenaSprzedazyPoZmianieZakupu", () => {
 });
 
 describe("cicha aktualizacja importera", () => {
+  it("zmiana samego kosztu zgłasza odświeżenie CSV bez udawania zmiany dostępności", () => {
+    przygotuj({ cenaZakupu: 5426.85, cenaSprzedazy: 6906, stan: bazowyRekord().stan, vat: 23, status: "aktywny" }, false);
+    const odswiez = vi.fn();
+    const polityka = stworzPolitykeStagingu(baza!.db, { odswiezDostepnosc: odswiez });
+    const r = { ...bazowyRekord(), cenaZakupu: 5947.5 } as unknown as RekordSurowy;
+    polityka.importer("MO5", [r]);
+    expect(karta().cenaZakupu).toBe(5947.5);
+    expect(odswiez).toHaveBeenCalledExactlyOnceWith("MO5");
+    expect(polityka.dostepnoscZmieniona()).toBe(false);
+    polityka.importer("MO5", [r]);
+    expect(odswiez).toHaveBeenCalledTimes(1);
+  });
+
+  it("reconcileOnly nie zmienia ceny i nie zgłasza odświeżenia CSV", () => {
+    przygotuj({ cenaZakupu: 5426.85, cenaSprzedazy: 6906, vat: 23, status: "aktywny" }, false);
+    const odswiez = vi.fn();
+    const polityka = stworzPolitykeStagingu(baza!.db, { odswiezDostepnosc: odswiez });
+    polityka.importer("MO5", [{ ...bazowyRekord(), cenaZakupu: 5947.5 } as unknown as RekordSurowy], { reconcileOnly: true });
+    expect(karta().cenaZakupu).toBe(5426.85);
+    expect(odswiez).not.toHaveBeenCalled();
+  });
+
   it("nowa cena zakupu z pliku przelicza cenę sprzedaży z narzutu", () => {
     const r = bazowyRekord();
     przygotuj({ cenaZakupu: 5426.85, cenaSprzedazy: 6906, marzaPct: 6, vat: 23, status: "aktywny" });

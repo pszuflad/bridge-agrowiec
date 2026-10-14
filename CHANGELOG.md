@@ -1,5 +1,14 @@
 # CHANGELOG
 
+2026-10-14 08:45
+obszar: backend
+
+pliki: rebuild/backend/src/selly/rest/{koszt-produktu.ts,sync-full.ts,discovery.ts,mapper-v2.ts}, src/import/polityka/fabryka.ts; test/{selly.koszt-zakupu.test.ts,selly.sync-full.test.ts,cena-sprzedazy-po-zmianie-zakupu.test.ts,gate/selly-atrapa.ts}. Kopie lokalne: /tmp/selly-purchase-bak-multi-20261014/; baza Git f4ca7557.
+
+zmiana: dokończenie NIEWDROŻONEGO kandydata: Tor 2 pomija wspólny koszt przy wielu ofertach/wariantach, także przy discovery i tworzeniu karty; koszt pojedynczej karty potwierdza odczytem po PUT. Cicha aktualizacja importera zmieniająca koszt/sprzedaż/stan zgłasza odświeżenie CSV po transakcji. Testy karty MO1/MO3 o wspólnym kodzie importu; test tworzenia uwzględnia poznaną w runtime cechę magazynu MO1=8, bez osłabiania ochrony tożsamości.
+
+powód: Anna zaakceptowała przygotowanie poprawek wielomagazynowości i zabroniła masowej zmiany produktów Selly; zostawiono regularny plik i import o 12:00 bez ingerencji. Ten wpis jest lokalny; nie wdrożono kodu ani nie zmieniono produkcji.
+
 2026-10-14 08:30
 obszar: backend
 

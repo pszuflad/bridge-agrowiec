@@ -3,6 +3,9 @@ import { zbudujCsvSelly } from "../src/selly/generator-csv.js";
 import { kosztZakupuBrutto } from "../src/selly/koszt-zakupu.js";
 import { wczytajEnv } from "../src/config/env.js";
 import { findDeltaProducts, syncDelta } from "../src/selly/rest/sync-delta.js";
+import { syncFullForDostawca } from "../src/selly/rest/sync-full.js";
+import { budujPayloadProduktuV2 } from "../src/selly/rest/mapper-v2.js";
+import { zasiejMapySelly } from "./gate/dane.js";
 import {
   stworzTestowaBaze, zasiejProdukty, zasiejMapowanie, stworzAtrapeSelly,
   stworzDiscoveryTestowe, mapowanie, type TestowaBaza,
@@ -198,5 +201,105 @@ describe("MO1_15231071 — kandydat poprawki kosztów CSV i REST", () => {
     expect(r.stats.ok).toBe(1);
     expect(t.atrapa.wywolania.filter(w => w.metoda === "updateVariant").map(w => w.argumenty[1]))
       .toEqual([5865]);
+  });
+
+  function drugiMagazyn() {
+    baza.sqlite.prepare(`UPDATE products SET kod='MO3_TEST', dostawca='MO3',
+      kod_importu='560115', ean='8903635013211', marka='ALLIANCE',
+      nazwa='12.5-18 ALLIANCE 317 131G 12PR TL', cena_zakupu=700,
+      cena_sprzedazy=950, stan=2, vat=23 WHERE kod='MO9_336319'`).run();
+    zasiejMapowanie(baza.sqlite, {
+      kodImportu: "560115", dostawca: "MO3", bridgeKod: "MO3_TEST",
+      productId: 5088, variantId: 9000, featureId: 4, stanWyslany: 2, cenaWyslana: 950,
+    });
+  }
+
+  function slowniki() {
+    zasiejMapySelly(baza.db);
+    baza.sqlite.prepare("INSERT INTO selly_dict (slownik,klucz,wartosc_id) VALUES ('producers','alliance',3)").run();
+    baza.sqlite.prepare("INSERT INTO selly_dict (slownik,klucz,wartosc_id) VALUES ('warehouses','mo1',8)").run();
+    baza.sqlite.prepare("INSERT INTO selly_dict (slownik,klucz,wartosc_id) VALUES ('warehouses','mo3',4)").run();
+  }
+
+  it("CSV wielomagazynowy zachowuje wspólny kod i dwa niezależne koszty", () => {
+    drugiMagazyn();
+    const rows = zbudujCsvSelly(baza.db, { kosztZakupuBrutto: true }).tresc.split("\r\n")
+      .slice(1).filter(Boolean).map(r => r.split(";")).filter(r => r[1] === "560115");
+    expect(rows).toHaveLength(2);
+    expect(rows.find(r => r[2] === "MO1")).toMatchObject({ 4: "1022.04", 6: "1083,-", 8: "8" });
+    expect(rows.find(r => r[2] === "MO3")).toMatchObject({ 4: "861.00", 6: "950,-", 8: "2" });
+  });
+
+  it("Tor 2 nie nadpisuje wspólnego kosztu przy dwóch magazynach, w obu kolejnościach", async () => {
+    drugiMagazyn();
+    slowniki();
+    for (const kolejnosc of [["MO1", "MO3"], ["MO3", "MO1"]]) {
+      const t = przygotuj(true);
+      const { discovery } = stworzDiscoveryTestowe(t.atrapa.klient, budujPayloadProduktuV2);
+      for (const dostawca of kolejnosc) {
+        const r = await syncFullForDostawca(baza.db, discovery, dostawca!, { autoCreate: false, buildCache: false });
+        expect(r.stats.err).toBe(0);
+        expect(r.stats.updated_A).toBe(1);
+      }
+      const puts = t.atrapa.wywolania.filter(w => w.metoda === "updateProduct");
+      expect(puts).toHaveLength(2);
+      for (const p of puts) {
+        expect(p.argumenty[1]).not.toHaveProperty("price_purchase");
+        expect(p.argumenty[1]).not.toHaveProperty("price");
+      }
+      expect(t.koszt()).toBe(919.94);
+      expect(t.atrapa.liczba("updateVariant")).toBe(0);
+      expect(receipt()).toBeNull();
+      expect(mapowanie(baza.db, "560115", "MO3")?.cena_zakupu_wyslana).toBeNull();
+    }
+  });
+
+  it("Tor 2 chroni wspólny koszt także po odnalezieniu brakującego mapowania MO3", async () => {
+    drugiMagazyn();
+    slowniki();
+    baza.sqlite.prepare("DELETE FROM selly_products WHERE dostawca='MO3'").run();
+    const t = przygotuj(true);
+    const { discovery } = stworzDiscoveryTestowe(t.atrapa.klient, budujPayloadProduktuV2);
+    const r = await syncFullForDostawca(baza.db, discovery, "MO3", { buildCache: false });
+    expect(r.stats.err).toBe(0);
+    const payload = t.atrapa.wywolania.find(w => w.metoda === "updateProduct")?.argumenty[1];
+    expect(payload).not.toHaveProperty("price_purchase");
+    expect(t.koszt()).toBe(919.94);
+  });
+
+  it("nowa wspólna karta z dwóch ofert nie otrzymuje arbitralnego kosztu pierwszego dostawcy", async () => {
+    drugiMagazyn();
+    slowniki();
+    baza.sqlite.prepare("DELETE FROM selly_products WHERE kod_importu='560115'").run();
+    const atrapa = stworzAtrapeSelly();
+    const { discovery } = stworzDiscoveryTestowe(atrapa.klient, budujPayloadProduktuV2);
+    // MO1 nie ma statycznego ID: na produkcji discovery poznało już cechę magazynu 8.
+    discovery.learnFeatureId("MO1", 8);
+    const r = await syncFullForDostawca(baza.db, discovery, "MO1", { buildCache: false });
+    expect(r.stats.err, JSON.stringify(r.errors)).toBe(0);
+    const payload = atrapa.wywolania.find(w => w.metoda === "createProduct")?.argumenty[0];
+    expect(payload).toBeDefined();
+    expect(payload).not.toHaveProperty("price_purchase");
+  });
+
+  it("Tor 2 jednoznacznej karty potwierdza koszt, nie zmienia sprzedaży i stanu", async () => {
+    slowniki();
+    const t = przygotuj();
+    const { discovery } = stworzDiscoveryTestowe(t.atrapa.klient, budujPayloadProduktuV2);
+    const r = await syncFullForDostawca(baza.db, discovery, "MO1", { autoCreate: false, buildCache: false });
+    expect(r.stats.err).toBe(0);
+    expect(t.koszt()).toBe(830.93);
+    expect(receipt()).toBe(830.93);
+    expect(t.atrapa.liczba("updateVariant")).toBe(0);
+  });
+
+  it("Tor 2 nie potwierdza kosztu, gdy GET po PUT nie potwierdza zapisu", async () => {
+    slowniki();
+    const t = przygotuj();
+    t.niePotwierdzaj();
+    const { discovery } = stworzDiscoveryTestowe(t.atrapa.klient, budujPayloadProduktuV2);
+    const r = await syncFullForDostawca(baza.db, discovery, "MO1", { autoCreate: false, buildCache: false });
+    expect(r.stats.err).toBe(1);
+    expect(receipt()).toBeNull();
   });
 });
