@@ -1,3 +1,5 @@
+import { isNotNull } from "drizzle-orm";
+
 import { dodajUzytkownika } from "../auth/dodaj-uzytkownika.js";
 import { ustawHasloTymczasowe } from "../auth/reset-hasla.js";
 import {
@@ -7,8 +9,11 @@ import {
 } from "../import/podmien-zrodla.js";
 import { dirname, join } from "node:path";
 import { usunWszystkieKartyAuto } from "../import/migracje/scal-karty-auto.js";
+import { wyprowadzKatalogiTrackingu } from "../partnerzy/katalogi-trackingu.js";
 import { uzupelnijDanePartnerow } from "../partnerzy/dane-partnerow.js";
+import { ustawNarzutyStartowe } from "../partnerzy/narzuty-startowe.js";
 import { naprawMagazynyDostawcow, ustawKonfiguracjeStartowa } from "../partnerzy/konfiguracja-startowa.js";
+import { partnerKraje } from "../db/schema.js";
 import { dodajPartnera } from "../repos/partnerzy.js";
 import { ustawWEnvPliku } from "./env-plik.js";
 import type { Krok } from "./runner.js";
@@ -128,6 +133,55 @@ export const KROKI_WDROZENIA: Krok[] = [
     opis: "partnerzy B2B: dopełnienie numerów VAT UE spółki Adtyres wg kraju (LT, NL i pozostałe, które były nieczytelne na pierwszym zrzucie) — uzupełnia tylko puste pola, niczego nie nadpisuje",
     async uruchom({ db }) {
       return uzupelnijDanePartnerow(db);
+    },
+  },
+  {
+    id: "2026-10-13-partnerzy-katalogi-trackingu",
+    tylkoProdukcja: true, // środowisko testowe działa na tym samym serwerze plików — nie może pisać do katalogów partnerów
+    opis: "partnerzy B2B: zapis plików trackingu do katalogów partnerów — ustawia PARTNERZY_KATALOGI_TRACKINGU w .env produkcji, wyprowadzone z PARTNERZY_KATALOGI_ZAMOWIEN (tylko istniejące katalogi; nie nadpisuje istniejącej wartości)",
+    async uruchom({ env }) {
+      if (env.PARTNERZY_KATALOGI_TRACKINGU?.trim()) return "PARTNERZY_KATALOGI_TRACKINGU jest już ustawione — bez zmian";
+      const dbPath = env.DB_PATH as string | undefined;
+      const sciezka = (env.PLIK_ENV as string | undefined) || (dbPath ? join(dirname(dbPath), "..", ".env") : "");
+      if (!sciezka) return { odloz: "brak DB_PATH — nie wiem, gdzie jest .env" };
+      if (!env.PARTNERZY_KATALOGI_ZAMOWIEN?.trim()) return { odloz: "brak PARTNERZY_KATALOGI_ZAMOWIEN w .env — wpisz tę zmienną (katalogi zamówień partnerów), a katalogi trackingu zostaną z niej wyprowadzone przy następnym wdrożeniu" };
+      const w = wyprowadzKatalogiTrackingu(env.PARTNERZY_KATALOGI_ZAMOWIEN);
+      if (!w.wartosc) return { odloz: `nie ma katalogu trackingu do wpisania (${w.pominiete.join("; ")})` };
+      // Wartość w cudzysłowie: skrypt wdrożenia czyta `.env` przez `source`, a średnik rozbiłby linię.
+      const opis = ustawWEnvPliku(sciezka, { PARTNERZY_KATALOGI_TRACKINGU: `"${w.wartosc}"` });
+      if (!opis) return { odloz: `brak pliku ${sciezka}` };
+      // Log wdrożenia jest publiczny (repozytorium publiczne) — bez ścieżek serwera plików: tylko nazwy partnerów i skutek.
+      const skutek = opis[0]?.match(/\((dopisano|zmieniono|bez zmian)\)$/)?.[1] ?? "ustawiono";
+      return `PARTNERZY_KATALOGI_TRACKINGU (${skutek}) dla: ${w.wartosc.split(";").map((x) => x.split("=")[0]).join(", ")}${w.pominiete.length ? ` — pominięto: ${w.pominiete.join("; ")}` : ""}`;
+    },
+  },
+  {
+    id: "2026-10-13-partnerzy-narzuty-startowe",
+    opis: "partnerzy B2B: narzuty startowe wg starego panelu — dopłata 5 % w krajach partnera, które mają jeszcze 0 %, oraz 7 reguł marek (Niemcy, Rolnicze: Alliance/CEAT 2 %, Vredestein 3 %); tylko uzupełnia, niczego nie nadpisuje; odkłada się, gdy nie rozpozna dostawcy w tabeli dostawców",
+    async uruchom({ db }) {
+      return ustawNarzutyStartowe(db);
+    },
+  },
+  {
+    id: "2026-10-14-partnerzy-zdjecie-przesylki-bazowej",
+    opis: "partnerzy B2B: przesyłka liczy się wyłącznie z tabel GEIS — czyści stare wartości „przesyłki bazowej” (np. 15 EUR z konfiguracji startowej) w krajach partnerów; pole nie jest już używane w wycenie",
+    async uruchom({ db }) {
+      const n = db.update(partnerKraje).set({ przesylkaStalaEur: null }).where(isNotNull(partnerKraje.przesylkaStalaEur)).run().changes;
+      return `wyczyszczono przesyłkę bazową w krajach: ${n}`;
+    },
+  },
+  {
+    id: "2026-10-14-partnerzy-selly-zamowienia-wlaczone",
+    tylkoProdukcja: true, // środowisko testowe nie może dostać zapisu do sklepu Selly
+    opis: "partnerzy B2B: włączenie „Utwórz w Selly” — PARTNERZY_SELLY_ZAMOWIENIA=true w .env produkcji (decyzja użytkowniczki 2026-10-14); zamówienie powstaje w sklepie dopiero po ręcznym kliknięciu, z podglądem; działa tylko przy SELLY_TRYB=pelny",
+    async uruchom({ env }) {
+      const dbPath = env.DB_PATH as string | undefined;
+      const sciezka = (env.PLIK_ENV as string | undefined) || (dbPath ? join(dirname(dbPath), "..", ".env") : "");
+      if (!sciezka) return { odloz: "brak DB_PATH — nie wiem, gdzie jest .env" };
+      const opis = ustawWEnvPliku(sciezka, { PARTNERZY_SELLY_ZAMOWIENIA: "true" });
+      if (!opis) return { odloz: `brak pliku ${sciezka}` };
+      const tryb = env.SELLY_TRYB === "pelny" ? "" : ` — UWAGA: SELLY_TRYB=${env.SELLY_TRYB ?? "(brak)"}, flaga zadziała dopiero przy SELLY_TRYB=pelny`;
+      return `${opis.join("; ")} — zacznie działać po restarcie backendu (wdrożenie wczytuje .env po krokach)${tryb}`;
     },
   },
 ];

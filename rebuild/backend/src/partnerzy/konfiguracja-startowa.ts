@@ -3,7 +3,7 @@
 //
 // Zasada: UZUPEŁNIA tylko to, czego partner jeszcze nie ma (magazyny, kraje, kolumny, nazwa pliku); niczego nie nadpisuje, bo użytkowniczka
 // mogła już coś ustawić w panelu. Kraje powstają z NARZUTEM 0 % — dopóki nie ustawi narzutu w panelu, generator ich nie publikuje (blokada ticketu 235),
-// więc aktywacja partnerów nie wypuszcza cen zakupu. Przesyłka: stały koszt 15 EUR za przesyłkę (przyjęty do poprawienia w panelu).
+// więc aktywacja partnerów nie wypuszcza cen zakupu. Przesyłka liczy się z tabel GEIS (ticket 259 zdjął stałą 15 EUR).
 
 import { eq } from "drizzle-orm";
 
@@ -13,7 +13,6 @@ import { dodajPartnera, dostepneMagazyny, edytujPartnera, ustawAktywnosc, ustawK
 import { zapiszKolumny, type KolumnaWejscie } from "../repos/partnerzy-kolumny.js";
 
 export const WYKLUCZONE_MAGAZYNY = ["MO6", "MO7", "MO8"] as const;
-export const PRZESYLKA_STALA_EUR = 15;
 
 const kat = (nazwaWPliku: string, zrodlo: string): KolumnaWejscie => ({ nazwaWPliku, zrodloTyp: "katalog", zrodlo });
 const cena = (nazwaWPliku: string, kraj: string): KolumnaWejscie => ({ nazwaWPliku, zrodloTyp: "cena", zrodlo: kraj });
@@ -71,7 +70,7 @@ export function ustawKonfiguracjeStartowa(db: Baza): string | { odloz: string } 
     }
     const istniejace = new Set(db.select().from(partnerKraje).where(eq(partnerKraje.partnerId, p.id)).all().map((k) => k.kraj));
     const nowe = s.kraje.filter((k) => !istniejace.has(k));
-    for (const k of nowe) ustawKraj(db, p.id, k, { narzutProc: 0, kursZrodlo: "nbp", kursReczny: null, kosztyDodatkowe: 0, przesylkaStalaEur: PRZESYLKA_STALA_EUR, mytoEur: 0, pakowanieEur: 0 });
+    for (const k of nowe) ustawKraj(db, p.id, k, { narzutProc: 0, kursZrodlo: "nbp", kursReczny: null, kosztyDodatkowe: 0, mytoEur: 0, pakowanieEur: 0 });
     if (nowe.length) opis.push(`${nowe.length} krajów (narzut 0 % do ustawienia)`);
     if (db.select().from(partnerKolumny).where(eq(partnerKolumny.partnerId, p.id)).all().length === 0) {
       zapiszKolumny(db, p.id, s.kolumny);

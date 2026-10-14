@@ -4,7 +4,7 @@
  * ⚠ NOWA funkcjonalność, trasy backendu poza `contract/openapi.yaml` (jak `/api/ean-pary`): kształty poniżej pochodzą z kodu
  * `rebuild/backend/src/repos/partnerzy.ts` i `partnerzy/logi.ts`, nie z nagrań fixtures.
  */
-import { zadanie } from "@/lib/api";
+import { BAZA_API, naglowki, rzucGdyBlad, zadanie } from "@/lib/api";
 
 export type PartnerNaLiscie = {
   id: number;
@@ -70,7 +70,6 @@ export type KrajPartnera = {
   /** EUR (od ticketu 235; wcześniej PLN). */
   kosztyDodatkowe: number;
   /** Stały koszt przesyłki w EUR; null = tabele GEIS. */
-  przesylkaStalaEur: number | null;
   /** Opłata drogowa i pakowanie w EUR; bieżąca opłata paliwowa kraju [%] (z historii). Opcjonalne w typie — backend zawsze je zwraca. */
   mytoEur?: number;
   pakowanieEur?: number;
@@ -126,6 +125,23 @@ export async function pobierzPodglad(id: number): Promise<WynikPodgladu> {
   return (await (await zadanie("POST", `${KLUCZ_PARTNERZY}/${id}/podglad`, {})).json()) as WynikPodgladu;
 }
 
+/**
+ * Pobranie PEŁNEGO pliku partnera z podglądu (ticket 260): `GET …/podglad/plik?nazwa=`. Pobieramy `fetch`em z nagłówkiem autoryzacji (zwykły link nie niesie tokenu),
+ * a plik zapisujemy przez tymczasową kotwicę — jak archiwum importów i CSV usuniętych Selly. Nic nie jest zapisywane ani wysyłane do partnera.
+ */
+export async function pobierzPlikPartnera(id: number, nazwa: string): Promise<void> {
+  const odpowiedz = await fetch(`${BAZA_API}${KLUCZ_PARTNERZY}/${id}/podglad/plik?nazwa=${encodeURIComponent(nazwa)}`, { headers: naglowki(false), credentials: "include" });
+  await rzucGdyBlad(odpowiedz);
+  const adres = URL.createObjectURL(await odpowiedz.blob());
+  const kotwica = document.createElement("a");
+  kotwica.href = adres;
+  kotwica.download = nazwa;
+  document.body.appendChild(kotwica);
+  kotwica.click();
+  kotwica.remove();
+  setTimeout(() => URL.revokeObjectURL(adres), 5000);
+}
+
 /** Błędy formuł z odpowiedzi 400 (`bledy[]`), albo pusta lista, gdy to inny błąd. */
 export function bledyPol(e: unknown): BladPola[] {
   const m = /^\d{3}: (.*)$/s.exec(e instanceof Error ? e.message : String(e));
@@ -179,7 +195,7 @@ export type UstawieniaDoZapisu = Pick<
   SzczegolyPartnera,
   "nazwa" | "stanMin" | "zaokraglanie" | "harmonogramMinuty" | "tolerancjaCenyProc" | "formatPliku" | "csvSeparator" | "kanalFtp" | "kanalEmail" | "emailSkrzynka" | "nazwaPliku" | "fakturaNazwa" | "fakturaNip" | "fakturaUlica" | "fakturaKod" | "fakturaMiasto" | "fakturaKraj" | "sellyStatusId" | "kontaktEmail" | "kontaktTelefon"
 >;
-export type UstawieniaKraju = Pick<KrajPartnera, "narzutProc" | "kursZrodlo" | "kursReczny" | "kosztyDodatkowe" | "przesylkaStalaEur" | "mytoEur" | "pakowanieEur"> & { paliwoProc?: number | null };
+export type UstawieniaKraju = Pick<KrajPartnera, "narzutProc" | "kursZrodlo" | "kursReczny" | "kosztyDodatkowe" | "mytoEur" | "pakowanieEur"> & { paliwoProc?: number | null };
 export type MagazynKatalogu = { magazyn: string; liczbaPozycji: number };
 
 export const ZAOKRAGLANIA: { wartosc: string; etykieta: string }[] = [
@@ -309,3 +325,29 @@ export async function zwolnijWysylanie(partnerId: number, zamowienieId: number):
 /** Aktualny kurs EUR z NBP (ticket 250) — do podglądu w tabeli krajów; ten sam kurs trafia do generowanych cenników. */
 export type KursNbpPodglad = { kurs: number; zrodlo: "nbp" | "nbp-zapisany"; dataTabeli: string | null; ostrzezenie: string | null };
 export const kluczKursuNbp = [KLUCZ_PARTNERZY, "kurs-nbp"];
+
+/** Przesyłka zamówienia partnera = numer listu przewozowego wpisany w panelu; z niej powstaje plik trackingu dla partnera (ticket 256). */
+export type Przesylka = {
+  id: number;
+  zamowienieId: number;
+  przewoznik: string;
+  numerPrzesylki: string;
+  typ: "delivery" | "pickup";
+  wyslano: string;
+  pozycje: { pozycjaId: number; ilosc: number }[];
+  plikNazwa: string | null;
+  /** `zapisany` = plik leży w katalogu partnera; `brak_katalogu` = katalog nie jest skonfigurowany (plik do pobrania z panelu); `blad` = zapis się nie udał. */
+  plikStatus: "zapisany" | "brak_katalogu" | "blad";
+  plikBlad: string | null;
+};
+export type ListaPrzesylek = { przesylki: Przesylka[]; katalogSkonfigurowany: boolean };
+export const kluczPrzesylek = (id: number, zamowienieId: number): string[] => [KLUCZ_PARTNERZY, String(id), "zamowienia", String(zamowienieId), "przesylki"];
+
+export type NowaPrzesylka = { przewoznik: string; numerPrzesylki: string; typ: "delivery" | "pickup"; wyslano?: string; pozycje?: { pozycjaId: number; ilosc: number }[] };
+export async function dodajPrzesylke(partnerId: number, zamowienieId: number, dane: NowaPrzesylka): Promise<{ przesylki: Przesylka[]; plik: Przesylka["plikStatus"] }> {
+  return (await (await zadanie("POST", `${KLUCZ_PARTNERZY}/${partnerId}/zamowienia/${zamowienieId}/przesylki`, dane)).json()) as { przesylki: Przesylka[]; plik: Przesylka["plikStatus"] };
+}
+export async function ponowPlikPrzesylki(partnerId: number, zamowienieId: number, wysylkaId: number): Promise<{ przesylki: Przesylka[]; plik: Przesylka["plikStatus"] }> {
+  return (await (await zadanie("POST", `${KLUCZ_PARTNERZY}/${partnerId}/zamowienia/${zamowienieId}/przesylki/${wysylkaId}/ponow`, {})).json()) as { przesylki: Przesylka[]; plik: Przesylka["plikStatus"] };
+}
+export const kluczPlikuPrzesylki = (id: number, zamowienieId: number, wysylkaId: number): string[] => [KLUCZ_PARTNERZY, String(id), "zamowienia", String(zamowienieId), "przesylki", String(wysylkaId), "plik"];

@@ -1,7 +1,7 @@
 // Kalkulator ceny partnera B2B (karta PARTNERZY, ticket 213 / PRT-2.4) — scala kurs (210), transport (212) i formuły (211).
 //
 // Domyślna formuła (EUR): zakup × (1 + narzut) / kurs  +  przesyłka (w EUR)  +  koszty dodatkowe (w EUR).
-// Przesyłka to baza kraju (`przesylkaStalaEur`) × (1 + paliwo %) + myto + pakowanie (ticket 243; same składniki zerowe = sama baza) albo, gdy go brak, stawka z tabel GEIS (z paliwem).
+// Przesyłka to ZAWSZE stawka z tabel GEIS wg wagi/wymiarów (z paliwem) + myto + pakowanie kraju. Stałej „przesyłki bazowej” kraju już nie ma (ticket 259).
 // Koszty dodatkowe partnera są w EUR (od ticketu 235; wcześniej PLN). Inną formułę ustawia partner (pole obliczeniowe).
 //
 // Zmienne formuły: zakup [PLN], narzut [ułamek: 12 % = 0.12], przesylka_eur, przesylka_pln (= przesylka_eur × kurs_EUR),
@@ -11,7 +11,7 @@
 
 import type { Baza } from "../db/index.js";
 import { BladFormuly, obliczFormule, parsujFormule, zaokraglij, type Wyrazenie } from "./formula.js";
-import { BladTransportu, kosztPrzesylki, paliwoNaDzien } from "./transport.js";
+import { BladTransportu, kosztPrzesylki } from "./transport.js";
 
 export const FORMULA_DOMYSLNA = "zakup * (1 + narzut) / kurs_EUR + przesylka_eur + koszty_dodatkowe";
 export const ZMIENNE_FORMULY = ["zakup", "narzut", "przesylka_eur", "przesylka_pln", "koszty_dodatkowe", "kurs_EUR", "waga"] as const;
@@ -41,7 +41,7 @@ export type PozycjaDoCeny = {
 export type WejscieKalkulatora = {
   pozycja: PozycjaDoCeny;
   /** Ustawienia kraju partnera (`partner_kraje`): narzut w PROCENTACH (12 = 12 %), koszty dodatkowe w EUR, opcjonalny stały koszt przesyłki w EUR. */
-  kraj: { kraj: string; narzutProc: number; kosztyDodatkowe: number; przesylkaStalaEur?: number | null; mytoEur?: number; pakowanieEur?: number };
+  kraj: { kraj: string; narzutProc: number; kosztyDodatkowe: number; mytoEur?: number; pakowanieEur?: number };
   /** Reguła zaokrąglania partnera (`partnerzy.zaokraglanie`): grosz | euro | gora5 | gora10. */
   zaokraglanie: string;
   /** Kurs PLN za 1 EUR użyty w tym pliku (z `kursEur`). */
@@ -86,25 +86,20 @@ export function obliczCene(db: Baza, w: WejscieKalkulatora): WynikKalkulatora {
   if (!(typeof p.cenaZakupu === "number" && Number.isFinite(p.cenaZakupu) && p.cenaZakupu > 0)) blad("Brak ceny zakupu.");
 
   const ostrzezenia: string[] = [];
-  // Myto i pakowanie kraju (panel, ticket 243) dochodzą do OBU ścieżek; paliwo liczy się od bazy (stała baza kraju albo stawka GEIS).
+  // Myto i pakowanie kraju (panel, ticket 243) dochodzą do stawki GEIS (która ma już paliwo).
   const dodatki = (kraj.mytoEur ?? 0) + (kraj.pakowanieEur ?? 0);
   let przesylkaEur: number;
-  if (typeof kraj.przesylkaStalaEur === "number") {
-    // Stała baza kraju (nadpisuje tabele GEIS): baza × (1 + paliwo %) + myto + pakowanie.
-    przesylkaEur = kraj.przesylkaStalaEur * (1 + paliwoNaDzien(db, kraj.kraj, w.data) / 100) + dodatki;
-  } else {
-    try {
-      przesylkaEur =
-        kosztPrzesylki(
-          db,
-          kraj.kraj,
-          { waga: p.waga, dlugosc: p.dlugosc, szerokosc: p.szerokoscPaczki, wysokosc: p.wysokosc },
-          w.data,
-        ).koszt + dodatki;
-    } catch (e) {
-      if (e instanceof BladTransportu) return blad(`Błąd kalkulacji transportu (${kraj.kraj}): ${e.message}`);
-      throw e;
-    }
+  try {
+    przesylkaEur =
+      kosztPrzesylki(
+        db,
+        kraj.kraj,
+        { waga: p.waga, dlugosc: p.dlugosc, szerokosc: p.szerokoscPaczki, wysokosc: p.wysokosc },
+        w.data,
+      ).koszt + dodatki;
+  } catch (e) {
+    if (e instanceof BladTransportu) return blad(`Błąd kalkulacji transportu (${kraj.kraj}): ${e.message}`);
+    throw e;
   }
   if (p.wagaAutoUzupelniona) ostrzezenia.push(`${p.kod}: waga uzupełniona automatycznie (mniej pewna).`);
   if (p.wagaSzacowana) ostrzezenia.push(`${p.kod}: waga szacowana (mniej pewna).`);

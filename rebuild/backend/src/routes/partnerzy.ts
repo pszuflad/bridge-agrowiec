@@ -19,6 +19,7 @@ import { zapiszAudyt } from "../repos/audit.js";
 import { pobierzBledy, pobierzLogi } from "../partnerzy/logi.js";
 import { OdbiorTrwaError, odbierzZamowieniaEmail, type OdbiorEmail } from "../partnerzy/odbior-email.js";
 import { BrakKursuError, kursEur, type KlientNbp } from "../partnerzy/kurs-nbp.js";
+import { BladTrackingu, dodajPrzesylke, katalogTrackinguPartnera, listaPrzesylek, zapiszPlikTrackingu, zbudujPlikTrackingu } from "../partnerzy/tracking.js";
 import { BladTworzenia, podgladDlaSelly, utworzWSelly, zwolnijWysylanie } from "../partnerzy/podglad-selly.js";
 import { zwaliduj } from "../partnerzy/walidacja-zamowienia.js";
 import { listaZamowien, szczegolyZamowieniaDlaPartnera } from "../repos/partnerzy-zamowienia.js";
@@ -44,9 +45,9 @@ import {
   walidujUstawieniaPartnera,
 } from "../repos/partnerzy.js";
 
-export type ZaleznosciPartnerzy = { db: Baza; serwis?: SerwisPartnerow; odbiorEmail?: OdbiorEmail; klientSelly?: KlientSelly; sellyZamowienia?: boolean; klientNbp?: KlientNbp };
+export type ZaleznosciPartnerzy = { db: Baza; serwis?: SerwisPartnerow; odbiorEmail?: OdbiorEmail; klientSelly?: KlientSelly; sellyZamowienia?: boolean; klientNbp?: KlientNbp; katalogiTrackingu?: ReadonlyMap<string, string> };
 
-export function trasyPartnerzy({ db, serwis, odbiorEmail, klientSelly, sellyZamowienia = false, klientNbp }: ZaleznosciPartnerzy): Router {
+export function trasyPartnerzy({ db, serwis, odbiorEmail, klientSelly, sellyZamowienia = false, klientNbp, katalogiTrackingu = new Map() }: ZaleznosciPartnerzy): Router {
   const router = Router();
   const wgrywanieGeis = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5_000_000 } });
 
@@ -285,6 +286,74 @@ export function trasyPartnerzy({ db, serwis, odbiorEmail, klientSelly, sellyZamo
   });
 
   /**
+   * Tracking (ticket 256): przesyłki zamówienia partnera. Wpisanie numeru listu przewozowego tworzy plik trackingu (CSV, format wg założenia użytkowniczki — `partnerzy/tracking.ts`)
+   * i od razu zapisuje go w katalogu partnera z `PARTNERZY_KATALOGI_TRACKINGU`; bez katalogu plik zostaje do pobrania w panelu. Błąd zapisu pliku NIE cofa przesyłki — widać go przy przesyłce i można ponowić.
+   */
+  const przesylkaParam = (req: Request, res: Response): { id: number; zamowienieId: number } | null => {
+    const id = idZParametru(req, res);
+    if (id === null) return null;
+    const zamowienieId = Number(req.params.zamowienieId);
+    if (!Number.isInteger(zamowienieId) || zamowienieId < 1) {
+      res.status(404).json({ error: "Nie ma takiego zamówienia tego partnera." });
+      return null;
+    }
+    return { id, zamowienieId };
+  };
+  const bladTrackingu = (e: unknown, res: Response): void => {
+    if (e instanceof BladTrackingu) return void res.status(e.status).json({ error: e.message });
+    throw e;
+  };
+
+  router.get("/api/partnerzy/:id/zamowienia/:zamowienieId/przesylki", requireAuth, (req, res) => {
+    const p = przesylkaParam(req, res);
+    if (!p) return;
+    const lista = listaPrzesylek(db, p.id, p.zamowienieId);
+    if (lista === null) return void res.status(404).json({ error: "Nie ma takiego zamówienia tego partnera." });
+    res.json({ przesylki: lista, katalogSkonfigurowany: katalogTrackinguPartnera(db, p.id, katalogiTrackingu) !== undefined });
+  });
+
+  router.post("/api/partnerzy/:id/zamowienia/:zamowienieId/przesylki", requireAuth, (req, res) => {
+    const p = przesylkaParam(req, res);
+    if (!p) return;
+    try {
+      const wysylkaId = dodajPrzesylke(db, p.id, p.zamowienieId, (req.body ?? {}) as never);
+      const status = zapiszPlikTrackingu(db, wysylkaId, katalogTrackinguPartnera(db, p.id, katalogiTrackingu));
+      audytuj(req, "partner_przesylka", p.id, { zamowienieId: p.zamowienieId, wysylkaId, plik: status });
+      res.json({ przesylki: listaPrzesylek(db, p.id, p.zamowienieId), plik: status });
+    } catch (e) {
+      bladTrackingu(e, res);
+    }
+  });
+
+  router.get("/api/partnerzy/:id/zamowienia/:zamowienieId/przesylki/:wysylkaId/plik", requireAuth, (req, res) => {
+    const p = przesylkaParam(req, res);
+    if (!p) return;
+    const wysylkaId = Number(req.params.wysylkaId);
+    try {
+      const lista = listaPrzesylek(db, p.id, p.zamowienieId);
+      if (lista === null || !Number.isInteger(wysylkaId) || !lista.some((w) => w.id === wysylkaId)) return void res.status(404).json({ error: "Nie ma takiej przesyłki tego zamówienia." });
+      res.json(zbudujPlikTrackingu(db, wysylkaId));
+    } catch (e) {
+      bladTrackingu(e, res);
+    }
+  });
+
+  router.post("/api/partnerzy/:id/zamowienia/:zamowienieId/przesylki/:wysylkaId/ponow", requireAuth, (req, res) => {
+    const p = przesylkaParam(req, res);
+    if (!p) return;
+    const wysylkaId = Number(req.params.wysylkaId);
+    try {
+      const lista = listaPrzesylek(db, p.id, p.zamowienieId);
+      if (lista === null || !Number.isInteger(wysylkaId) || !lista.some((w) => w.id === wysylkaId)) return void res.status(404).json({ error: "Nie ma takiej przesyłki tego zamówienia." });
+      const status = zapiszPlikTrackingu(db, wysylkaId, katalogTrackinguPartnera(db, p.id, katalogiTrackingu));
+      audytuj(req, "partner_przesylka_ponow", p.id, { zamowienieId: p.zamowienieId, wysylkaId, plik: status });
+      res.json({ przesylki: listaPrzesylek(db, p.id, p.zamowienieId), plik: status });
+    } catch (e) {
+      bladTrackingu(e, res);
+    }
+  });
+
+  /**
    * Ręczne utworzenie zamówienia partnera w Selly (ticket 249). Tylko z flagą `PARTNERZY_SELLY_ZAMOWIENIA`, bez blokad podglądu i w statusie `przyjete`;
    * 403 (flaga), 404, 409 (blokady/zmiana statusu), 502 (odmowa Selly), 503 (brak klienta). Odpowiedź: `{numerWlasny, idSelly}`.
    */
@@ -465,6 +534,25 @@ export function trasyPartnerzy({ db, serwis, odbiorEmail, klientSelly, sellyZamo
     } catch (e) {
       console.error("[partnerzy] podgląd nie powiódł się:", e instanceof Error ? e.message : e);
       res.status(500).json({ error: "Podgląd nie powiódł się." });
+    }
+  });
+
+  /** Pobranie PEŁNEGO pliku partnera z podglądu (ticket 260): `?nazwa=<plik z podglądu>`; bez zapisu na dysk i bez wysyłki. */
+  router.get("/api/partnerzy/:id/podglad/plik", requireAuth, async (req, res) => {
+    const id = idZParametru(req, res);
+    if (id === null) return;
+    if (!serwis) return void res.status(503).json({ error: "Podgląd plików partnerów nie jest skonfigurowany na tym serwerze." });
+    const nazwa = typeof req.query.nazwa === "string" ? req.query.nazwa : "";
+    if (!/^[A-Za-z0-9._-]{1,120}$/.test(nazwa)) return void res.status(400).json({ error: "Brak poprawnej nazwy pliku (`nazwa`)." });
+    try {
+      const plik = await serwis.pelnyPlik(id, nazwa);
+      if (!plik) return void res.status(404).json({ error: "Partner nie ma takiego pliku (sprawdź nazwę w podglądzie)." });
+      res.setHeader("Content-Type", plik.nazwa.endsWith(".xml") ? "application/xml; charset=utf-8" : "text/csv; charset=utf-8");
+      res.setHeader("Content-Disposition", `attachment; filename="${plik.nazwa}"`);
+      res.send(plik.tekst);
+    } catch (e) {
+      console.error("[partnerzy] pobranie pliku nie powiodło się:", e instanceof Error ? e.message : e);
+      res.status(500).json({ error: "Pobranie pliku nie powiodło się." });
     }
   });
 

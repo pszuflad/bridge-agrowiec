@@ -221,3 +221,13 @@ export async function podgladPartnera(db: Baza, klientNbp: KlientNbp, partnerId:
     pozycjeWybrane: wynik.pozycjeWybrane,
   };
 }
+
+/**
+ * Pełny plik partnera do pobrania z panelu (ticket 260): ta sama treść, którą generowanie zapisałoby w katalogu (wszystkie pozycje), ale NIC nie jest zapisywane
+ * ani wysyłane i nie dotyka `partner_kursy`. `null` = partner nie ma takiego pliku (np. zła nazwa albo błąd konfiguracji — wtedy plik by nie powstał).
+ */
+export async function pelnyPlikPartnera(db: Baza, klientNbp: KlientNbp, partnerId: number, nazwa: string, opcje: { teraz?: () => Date } = {}): Promise<{ nazwa: string; tekst: string } | null> {
+  const { pliki } = await przygotujPliki(db, klientNbp, partnerId, { teraz: opcje.teraz });
+  const p = pliki.find((x) => x.nazwa === nazwa);
+  return p ? { nazwa: p.nazwa, tekst: p.tekst } : null;
+}

@@ -88,11 +88,11 @@ function Kraj({ t }: { t: TabelaGeis }) {
 }
 
 type PodgladPrzesylki = {
-  zrodlo: "stala-baza" | "geis";
-  wagaRozliczeniowa: number | null;
-  wagaRzeczywista: number | null;
-  wagaGabarytowa: number | null;
-  progKg: number | null;
+  zrodlo: "geis";
+  wagaRozliczeniowa: number;
+  wagaRzeczywista: number;
+  wagaGabarytowa: number;
+  progKg: number;
   baza: number;
   paliwoProc: number;
   paliwoEur: number;
@@ -159,11 +159,7 @@ function PodgladKosztu() {
       {blad ? <p className="text-sm text-destructive" role="alert" data-testid="text-przesylka-blad">{blad}</p> : null}
       {wynik ? (
         <ul className="space-y-0.5 text-sm" data-testid="wynik-przesylki">
-          {wynik.zrodlo === "geis" ? (
-            <li>Waga rozliczeniowa {wynik.wagaRozliczeniowa?.toFixed(1)} kg (rzeczywista {wynik.wagaRzeczywista?.toFixed(1)}, gabarytowa {wynik.wagaGabarytowa?.toFixed(1)}) → próg {wynik.progKg} kg: stawka {eur(wynik.baza)}</li>
-          ) : (
-            <li>Przesyłka bazowa kraju (nadpisuje tabele GEIS): {eur(wynik.baza)}</li>
-          )}
+          <li>Waga rozliczeniowa {wynik.wagaRozliczeniowa.toFixed(1)} kg (rzeczywista {wynik.wagaRzeczywista.toFixed(1)}, gabarytowa {wynik.wagaGabarytowa.toFixed(1)}) → próg {wynik.progKg} kg: stawka {eur(wynik.baza)}</li>
           <li>Paliwo {wynik.paliwoProc}%: {eur(wynik.paliwoEur)}</li>
           {wynik.pakowanieGeisEur > 0 ? <li>Pakowanie z tabeli GEIS: {eur(wynik.pakowanieGeisEur)}</li> : null}
           <li>Myto: {eur(wynik.mytoEur)}</li>
