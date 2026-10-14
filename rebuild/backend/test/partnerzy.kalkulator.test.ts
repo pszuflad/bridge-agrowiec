@@ -42,24 +42,9 @@ describe("kalkulator ceny partnera", () => {
     expect(w.ostrzezenia).toEqual([]);
   });
 
-  it("stały koszt przesyłki kraju (EUR) zastępuje tabele GEIS — także dla kraju bez tabeli i bez wagi", () => {
-    const w = obliczCene(db, {
-      ...BAZA,
-      kraj: { ...BAZA.kraj, kraj: "ZZ", przesylkaStalaEur: 15 },
-      pozycja: { ...POZYCJA, waga: null, dlugosc: null },
-    });
-    expect(w.skladniki.przesylkaEur).toBe(15);
-    expect(w.cenaPrzedZaokragleniem).toBeCloseTo((1000 * 1.12) / 4.3 + 15 + 43, 9);
-  });
-
-  it("stała baza kraju: baza × (1 + paliwo %) + myto + pakowanie (paliwo z historii na dzień wyceny)", () => {
-    ustawPaliwo(db, "ZZ", 44, "2026-01-01");
-    const w = obliczCene(db, {
-      ...BAZA,
-      kraj: { ...BAZA.kraj, kraj: "ZZ", przesylkaStalaEur: 100, mytoEur: 9.92, pakowanieEur: 15 },
-      pozycja: { ...POZYCJA, waga: null, dlugosc: null },
-    });
-    expect(w.skladniki.przesylkaEur).toBeCloseTo(100 * 1.44 + 9.92 + 15, 9);
+  it("kraj bez tabeli GEIS albo pozycja bez wagi i wymiarów: pozycja nie jest wyceniana (nigdy stała przesyłka, nigdy cena 0)", () => {
+    expect(() => obliczCene(db, { ...BAZA, kraj: { ...BAZA.kraj, kraj: "ZZ" }, pozycja: POZYCJA })).toThrow(/transportu/);
+    expect(() => obliczCene(db, { ...BAZA, pozycja: { ...POZYCJA, waga: null, dlugosc: null } })).toThrow(BladKalkulacji);
   });
 
   it("ścieżka GEIS: stawka × (1 + paliwo %) + pakowanie z tabeli + myto i pakowanie kraju z panelu", () => {

@@ -11,6 +11,7 @@ import { KROKI_WDROZENIA } from "../src/kroki/rejestr.js";
 import { uruchomKroki } from "../src/kroki/runner.js";
 import { generujPlikiPartnera } from "../src/partnerzy/generator.js";
 import { naprawMagazynyDostawcow, ustawKonfiguracjeStartowa } from "../src/partnerzy/konfiguracja-startowa.js";
+import { importujTabeleGeis } from "../src/partnerzy/transport.js";
 import { szczegolyPartnera } from "../src/repos/partnerzy.js";
 import { KATALOG_SCHEMATU } from "./gate/repo.js";
 
@@ -28,6 +29,7 @@ describe("konfiguracja startowa partnerów", () => {
     katalog = mkdtempSync(join(tmpdir(), "bridge-237-"));
     ({ sqlite, db } = otworzBaze(join(katalog, "t.db")));
     zastosujMigracje(sqlite, KATALOG_SCHEMATU());
+    importujTabeleGeis(db, { AT: { wspGabarytowy: 250, stawki: [[200, 15]] } }); // przesyłka liczy się z tabel GEIS (ticket 259)
     db.insert(products).values(["MO1", "MO4", "MO6", "MO7", "MO8"].map((m) => produkt(`K_${m}`, m))).run();
   });
   afterEach(() => {
@@ -44,7 +46,7 @@ describe("konfiguracja startowa partnerów", () => {
     expect(a).toMatchObject({ aktywny: true, nazwaPliku: "adtyres_agrowiec" });
     expect(a.magazyny).toEqual(["MO1", "MO4"]);
     expect(a.kraje.map((k) => k.kraj)).toEqual(["AT", "BE", "CZ", "DE", "FR", "HU", "IT", "LT", "LU", "LV", "NL", "RO", "SK"]);
-    expect(a.kraje.every((k) => k.narzutProc === 0 && k.przesylkaStalaEur === 15)).toBe(true);
+    expect(a.kraje.every((k) => k.narzutProc === 0 && k.przesylkaStalaEur === null)).toBe(true);
     expect(a.kolumny.map((k) => k.nazwaWPliku)).toEqual(["CatNumber", "EAN", "ProductName", "ProductBrand", "ProductModel", "ProductSize", "PriceEurNet", "StockQty", "DOT", "Warehouse"]);
     expect(a.kolumny[0]).toMatchObject({ zrodloTyp: "katalog", zrodlo: "numerPartnera" });
     const t = szczegolyPartnera(db, id("TyreWorld"))!;
@@ -76,12 +78,12 @@ describe("konfiguracja startowa partnerów", () => {
 
   it("nie nadpisuje tego, co użytkowniczka już ustawiła, i jest powtarzalne", async () => {
     await uruchomKroki(sqlite, db, KROKI_WDROZENIA, {});
-    sqlite.prepare("UPDATE partner_kraje SET narzut_proc = 17, przesylka_stala_eur = 20 WHERE kraj = 'AT'").run();
+    sqlite.prepare("UPDATE partner_kraje SET narzut_proc = 17 WHERE kraj = 'AT'").run();
     sqlite.prepare("DELETE FROM partner_magazyny").run();
     sqlite.prepare("INSERT INTO partner_magazyny (partner_id, magazyn) SELECT id, 'MO4' FROM partnerzy").run();
     const opis = ustawKonfiguracjeStartowa(db);
     expect(opis).toContain("bez zmian");
-    expect(db.select().from(partnerKraje).all().filter((k) => k.kraj === "AT").every((k) => k.narzutProc === 17 && k.przesylkaStalaEur === 20)).toBe(true);
+    expect(db.select().from(partnerKraje).all().filter((k) => k.kraj === "AT").every((k) => k.narzutProc === 17)).toBe(true);
     expect(szczegolyPartnera(db, id("Adtyres"))!.magazyny).toEqual(["MO4"]);
   });
 

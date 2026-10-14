@@ -129,6 +129,20 @@ describe("kolumny, pola obliczeniowe i podgląd", () => {
       expect(s.sqlite.prepare("SELECT COUNT(*) c FROM partner_logi").get()).toEqual({ c: 0 });
     });
 
+    it("pełny plik do pobrania: WSZYSTKIE pozycje (nie tylko 20), ta sama treść co podgląd, nic nie zapisuje; nieznana nazwa = null", async () => {
+      await skonfiguruj();
+      const serwis = stworzSerwisPartnerow({ db: s.db, klientNbp: NBP, katalogBazowy: katalog });
+      const nazwa = (await serwis.podglad(id)).pliki[0]!.nazwa;
+      const plik = await serwis.pelnyPlik(id, nazwa);
+      expect(plik).not.toBeNull();
+      const wiersze = plik!.tekst.trim().split("\n");
+      expect(wiersze[0]).toBe("Kod;Cena;DAP");
+      expect(wiersze).toHaveLength(31); // nagłówek + 30 pozycji
+      expect(await serwis.pelnyPlik(id, "inny.csv")).toBeNull();
+      expect(readdirSync(katalog)).toEqual([]);
+      expect(s.sqlite.prepare("SELECT COUNT(*) c FROM partner_kursy").get()).toEqual({ c: 0 });
+    });
+
     it("błędy konfiguracji (brak kolumn) wracają w polu `bledy`, bez wyjątku", async () => {
       importujTabeleGeis(s.db, { AT: { wspGabarytowy: 200, stawki: [[100, 61]] } });
       const serwis = stworzSerwisPartnerow({ db: s.db, klientNbp: NBP, katalogBazowy: katalog });
