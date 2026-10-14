@@ -180,9 +180,7 @@ export function walidujUstawieniaKraju(cialo: unknown): UstawieniaKrajuZPaliwem 
   const kursZrodlo = cialo.kursZrodlo ?? "nbp";
   if (!wSpisie(ZRODLA_KURSU, kursZrodlo)) return { blad: "Pole `kursZrodlo` musi mieć wartość `nbp` albo `reczny`." };
   const kursReczny = cialo.kursReczny ?? null;
-  if (kursZrodlo === "reczny" && !(liczbaSkonczona(kursReczny) && kursReczny > 0))
-    return { blad: "Kurs ręczny wymaga `kursReczny` > 0." };
-  if (kursReczny !== null && !liczbaSkonczona(kursReczny)) return { blad: "Pole `kursReczny` musi być liczbą albo null." };
+  if (kursReczny !== null && !(liczbaSkonczona(kursReczny) && kursReczny > 0)) return { blad: "Pole `kursReczny` musi być liczbą > 0 albo null (brak kursu ręcznego)." };
   const kosztyDodatkowe = cialo.kosztyDodatkowe ?? 0;
   if (!liczbaSkonczona(kosztyDodatkowe) || kosztyDodatkowe < 0) return { blad: "Pole `kosztyDodatkowe` musi być liczbą ≥ 0." };
   const mytoEur = cialo.mytoEur ?? 0;
@@ -197,7 +195,7 @@ export function walidujUstawieniaKraju(cialo: unknown): UstawieniaKrajuZPaliwem 
     pakowanieEur,
     paliwoProc,
     kursZrodlo,
-    kursReczny: kursZrodlo === "reczny" ? (kursReczny as number) : null,
+    kursReczny,
     kosztyDodatkowe,
   };
 }

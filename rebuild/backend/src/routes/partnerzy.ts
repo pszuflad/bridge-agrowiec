@@ -20,6 +20,8 @@ import { pobierzBledy, pobierzLogi } from "../partnerzy/logi.js";
 import { OdbiorTrwaError, odbierzZamowieniaEmail, type OdbiorEmail } from "../partnerzy/odbior-email.js";
 import { BrakKursuError, kursEur, type KlientNbp } from "../partnerzy/kurs-nbp.js";
 import { BladTrackingu, dodajPrzesylke, katalogTrackinguPartnera, listaPrzesylek, zapiszPlikTrackingu, zbudujPlikTrackingu } from "../partnerzy/tracking.js";
+import { powiadomOBledzieSelly } from "../partnerzy/powiadomienia.js";
+import type { NadawcaEmail } from "../poczta/nadawca.js";
 import { BladTworzenia, podgladDlaSelly, utworzWSelly, zwolnijWysylanie } from "../partnerzy/podglad-selly.js";
 import { zwaliduj } from "../partnerzy/walidacja-zamowienia.js";
 import { listaZamowien, szczegolyZamowieniaDlaPartnera } from "../repos/partnerzy-zamowienia.js";
@@ -45,9 +47,9 @@ import {
   walidujUstawieniaPartnera,
 } from "../repos/partnerzy.js";
 
-export type ZaleznosciPartnerzy = { db: Baza; serwis?: SerwisPartnerow; odbiorEmail?: OdbiorEmail; klientSelly?: KlientSelly; sellyZamowienia?: boolean; klientNbp?: KlientNbp; katalogiTrackingu?: ReadonlyMap<string, string> };
+export type ZaleznosciPartnerzy = { db: Baza; serwis?: SerwisPartnerow; odbiorEmail?: OdbiorEmail; klientSelly?: KlientSelly; sellyZamowienia?: boolean; klientNbp?: KlientNbp; katalogiTrackingu?: ReadonlyMap<string, string>; powiadomienia?: { nadawca: NadawcaEmail; odbiorcy: string[] } };
 
-export function trasyPartnerzy({ db, serwis, odbiorEmail, klientSelly, sellyZamowienia = false, klientNbp, katalogiTrackingu = new Map() }: ZaleznosciPartnerzy): Router {
+export function trasyPartnerzy({ db, serwis, odbiorEmail, klientSelly, sellyZamowienia = false, klientNbp, katalogiTrackingu = new Map(), powiadomienia }: ZaleznosciPartnerzy): Router {
   const router = Router();
   const wgrywanieGeis = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5_000_000 } });
 
@@ -147,6 +149,17 @@ export function trasyPartnerzy({ db, serwis, odbiorEmail, klientSelly, sellyZamo
    * Podgląd kosztu przesyłki (ticket 246): `{partnerId, kraj, waga, dlugosc, szerokosc, wysokosc}` (cm, kg) → rozbicie kosztu w EUR.
    * 400 z komunikatem, gdy nie da się policzyć (brak tabeli kraju, wymiary ponad limit, waga ponad najwyższy próg).
    */
+  /** Wiadomość próbna na adresy powiadomień (ticket 263) — do sprawdzenia, że SMTP i adres odbiorcy działają. 503 = powiadomienia nie są skonfigurowane. */
+  router.post("/api/partnerzy/powiadomienia/test", requireAuth, async (_req, res) => {
+    if (!powiadomienia || powiadomienia.odbiorcy.length === 0) return void res.status(503).json({ error: "Powiadomienia e-mail nie są skonfigurowane na serwerze (SMTP_* i POWIADOMIENIA_PARTNERZY_DO)." });
+    try {
+      await powiadomienia.nadawca.wyslij({ do: powiadomienia.odbiorcy, temat: "Bridge: wiadomość próbna", tekst: "To wiadomość próbna z Bridge. Jeśli ją widzisz, powiadomienia o błędach zamówień partnerów będą dochodzić na ten adres." });
+      res.json({ wyslano: powiadomienia.odbiorcy.length });
+    } catch (e) {
+      res.status(502).json({ error: `Nie udało się wysłać wiadomości: ${e instanceof Error ? e.message : String(e)}` });
+    }
+  });
+
   router.post("/api/partnerzy/geis/podglad-kosztu", requireAuth, (req, res) => {
     const c = (req.body ?? {}) as Record<string, unknown>;
     const partnerId = Number(c.partnerId);
@@ -370,6 +383,8 @@ export function trasyPartnerzy({ db, serwis, odbiorEmail, klientSelly, sellyZamo
     } catch (e) {
       if (e instanceof BladTworzenia) {
         audytuj(req, "partner_zamowienie_utworz_w_selly_blad", id, { zamowienieId, status: e.status }); // bez treści błędu (może zawierać dane sklepu)
+        // 502 = Selly odrzuciło zamówienie albo nie wiadomo, czy je przyjęło; 403/404/409 to blokady widoczne od razu w panelu — bez e-maila.
+        if (e.status === 502 && powiadomienia) void powiadomOBledzieSelly(db, powiadomienia.nadawca, powiadomienia.odbiorcy, { partnerId: id, zamowienieId, powod: e.message }, console.error);
         return void res.status(e.status).json({ error: e.message });
       }
       throw e;

@@ -794,6 +794,13 @@ export const partnerZamowienia = sqliteTable("partner_zamowienia", {
 	pobrano: text().notNull(),
 }, (table) => [unique().on(table.partnerId, table.numerPartnera)]);
 
+// Ticket 263 (migracja 038) — które powiadomienia e-mail o zamówieniach partnerów już wysłano.
+export const partnerPowiadomienia = sqliteTable("partner_powiadomienia", {
+	zamowienieId: integer("zamowienie_id").notNull().references(() => partnerZamowienia.id, { onDelete: "cascade" }),
+	rodzaj: text().notNull(),
+	wyslano: text().notNull(),
+}, (table) => [primaryKey({ columns: [table.zamowienieId, table.rodzaj] })]);
+
 // Ticket 256 (migracja 037) — wysyłki zamówień partnerów (numer listu przewozowego → plik trackingu).
 export const partnerWysylki = sqliteTable("partner_wysylki", {
 	id: integer().primaryKey({ autoIncrement: true }),

@@ -1,7 +1,7 @@
 /** Tickety 248/249: podgląd zamówienia partnera przed Selly i jego ręczne utworzenie — dopasowanie, blokady, brak duplikatów. Zawsze atrapa Selly. */
 import { eq } from "drizzle-orm";
 import request from "supertest";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { kursyNbp, partnerKraje, partnerZamowienia, partnerzy, products, sellyProducts } from "../src/db/schema.js";
 import { podgladDlaSelly } from "../src/partnerzy/podglad-selly.js";
@@ -232,6 +232,28 @@ describe("zamówienie partnera → Selly", () => {
       expect(odp.status).toBe(502);
       expect(odp.body.error).toMatch(/Selly odrzuciło.*niepoprawne pole/);
       expect(stan(id)).toEqual({ status: "przyjete", numer: null });
+    });
+
+    it("odmowa Selly wysyła e-mail do osoby od zamówień (ticket 263); blokada 409 nie wysyła; błąd SMTP nie psuje odpowiedzi", async () => {
+      const atrapa = stworzAtrapeSelly();
+      const klient: KlientSelly = { ...atrapa.klient, createOrder: () => Promise.reject(new BladSelly("[Selly] 422 niepoprawne pole", 422, null)) };
+      const wyslane: { do: string[]; temat: string; tekst: string }[] = [];
+      let psuj = false;
+      const nadawca = { wyslij: async (w: { do: string[]; temat: string; tekst: string }) => { if (psuj) throw new Error("SMTP padł"); wyslane.push(w); } };
+      s = await stworzSrodowiskoTestowe(undefined, { klientSelly: klient, sellyZamowienia: true, powiadomienia: { nadawca, odbiorcy: ["marta@firma.example"] } });
+      const partnerId = dodajPartnera();
+      katalogZSelly();
+      kursEur();
+      const id = przyjete(partnerId);
+      const auth = await zaloguj();
+      expect((await request(s.app).post(url(partnerId, id)).set(auth)).status).toBe(502);
+      await vi.waitFor(() => expect(wyslane).toHaveLength(1));
+      expect(wyslane[0]!.do).toEqual(["marta@firma.example"]);
+      expect(wyslane[0]!.temat).toMatch(/błąd przy tworzeniu w Selly/);
+      expect(wyslane[0]!.tekst).toMatch(/Selly odrzuciło.*niepoprawne pole/);
+      psuj = true;
+      expect((await request(s.app).post(url(partnerId, id)).set(auth)).status).toBe(502); // SMTP padł, użytkownik dalej dostaje swój błąd
+      expect(wyslane).toHaveLength(1);
     });
 
     it("błąd niejednoznaczny (timeout / 5xx): zamówienie ZOSTAJE zablokowane w „wysylanie”, drugie kliknięcie nie tworzy duplikatu; „Zwolnij” odblokowuje", async () => {

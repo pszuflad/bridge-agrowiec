@@ -5,6 +5,8 @@ import { stworzApp } from "./app.js";
 import { klientNbpHttp } from "./partnerzy/kurs-nbp.js";
 import { stworzHarmonogramOdbioru, type OdbiorEmail } from "./partnerzy/odbior-email.js";
 import { otworzSkrzynkeImap } from "./partnerzy/poczta-imap.js";
+import { wyslijNowePowiadomienia } from "./partnerzy/powiadomienia.js";
+import { konfiguracjaSmtp, nadawcaSmtp, parsujAdresy } from "./poczta/nadawca.js";
 import { stworzHarmonogramOdbioruPlikow } from "./partnerzy/odbior-plikow.js";
 import { parsujKatalogiPublikacji } from "./partnerzy/publikacja.js";
 import { stworzSerwisPartnerow } from "./partnerzy/scheduler.js";
@@ -151,6 +153,10 @@ const odbiorEmail: OdbiorEmail = {
   otworz: otworzSkrzynkeImap,
   ustawienia: { host: env.PARTNERZY_IMAP_HOST, port: env.PARTNERZY_IMAP_PORT, haslo: (id) => process.env[`PARTNERZY_IMAP_HASLO_${id}`] || undefined },
 };
+// Powiadomienia e-mail o błędach zamówień partnerów (ticket 263): wymagają SMTP_* i POWIADOMIENIA_PARTNERZY_DO; brak czegokolwiek = wyłączone.
+const konfigSmtp = konfiguracjaSmtp(env);
+const odbiorcyPowiadomien = parsujAdresy(env.POWIADOMIENIA_PARTNERZY_DO);
+const powiadomienia = konfigSmtp && odbiorcyPowiadomien.length > 0 ? { nadawca: nadawcaSmtp(konfigSmtp), odbiorcy: odbiorcyPowiadomien } : undefined;
 const harmonogramOdbioru = stworzHarmonogramOdbioru({ db, ...odbiorEmail, interwalMs: env.PARTNERZY_ODBIOR_EMAIL_MINUTY * 60_000 });
 
 // Odbiór zamówień z plików XML na serwerze plików (ticket 239): błędna wartość mapowania NIE przewraca backendu — loguje błąd i nic nie odbiera.
@@ -176,6 +182,7 @@ const app = stworzApp({
   sellyZamowienia: env.PARTNERZY_SELLY_ZAMOWIENIA && env.SELLY_TRYB === "pelny",
   katalogiTrackingu,
   klientNbp,
+  powiadomienia,
 });
 
 const server = app.listen(env.PORT, env.HOST, () => {
@@ -228,6 +235,14 @@ const server = app.listen(env.PORT, env.HOST, () => {
     harmonogramOdbioru.uruchom();
   } else {
     console.log("[partnerzy-odbior-email] wyłączony (PARTNERZY_ODBIOR_EMAIL nie jest ustawione)");
+  }
+
+  if (powiadomienia) {
+    const przebieg = (): void => void wyslijNowePowiadomienia(db, powiadomienia.nadawca, powiadomienia.odbiorcy, { log: console.error }).catch((e: unknown) => console.error("[powiadomienia] przebieg nie powiódł się:", e instanceof Error ? e.message : e));
+    setInterval(przebieg, env.POWIADOMIENIA_PARTNERZY_MINUTY * 60_000).unref();
+    console.log(`[powiadomienia] włączone (${odbiorcyPowiadomien.length} odbiorców, przebieg co ${env.POWIADOMIENIA_PARTNERZY_MINUTY} min)`);
+  } else {
+    console.log("[powiadomienia] wyłączone (brak SMTP_HOST/SMTP_USER/SMTP_HASLO/SMTP_OD lub POWIADOMIENIA_PARTNERZY_DO)");
   }
 
   if (env.PARTNERZY_ODBIOR_PLIKOW) {

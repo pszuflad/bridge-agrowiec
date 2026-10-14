@@ -146,6 +146,18 @@ const schemaEnvBazowe = z.object({
   PARTNERZY_ODBIOR_PLIKOW_MINUTY: z.coerce.number().int().min(1).max(1440).default(5),
   PARTNERZY_KATALOGI_ZAMOWIEN: z.string().min(1).optional(),
   /**
+   * Powiadomienia e-mail o błędach zamówień partnerów (ticket 263). Wymagane razem: SMTP_HOST, SMTP_USER, SMTP_HASLO (sekret — wpisuje użytkowniczka w `.env`
+   * serwera), SMTP_OD oraz POWIADOMIENIA_PARTNERZY_DO (adresy odbiorców, po przecinku). Brak któregokolwiek = powiadomienia wyłączone (bez błędu).
+   */
+  SMTP_HOST: z.string().min(1).optional(),
+  SMTP_PORT: z.coerce.number().int().min(1).max(65535).default(465),
+  SMTP_USER: z.string().min(1).optional(),
+  SMTP_HASLO: z.string().min(1).optional(),
+  SMTP_OD: z.string().min(1).optional(),
+  SMTP_OD_NAZWA: z.string().min(1).default("Bridge"),
+  POWIADOMIENIA_PARTNERZY_DO: z.string().min(1).optional(),
+  POWIADOMIENIA_PARTNERZY_MINUTY: z.coerce.number().int().min(1).max(1440).default(5),
+  /**
    * Odbiór zamówień partnerów przez e-mail (karta PARTNERZY, ticket 229) — DOMYŚLNIE WYŁĄCZONY. Host/port IMAP wspólne; hasło skrzynki każdego
    * partnera w `PARTNERZY_IMAP_HASLO_<id partnera>` (czytane wprost ze środowiska, nie tutaj). Brak hosta lub hasła = kanał pomijany z wpisem w logu.
    */

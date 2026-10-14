@@ -12,6 +12,7 @@ import { usunWszystkieKartyAuto } from "../import/migracje/scal-karty-auto.js";
 import { wyprowadzKatalogiTrackingu } from "../partnerzy/katalogi-trackingu.js";
 import { uzupelnijDanePartnerow } from "../partnerzy/dane-partnerow.js";
 import { ustawNarzutyStartowe } from "../partnerzy/narzuty-startowe.js";
+import { konfiguracjaSmtp, nadawcaSmtp, parsujAdresy } from "../poczta/nadawca.js";
 import { naprawMagazynyDostawcow, ustawKonfiguracjeStartowa } from "../partnerzy/konfiguracja-startowa.js";
 import { partnerKraje } from "../db/schema.js";
 import { dodajPartnera } from "../repos/partnerzy.js";
@@ -182,6 +183,59 @@ export const KROKI_WDROZENIA: Krok[] = [
       if (!opis) return { odloz: `brak pliku ${sciezka}` };
       const tryb = env.SELLY_TRYB === "pelny" ? "" : ` — UWAGA: SELLY_TRYB=${env.SELLY_TRYB ?? "(brak)"}, flaga zadziała dopiero przy SELLY_TRYB=pelny`;
       return `${opis.join("; ")} — zacznie działać po restarcie backendu (wdrożenie wczytuje .env po krokach)${tryb}`;
+    },
+  },
+  {
+    id: "2026-10-14-partnerzy-smtp-ustawienia",
+    tylkoProdukcja: true, // środowisko testowe nie wysyła poczty do prawdziwych adresów
+    opis: "partnerzy B2B: ustawienia SMTP skrzynki nadawczej powiadomień (serwer, port, użytkownik, adres i nazwa nadawcy) i odbiorca powiadomień (info@agroopony.eu) w .env produkcji; dopisuje TYLKO brakujące klucze, nie ustawia hasła (SMTP_HASLO przychodzi z sekretu GitHub albo z ręcznego wpisu)",
+    async uruchom({ env }) {
+      const dbPath = env.DB_PATH as string | undefined;
+      const sciezka = (env.PLIK_ENV as string | undefined) || (dbPath ? join(dirname(dbPath), "..", ".env") : "");
+      if (!sciezka) return { odloz: "brak DB_PATH — nie wiem, gdzie jest .env" };
+      const domyslne: Record<string, string> = {
+        SMTP_HOST: "vpshd86.cyber-folks.pl",
+        SMTP_PORT: "465",
+        SMTP_USER: "info@agroopony.eu",
+        SMTP_OD: "info@agroopony.eu",
+        SMTP_OD_NAZWA: "AGROOPONY",
+        // Odbiorca powiadomień: ogólna skrzynka firmowa (decyzja użytkowniczki 2026-10-14: „adres Marty to info”).
+        POWIADOMIENIA_PARTNERZY_DO: "info@agroopony.eu",
+      };
+      const brakujace = Object.fromEntries(Object.entries(domyslne).filter(([klucz]) => !env[klucz]?.trim()));
+      if (Object.keys(brakujace).length === 0) return "ustawienia SMTP już są w .env — bez zmian";
+      const opis = ustawWEnvPliku(sciezka, brakujace);
+      if (!opis) return { odloz: `brak pliku ${sciezka}` };
+      return `${opis.join("; ")} — hasło (SMTP_HASLO) przychodzi z sekretu GitHub (ticket 264) albo z ręcznego wpisu w .env`;
+    },
+  },
+  {
+    id: "2026-10-14-partnerzy-powiadomienia-test-wysylki",
+    tylkoProdukcja: true, // środowisko testowe nie wysyła poczty
+    opis: "partnerzy B2B: jednorazowa wiadomość próbna na adres powiadomień — sprawdza, że SMTP i odbiorca działają; ruszy dopiero, gdy w środowisku wdrożenia są wszystkie SMTP_* i hasło; błąd SMTP NIE przerywa wdrożenia (krok zostaje odłożony i ponowi się)",
+    wymagaEnv: ["SMTP_HOST", "SMTP_USER", "SMTP_HASLO", "SMTP_OD", "POWIADOMIENIA_PARTNERZY_DO"],
+    async uruchom({ env }) {
+      const konfig = konfiguracjaSmtp({
+        SMTP_HOST: env.SMTP_HOST,
+        SMTP_PORT: env.SMTP_PORT ? Number(env.SMTP_PORT) : undefined,
+        SMTP_USER: env.SMTP_USER,
+        SMTP_HASLO: env.SMTP_HASLO,
+        SMTP_OD: env.SMTP_OD,
+        SMTP_OD_NAZWA: env.SMTP_OD_NAZWA,
+      });
+      const odbiorcy = parsujAdresy(env.POWIADOMIENIA_PARTNERZY_DO);
+      if (!konfig || odbiorcy.length === 0) return { odloz: "niepełna konfiguracja SMTP albo brak poprawnego adresu odbiorcy" };
+      try {
+        await nadawcaSmtp(konfig).wyslij({
+          do: odbiorcy,
+          temat: "Bridge: wiadomość próbna powiadomień",
+          tekst: "To wiadomość próbna z Bridge, wysłana przy wdrożeniu. Jeśli ją widzisz, powiadomienia o błędach zamówień partnerów będą dochodzić na ten adres.",
+        });
+      } catch (e) {
+        // Dziennik wdrożenia jest publiczny: komunikat błędu SMTP (bez hasła — maskuje je nadawca), bez adresów.
+        return { odloz: `wysyłka SMTP nie powiodła się: ${e instanceof Error ? e.message : String(e)} — ponowię przy następnym wdrożeniu` };
+      }
+      return `wysłano wiadomość próbną na ${odbiorcy.length} adres(y) powiadomień`;
     },
   },
 ];

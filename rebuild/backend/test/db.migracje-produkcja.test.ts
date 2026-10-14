@@ -202,6 +202,7 @@ describe("pełny łańcuch migracji na schemacie produkcji @ 7d6cfc9 (bez `_migr
       "partner_magazyny",
       "partner_narzuty",
       "partner_pola_obliczeniowe",
+      "partner_powiadomienia",
       "partner_wykluczenia",
       "partner_wysylki",
       "partner_zamowienia",
