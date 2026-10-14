@@ -1,4 +1,4 @@
-// Kurs EUR dla partnerów B2B — NBP tabela A albo ręczny (karta PARTNERZY, ticket 210 / PRT-2.1).
+// Kurs EUR dla partnerów B2B — NBP tabela A i ręczny RÓWNOLEGLE, obowiązuje niższy (karta PARTNERZY, ticket 210 / PRT-2.1; ticket 262).
 //
 // Zasady z karty: kurs NBP = ostatnio OPUBLIKOWANY (w weekend i święta API oddaje ostatnią tabelę); gdy NBP nie
 // odpowiada — ostatni zapisany kurs + ostrzeżenie; każdy plik zapisuje użyty kurs (`partner_kursy`).
@@ -17,9 +17,9 @@ export interface KlientNbp {
 
 export type UzytyKurs = {
   kurs: number;
-  /** `reczny` – wpisany przez użytkownika; `nbp` – świeżo pobrany; `nbp-zapisany` – rezerwa po awarii NBP. */
+  /** `reczny` – wpisany przez użytkownika (był niższy od NBP albo NBP niedostępny); `nbp` – świeżo pobrany; `nbp-zapisany` – rezerwa po awarii NBP. */
   zrodlo: "reczny" | "nbp" | "nbp-zapisany";
-  /** Data tabeli NBP (brak dla kursu ręcznego). */
+  /** Data tabeli NBP, z którą porównano kurs (brak, gdy NBP nie odpowiadał, a kurs ręczny wystarczył). */
   dataTabeli: string | null;
   ostrzezenie: string | null;
 };
@@ -60,8 +60,10 @@ function ostatniZapisany(db: Baza): KursNbp | null {
 }
 
 /**
- * Kurs EUR wg ustawień kraju partnera. Ręczny: bez sięgania do sieci. NBP: pobiera i zapisuje; przy awarii bierze
- * ostatni zapisany i zwraca ostrzeżenie (do logu operacji); bez żadnego kursu rzuca `BrakKursuError` — nigdy nie zgaduje.
+ * Kurs EUR wg ustawień kraju partnera (od ticketu 262: NBP i ręczny działają RÓWNOLEGLE).
+ * Bez kursu ręcznego: NBP (pobiera i zapisuje; przy awarii ostatni zapisany + ostrzeżenie; bez żadnego kursu `BrakKursuError` — nigdy nie zgaduje).
+ * Z kursem ręcznym: obowiązuje NIŻSZY z dwóch (decyzja użytkowniczki 2026-10-14: niższy kurs = wyższa cena w EUR = ochrona przed stratą przy przeliczeniu).
+ * Gdy NBP nie odpowiada i nie ma zapisanego kursu, wystarczy ręczny (z ostrzeżeniem). Pole `kursZrodlo` nie decyduje już o wyborze — liczy się to, czy kurs ręczny jest ustawiony.
  */
 export async function kursEur(
   db: Baza,
@@ -69,29 +71,30 @@ export async function kursEur(
   ustawienia: { kursZrodlo: string; kursReczny: number | null },
   teraz: () => Date = () => new Date(),
 ): Promise<UzytyKurs> {
-  if (ustawienia.kursZrodlo === "reczny") {
-    if (!(typeof ustawienia.kursReczny === "number" && ustawienia.kursReczny > 0))
-      throw new BrakKursuError("Kurs ręczny jest włączony, ale nie ma wartości kursu.");
-    return { kurs: ustawienia.kursReczny, zrodlo: "reczny", dataTabeli: null, ostrzezenie: null };
-  }
+  const reczny = typeof ustawienia.kursReczny === "number" && Number.isFinite(ustawienia.kursReczny) && ustawienia.kursReczny > 0 ? ustawienia.kursReczny : null;
+  let nbp: { kurs: number; data: string; zapisany: boolean } | null = null;
+  let powodBledu: string | null = null;
   try {
-    const nbp = await klient.pobierzKursEur();
+    const swiezy = await klient.pobierzKursEur();
     db.insert(kursyNbp)
-      .values({ data: nbp.data, kurs: nbp.kurs, pobrano: teraz().toISOString() })
-      .onConflictDoUpdate({ target: kursyNbp.data, set: { kurs: nbp.kurs, pobrano: teraz().toISOString() } })
+      .values({ data: swiezy.data, kurs: swiezy.kurs, pobrano: teraz().toISOString() })
+      .onConflictDoUpdate({ target: kursyNbp.data, set: { kurs: swiezy.kurs, pobrano: teraz().toISOString() } })
       .run();
-    return { kurs: nbp.kurs, zrodlo: "nbp", dataTabeli: nbp.data, ostrzezenie: null };
+    nbp = { ...swiezy, zapisany: false };
   } catch (e) {
-    const powod = e instanceof Error ? e.message : String(e);
+    powodBledu = e instanceof Error ? e.message : String(e);
     const zapisany = ostatniZapisany(db);
-    if (!zapisany) throw new BrakKursuError(`NBP nie odpowiada (${powod}) i nie ma żadnego zapisanego kursu.`);
-    return {
-      kurs: zapisany.kurs,
-      zrodlo: "nbp-zapisany",
-      dataTabeli: zapisany.data,
-      ostrzezenie: `NBP nie odpowiada (${powod}) — użyto ostatniego zapisanego kursu ${zapisany.kurs} z tabeli ${zapisany.data}.`,
-    };
+    if (zapisany) nbp = { ...zapisany, zapisany: true };
   }
+  const ostrzezenieNbp = nbp?.zapisany ? `NBP nie odpowiada (${powodBledu}) — użyto ostatniego zapisanego kursu ${nbp.kurs} z tabeli ${nbp.data}.` : null;
+  if (reczny !== null) {
+    if (nbp === null)
+      return { kurs: reczny, zrodlo: "reczny", dataTabeli: null, ostrzezenie: `NBP nie odpowiada (${powodBledu}) i nie ma zapisanego kursu — użyto samego kursu ręcznego ${reczny}.` };
+    if (reczny <= nbp.kurs) return { kurs: reczny, zrodlo: "reczny", dataTabeli: nbp.data, ostrzezenie: ostrzezenieNbp };
+    return { kurs: nbp.kurs, zrodlo: nbp.zapisany ? "nbp-zapisany" : "nbp", dataTabeli: nbp.data, ostrzezenie: ostrzezenieNbp };
+  }
+  if (nbp === null) throw new BrakKursuError(`NBP nie odpowiada (${powodBledu}) i nie ma żadnego zapisanego kursu.`);
+  return { kurs: nbp.kurs, zrodlo: nbp.zapisany ? "nbp-zapisany" : "nbp", dataTabeli: nbp.data, ostrzezenie: ostrzezenieNbp };
 }
 
 /** Zapisuje kurs użyty przy wygenerowaniu pliku (`partner_kursy`). */
