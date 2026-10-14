@@ -238,18 +238,4 @@ export const KROKI_WDROZENIA: Krok[] = [
       return `wysłano wiadomość próbną na ${odbiorcy.length} adres(y) powiadomień`;
     },
   },
-  {
-    id: "2026-10-14-partnerzy-odbior-plikow-wlaczony",
-    tylkoProdukcja: true, // środowisko testowe nie czyta katalogów produkcyjnych
-    opis: "partnerzy B2B: włączenie odbioru zamówień z plików XML co 10 minut (jak w dawnej integracji) — PARTNERZY_ODBIOR_PLIKOW=true, PARTNERZY_ODBIOR_PLIKOW_MINUTY=10; ruszy dopiero, gdy jest mapowanie katalogów zamówień; pliki starsze niż 30 dni są ignorowane",
-    wymagaEnv: ["PARTNERZY_KATALOGI_ZAMOWIEN"],
-    async uruchom({ env }) {
-      const dbPath = env.DB_PATH as string | undefined;
-      const sciezka = (env.PLIK_ENV as string | undefined) || (dbPath ? join(dirname(dbPath), "..", ".env") : "");
-      if (!sciezka) return { odloz: "brak DB_PATH — nie wiem, gdzie jest .env" };
-      const opis = ustawWEnvPliku(sciezka, { PARTNERZY_ODBIOR_PLIKOW: "true", PARTNERZY_ODBIOR_PLIKOW_MINUTY: "10" });
-      if (!opis) return { odloz: `brak pliku ${sciezka}` };
-      return `${opis.join("; ")} — zacznie działać po restarcie backendu (wdrożenie wczytuje .env po krokach)`;
-    },
-  },
 ];

@@ -244,7 +244,7 @@ function PodgladDoSelly({ partnerId, zamowienieId }: { partnerId: number; zamowi
             <p className="text-muted-foreground" data-testid={`podglad-gotowe-${zamowienieId}`}>Wszystkie pozycje dopasowane i powiązane z Selly, dane do faktury kompletne.</p>
           )}
           {p.kurs ? (
-            <p className="text-muted-foreground" data-testid={`podglad-kurs-${zamowienieId}`}>Ceny z pliku (EUR) przeliczone na PLN po kursie {p.kurs.kurs} (tabela NBP z {p.kurs.data}) — zamówienie w Selly powstaje w PLN.</p>
+            <p className="text-muted-foreground" data-testid={`podglad-kurs-${zamowienieId}`}>Kurs EUR w zamówieniu (exchange_rate): {p.kurs.kurs} PLN za 1 EUR, tabela NBP z {p.kurs.data} — sprawdź, czy kierunek zgadza się z Selly.</p>
           ) : null}
           {p.zadanie ? (
             <details>
