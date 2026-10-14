@@ -59,13 +59,13 @@ describe("zamówienie partnera → Selly", () => {
       expect(p.pozycje[0]!.dopasowanie).toMatchObject({ kod: "011200284", dostawca: "MO1", sellyProductId: 501, sellyVariantId: 601 });
       expect(p.ostrzezenia).toEqual([expect.stringMatching(/pełnego adresu dostawy.*ulica, kod pocztowy, miasto/)]);
       expect(p.zadanie).toMatchObject({
-        status_id: 3, payment_id: 10, delivery_id: 10, email: "bill@partner.example", phone: "+376 111 222", currency: "EUR", exchange_rate: 4.25,
+        status_id: 3, payment_id: 10, delivery_id: 10, email: "bill@partner.example", phone: "+376 111 222", currency: "PLN", exchange_rate: 1,
         invoice_company: "Adtyres SL", invoice_nip: "ATU1", invoice_postcode: "AD500", ship_company: "Jan Kowalski", delivery_country_iso2: "AT",
       });
       expect((p.zadanie as { client_comment: string }).client_comment).toMatch(/Adtyres nr /);
       expect((p.zadanie as { products: unknown[] }).products).toEqual([
-        { product_id: 501, variant_id: 601, quantity: 2, price_with_tax: 202, vat_rate_id: 101 },
-        { product_id: 502, variant_id: 602, quantity: 1, price_with_tax: 99.5, vat_rate_id: 101 },
+        { product_id: 501, variant_id: 601, quantity: 2, price_with_tax: 858.5, vat_rate_id: 101 },
+        { product_id: 502, variant_id: 602, quantity: 1, price_with_tax: 422.88, vat_rate_id: 101 },
       ]);
     });
 

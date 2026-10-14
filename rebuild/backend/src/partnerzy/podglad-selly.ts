@@ -76,6 +76,9 @@ export function adresDostawy(d: Record<string, string>) {
   };
 }
 
+/** Cena EUR → PLN po kursie NBP, zaokrąglona do groszy. */
+const naPln = (eur: number, kurs: number): number => Math.round(eur * kurs * 100) / 100;
+
 const ostatniKursEur = (db: Baza): { kurs: number; data: string } | null => db.select({ kurs: kursyNbp.kurs, data: kursyNbp.data }).from(kursyNbp).orderBy(desc(kursyNbp.data)).limit(1).get() ?? null;
 
 export function podgladDlaSelly(db: Baza, partnerId: number, zamowienieId: number, tworzenieWlaczone = false): PodgladSelly | null {
@@ -157,9 +160,10 @@ export function podgladDlaSelly(db: Baza, partnerId: number, zamowienieId: numbe
       status_id: p.sellyStatusId,
       payment_id: p.sellyPaymentId ?? SELLY_PLATNOSC_ID,
       delivery_id: p.sellyDeliveryId ?? SELLY_DOSTAWA_ID,
-      currency: waluta,
-      exchange_rate: kurs,
-      delivery_price: z.kosztDostawy ?? 0,
+      // Jak w dawnej integracji: cena EUR z pliku partnera × kurs NBP, zamówienie w Selly w PLN (kurs 1).
+      currency: "PLN",
+      exchange_rate: 1,
+      delivery_price: naPln(z.kosztDostawy ?? 0, kurs),
       email: emailZamawiajacego,
       phone: telefon,
       ship_company: adres.odbiorca,
@@ -183,7 +187,7 @@ export function podgladDlaSelly(db: Baza, partnerId: number, zamowienieId: numbe
         product_id: x.dopasowanie!.sellyProductId,
         variant_id: x.dopasowanie!.sellyVariantId,
         quantity: x.ilosc,
-        price_with_tax: x.cena,
+        price_with_tax: naPln(x.cena!, kurs),
         vat_rate_id: p.sellyVatId ?? SELLY_VAT_ID,
       })),
     };

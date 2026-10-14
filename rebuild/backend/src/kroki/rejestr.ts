@@ -10,7 +10,7 @@ import {
 import { dirname, join } from "node:path";
 import { usunWszystkieKartyAuto } from "../import/migracje/scal-karty-auto.js";
 import { wyprowadzKatalogiTrackingu } from "../partnerzy/katalogi-trackingu.js";
-import { uzupelnijDanePartnerow } from "../partnerzy/dane-partnerow.js";
+import { uzupelnijDanePartnerow, ustawEmailZamowienTyreworld } from "../partnerzy/dane-partnerow.js";
 import { ustawNarzutyStartowe } from "../partnerzy/narzuty-startowe.js";
 import { konfiguracjaSmtp, nadawcaSmtp, parsujAdresy } from "../poczta/nadawca.js";
 import { naprawMagazynyDostawcow, ustawKonfiguracjeStartowa } from "../partnerzy/konfiguracja-startowa.js";
@@ -236,6 +236,13 @@ export const KROKI_WDROZENIA: Krok[] = [
         return { odloz: `wysyłka SMTP nie powiodła się: ${e instanceof Error ? e.message : String(e)} — ponowię przy następnym wdrożeniu` };
       }
       return `wysłano wiadomość próbną na ${odbiorcy.length} adres(y) powiadomień`;
+    },
+  },
+  {
+    id: "2026-10-14-partnerzy-tyreworld-email-zamowien",
+    opis: "partnerzy B2B: e-mail zamawiającego TyreWorld = adres zamówień (bestellung@) zamiast księgowości — tylko gdy nadal stoi adres z kartoteki; ręcznej zmiany nie nadpisuje",
+    async uruchom({ db }) {
+      return ustawEmailZamowienTyreworld(db);
     },
   },
 ];
