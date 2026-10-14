@@ -11,6 +11,7 @@ import { dirname, join } from "node:path";
 import { usunWszystkieKartyAuto } from "../import/migracje/scal-karty-auto.js";
 import { wyprowadzKatalogiTrackingu } from "../partnerzy/katalogi-trackingu.js";
 import { uzupelnijDanePartnerow } from "../partnerzy/dane-partnerow.js";
+import { zalozZamowienieTestowe } from "../partnerzy/zamowienie-testowe.js";
 import { ustawNarzutyStartowe } from "../partnerzy/narzuty-startowe.js";
 import { konfiguracjaSmtp, nadawcaSmtp, parsujAdresy } from "../poczta/nadawca.js";
 import { naprawMagazynyDostawcow, ustawKonfiguracjeStartowa } from "../partnerzy/konfiguracja-startowa.js";
@@ -250,6 +251,14 @@ export const KROKI_WDROZENIA: Krok[] = [
       const opis = ustawWEnvPliku(sciezka, { PARTNERZY_ODBIOR_PLIKOW: "true", PARTNERZY_ODBIOR_PLIKOW_MINUTY: "10" });
       if (!opis) return { odloz: `brak pliku ${sciezka}` };
       return `${opis.join("; ")} — zacznie działać po restarcie backendu (wdrożenie wczytuje .env po krokach)`;
+    },
+  },
+  {
+    id: "2026-10-14-partnerzy-zamowienie-testowe-selly",
+    tylkoProdukcja: true, // środowisko testowe nie ma prawdziwego powiązania ze sklepem Selly
+    opis: "partnerzy B2B: jedno zamówienie testowe (TEST-SELLY-…, 1 szt. produktu z powiązaniem Selly, 10 EUR) w panelu Adtyres — do sprawdzenia „Utwórz w Selly”; po teście usuwa się je w Selly ręcznie; brak pasującego produktu → krok odłożony",
+    async uruchom({ db }) {
+      return zalozZamowienieTestowe(db, "Adtyres");
     },
   },
 ];
