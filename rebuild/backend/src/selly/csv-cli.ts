@@ -43,6 +43,7 @@ try {
     katalog: env.SELLY_CSV_DIR,
     plik: env.SELLY_CSV_PLIK,
     url: env.SELLY_CSV_URL,
+    kosztZakupuBrutto: env.SELLY_CSV_KOSZT_BRUTTO,
   });
   // Te same cztery linie, które wypisywał `generate_selly_export.cjs` — cron produkcji
   // loguje stdout, więc treść zostaje rozpoznawalna dla kogoś, kto czyta stare logi.

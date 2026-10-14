@@ -65,6 +65,7 @@ export type ProduktSklepu = {
   product_id: number;
   name?: string | null;
   price?: number | null;
+  price_purchase?: number | null;
   product_code?: string | null;
   provider_code?: string | null;
   ean?: string | null;
@@ -223,9 +224,10 @@ export function stworzAtrapeSelly(opcje: OpcjeAtrapy = {}): AtrapaSelly {
       zapisz("updateProduct", id, payload);
       // Efekt PUT w sklepie (Tor 2): cechy i kategoria nadpisują się tylko, gdy payload je niesie.
       const produkt = sklep.get(id);
-      const p = (payload ?? {}) as { features?: CechaProduktu[]; category_id?: number };
+      const p = (payload ?? {}) as { features?: CechaProduktu[]; category_id?: number; price_purchase?: number };
       if (produkt && p.features) produkt.features = structuredClone(p.features);
       if (produkt && p.category_id !== undefined) produkt.category_id = p.category_id;
+      if (produkt && p.price_purchase !== undefined) produkt.price_purchase = p.price_purchase;
       return Promise.resolve({ data: { product_id: id } });
     },
 
@@ -249,6 +251,7 @@ export function stworzAtrapeSelly(opcje: OpcjeAtrapy = {}): AtrapaSelly {
           name: produkt.name,
           ean: produkt.ean,
           price: produkt.price,
+          price_purchase: produkt.price_purchase,
           variants: structuredClone(produkt.warianty),
           features: structuredClone(produkt.features ?? []),
         },

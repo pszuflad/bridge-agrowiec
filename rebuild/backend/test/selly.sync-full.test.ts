@@ -124,7 +124,7 @@ describe("Tor 2 — sync_full", () => {
       const wynik = await syncFullForDostawca(baza.db, discovery, "MO9", { autoCreate: false });
 
       expect(wynik.stats).toMatchObject({ total: 2, updated_A: 1, skip: 1, err: 0 });
-      expect(atrapa.liczba("getProduct")).toBe(1);
+      expect(atrapa.liczba("getProduct")).toBe(2);
 
       const payload = argumenty(atrapa, "updateProduct")[0]?.[1] as PayloadPut;
       expect(payload.category_id).toBe(1);
@@ -188,7 +188,7 @@ describe("Tor 2 — sync_full", () => {
 
       await syncFullForDostawca(baza.db, discovery, "MO9", { autoCreate: false });
 
-      expect(atrapa.liczba("getProduct")).toBe(1);
+      expect(atrapa.liczba("getProduct")).toBe(2);
       const payload = argumenty(atrapa, "updateProduct")[0]?.[1] as PayloadPut;
       expect(payload.features).toBeUndefined();
       expect(payload.category_id).toBeUndefined();

@@ -225,6 +225,7 @@ export function stworzPolitykeStagingu(
   const sqlite = uchwytSqlite(db);
   const odswiezDostepnosc = zaleznosci.odswiezDostepnosc ?? (() => {});
   let dostepnoscZmieniona = false;
+  let eksportCenZmieniony = false;
 
   /**
    * `find = code => U.getProductByKod(code)` (`staging_policy.cjs:134`).
@@ -282,6 +283,7 @@ export function stworzPolitykeStagingu(
     opcje: OpcjeImportu = {},
   ): StatystykiImportu {
     dostepnoscZmieniona = false;
+    eksportCenZmieniony = false;
     if (!Array.isArray(wejscie)) throw new Error("Nieprawidłowy cennik");
 
     const meta = opcje.meta;
@@ -882,6 +884,9 @@ export function stworzPolitykeStagingu(
           applyDims(patch, biezacy.rozmiar);
           applyLinkMemory(sqlite, patch, biezacy as unknown as Record<string, unknown>);
           aktualizujProdukt(db, biezacy.id, patch as Partial<ProduktWewnetrzny>);
+          if (["cenaZakupu", "cenaSprzedazy", "stan"].some(k => k in patch)) {
+            eksportCenZmieniony = true;
+          }
           stats.autoZatwierdzone += 1;
           // ⚠ Pola tożsamości pochodzą z karty SPRZED zmiany, ceny i stan — z wartości PO.
           zapiszHistorieCen(db, {
@@ -1117,7 +1122,7 @@ export function stworzPolitykeStagingu(
       }
     });
 
-    if (dostepnoscZmieniona && !opcje.reconcileOnly) odswiezDostepnosc(dostawca);
+    if ((dostepnoscZmieniona || eksportCenZmieniony) && !opcje.reconcileOnly) odswiezDostepnosc(dostawca);
     return wynik;
   }
 

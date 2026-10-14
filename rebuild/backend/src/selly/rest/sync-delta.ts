@@ -21,6 +21,7 @@ import type { Baza } from "../../db/index.js";
 import type { Discovery, WierszBridge, WynikMapowania } from "./discovery.js";
 import { sprawdzCelSelly } from "./bezpieczenstwo.js";
 import { szczegolyDoZapisu } from "./log-szczegoly.js";
+import { synchronizujKosztProduktuJednegoWariantu } from "./koszt-produktu.js";
 
 /**
  * Rodzaj błędu synchronizacji — do rozróżnienia w panelu (ticket 194). Liczba „Błąd” w dzienniku zlewała dotąd
@@ -148,7 +149,9 @@ export type WynikSyncDelta = {
  *    (`sp.selly_variant_id`) wchodzi bez EAN-u, bo wariant i tak trzeba zaktualizować.
  *    Bez mapowania EAN nadal jest konieczny (discovery nie ma po czym szukać).
  */
-export function findDeltaProducts(db: Baza, dostawca: string | null = null, limit = 10000): WierszDelta[] {
+export function findDeltaProducts(
+  db: Baza, dostawca: string | null = null, limit = 10000, kosztProduktu = false, kodProduktu?: string,
+): WierszDelta[] {
   const where = [
     `(p.status = 'aktywny' OR (p.status = 'wstrzymany' AND sp.selly_variant_id IS NOT NULL
         AND NOT EXISTS(SELECT 1 FROM products active
@@ -163,6 +166,11 @@ export function findDeltaProducts(db: Baza, dostawca: string | null = null, limi
   if (dostawca) {
     where.push("p.dostawca = ?");
     params.push(dostawca);
+  }
+  // Próba pojedynczej karty nie może przy okazji uruchomić delty innych ofert.
+  if (kodProduktu) {
+    where.push("p.kod = ?");
+    params.push(kodProduktu);
   }
   const sql = `
     SELECT p.id, p.status, p.kod, p.kod_importu, p.dostawca, p.ean, p.nazwa,
@@ -179,6 +187,12 @@ export function findDeltaProducts(db: Baza, dostawca: string | null = null, limi
         OR sp.stan_wyslany IS NULL
         OR sp.stan_wyslany != CASE WHEN p.status = 'wstrzymany' THEN 0 ELSE p.stan END
         OR sp.cena_sprzedazy_wyslana IS NULL OR sp.cena_sprzedazy_wyslana != p.cena_sprzedazy
+        ${kosztProduktu ? `OR (p.status = 'aktywny' AND p.cena_zakupu > 0
+          AND (sp.cena_zakupu_wyslana IS NULL OR sp.cena_zakupu_wyslana != p.cena_zakupu)
+          AND (SELECT COUNT(*) FROM products oferta
+               WHERE oferta.kod_importu = p.kod_importu AND oferta.status = 'aktywny') = 1
+          AND (SELECT COUNT(DISTINCT mapa.selly_variant_id) FROM selly_products mapa
+               WHERE mapa.selly_product_id = sp.selly_product_id) = 1)` : ""}
       )
     LIMIT ?
   `;
@@ -273,11 +287,11 @@ function markSynced(db: Baza, row: WierszDelta, priceOk: boolean, stockOk: boole
   db.$client
     .prepare(
       `UPDATE selly_products
-    SET stan_wyslany = ?, cena_sprzedazy_wyslana = ?, cena_zakupu_wyslana = ?,
+    SET stan_wyslany = ?, cena_sprzedazy_wyslana = ?,
         ostatnia_sync = datetime('now'), ostatni_status = 'ok', ostatni_blad = NULL
     WHERE kod_importu = ? AND dostawca = ?`,
     )
-    .run(stockOk ? row.stan : null, priceOk ? row.cena_sprzedazy : null, row.cena_zakupu, row.kod_importu, row.dostawca);
+    .run(stockOk ? row.stan : null, priceOk ? row.cena_sprzedazy : null, row.kod_importu, row.dostawca);
 }
 
 /**
@@ -316,10 +330,12 @@ export async function syncDelta(
   db: Baza,
   discovery: Discovery,
   dostawca: string | null = null,
-  opts: { dryRun?: boolean; maxProducts?: number } = {},
+  opts: {
+    dryRun?: boolean; maxProducts?: number; kosztProduktuJednegoWariantu?: boolean; kodProduktu?: string;
+  } = {},
 ): Promise<WynikSyncDelta> {
   const { dryRun = false, maxProducts = 5000 } = opts;
-  const rows = findDeltaProducts(db, dostawca, maxProducts);
+  const rows = findDeltaProducts(db, dostawca, maxProducts, opts.kosztProduktuJednegoWariantu, opts.kodProduktu);
   const logId = logSyncStart(db, dostawca);
 
   const stats: StatystykiDelta = {
@@ -448,6 +464,9 @@ export async function syncDelta(
             target.product.price !== row.cena_sprzedazy) {
           await discovery.apiWithRetry(`PUT /api/products/${productId} price`, () =>
             discovery.klient.updateProduct(productId, { price: row.cena_sprzedazy }));
+        }
+        if (opts.kosztProduktuJednegoWariantu && target) {
+          await synchronizujKosztProduktuJednegoWariantu(db, discovery, row, productId, target);
         }
         stats.ok++;
         markSynced(db, row, true, true);

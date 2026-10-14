@@ -343,11 +343,15 @@ export function stworzDiscovery({
    * ⚠ Nieudany PUT „Magazyny” na domyślnym wariancie jest tylko logowany, a wynik i tak niesie
    * `feature_id_magazyn` — zastane (`:262-271`).
    */
-  async function createProduct(bridgeRow: WierszBridge, dictMaps: SlownikiSelly): Promise<WynikUtworzenia> {
+  async function createProduct(
+    bridgeRow: WierszBridge, dictMaps: SlownikiSelly, bezWspolnegoKosztu = false,
+  ): Promise<WynikUtworzenia> {
     const payload = budujPayloadProduktu(bridgeRow, dictMaps);
     if (payload._error) {
       return { error: payload._error };
     }
+    // Tworzenie wspólnej karty też nie może utrwalić arbitralnego kosztu pierwszego dostawcy.
+    if (bezWspolnegoKosztu) delete payload.price_purchase;
 
     // KROK PROTECT: czy product_code już istnieje w Selly
     if (productCodeCache && payload.product_code) {
@@ -560,7 +564,10 @@ export function stworzDiscovery({
     if (!dictMaps) {
       return { error: "produkt nie istnieje w Selly ale brak dictMaps do createProduct", action: "not_found" };
     }
-    const created = await createProduct(bridgeRow, dictMaps);
+    const liczbaOfert = (sqlite.prepare(
+      "SELECT COUNT(*) AS n FROM products WHERE kod_importu = ? AND status = 'aktywny'",
+    ).get(kod_importu) as { n: number }).n;
+    const created = await createProduct(bridgeRow, dictMaps, liczbaOfert !== 1);
     if (created.error) {
       return { error: "createProduct: " + created.error, action: "not_found" };
     }
