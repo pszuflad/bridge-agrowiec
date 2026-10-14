@@ -18,8 +18,9 @@ import { znajdzPozycjeKatalogu } from "./walidacja-zamowienia.js";
  * (migracja 034) zostają jako opcjonalne nadpisania; panel ich nie pokazuje — w ustawieniach partnera jest tylko status.
  */
 export const SELLY_VAT_ID = 101;
-export const SELLY_PLATNOSC_ID = 10;
-export const SELLY_DOSTAWA_ID = 10;
+/** Przelew i dostawa kurierska ze sklepu Selly (potwierdzone przez użytkowniczkę 2026-10-14; wcześniejsze 10 było założeniem, a 101 to ID VAT). */
+export const SELLY_PLATNOSC_ID = 1;
+export const SELLY_DOSTAWA_ID = 209;
 
 export const STATUS_WYSYLANIE = "wysylanie";
 export const STATUS_WYSLANE = "wyslane";

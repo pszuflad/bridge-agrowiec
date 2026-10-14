@@ -74,3 +74,20 @@ export function uzupelnijDanePartnerow(db: Baza): string {
   }
   return opisy.length ? opisy.join("; ") : "brak partnerów TyreWorld/Adtyres — nic do uzupełnienia";
 }
+
+/** Błędne wartości, jakie pola płatności/dostawy mogły mieć w danych partnerów (10 = dawne założenie, 101 = ID VAT wpisane w złe pole). */
+const BLEDNE_ID_SELLY = [10, 101];
+
+/** Ticket 269: płatność (przelew, ID 1) i dostawa (kurierska, ID 209) dla TyreWorld i Adtyres — uzupełnia puste pola i zastępuje tylko znane błędne wartości. */
+export function ustawPlatnoscIDostaweSelly(db: Baza, platnosc: number, dostawa: number): string {
+  const opisy: string[] = [];
+  for (const p of db.select().from(partnerzy).all()) {
+    if (!["tyreworld", "adtyres"].includes(p.nazwa.toLowerCase())) continue;
+    const zmiany: Partial<typeof partnerzy.$inferInsert> = {};
+    if (p.sellyPaymentId === null || BLEDNE_ID_SELLY.includes(p.sellyPaymentId)) zmiany.sellyPaymentId = platnosc;
+    if (p.sellyDeliveryId === null || BLEDNE_ID_SELLY.includes(p.sellyDeliveryId)) zmiany.sellyDeliveryId = dostawa;
+    if (Object.keys(zmiany).length) db.update(partnerzy).set({ ...zmiany, zmieniono: new Date().toISOString() }).where(eq(partnerzy.id, p.id)).run();
+    opisy.push(`${p.nazwa}: ${Object.keys(zmiany).length ? Object.keys(zmiany).join(", ") + " ustawione" : "bez zmian"}`);
+  }
+  return opisy.length ? opisy.join("; ") : "brak partnerów TyreWorld/Adtyres";
+}
