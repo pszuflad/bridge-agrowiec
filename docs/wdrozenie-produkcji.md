@@ -116,6 +116,7 @@ printf 'command="bash /home/admin/private_apps/bridge-prod/repo/tools/deploy-pro
 | `PROD_SSH_KEY` | zawartość `~/.ssh/deploy_prod_ed25519` (klucz **prywatny**) |
 | `PROD_SSH_KNOWN_HOSTS` | wynik `ssh-keyscan -p 222 vpshd86.cyber-folks.pl` |
 | `SMTP_MAIL_INFO_PASSWORD` | **opcjonalny** (ticket 264): hasło skrzynki nadawczej powiadomień (`info@agroopony.eu`). Workflow przekazuje je na stdin skryptu wdrożenia, który zapisuje je w `.env` jako `SMTP_HASLO` i wymusza wdrożenie. Działa od drugiego wdrożenia po wprowadzeniu zmiany (Actions → „Deploy produkcja” → „Run workflow”). |
+| `PARTNERZY_KATALOGI_ZAMOWIEN` | **opcjonalny** (ticket 265): mapowanie katalogów zamówień partnerów `Nazwa=/ścieżka;Nazwa2=/ścieżka2` (jak w `.env`; ścieżki nie są w repozytorium). Workflow przekazuje je jako drugą linię stdin skryptu wdrożenia, który zapisuje je w `.env` jako `PARTNERZY_KATALOGI_ZAMOWIEN`. Po zapisie krok wdrożenia sam wyprowadza katalogi trackingu. |
 | `PROD_SSH_HOST`, `PROD_SSH_PORT`, `PROD_SSH_USER` | `vpshd86.cyber-folks.pl`, `222`, `admin` (ten sam serwer co staging; nie `agroopony.eu`) |
 
 ### C3. Environment „produkcja" — Settings → Environments

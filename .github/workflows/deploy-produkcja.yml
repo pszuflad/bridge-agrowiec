@@ -19,6 +19,7 @@ name: Deploy produkcja
 # Opcjonalny sekret (ticket 264):
 #   SMTP_MAIL_INFO_PASSWORD       hasło skrzynki nadawczej powiadomień (info@agroopony.eu). Workflow przekazuje je na STDIN skryptu wdrożenia
 #                         (nie w poleceniu SSH), a skrypt zapisuje je w .env serwera jako SMTP_HASLO i wymusza wdrożenie. Brak sekretu = nic się nie zmienia.
+#   PARTNERZY_KATALOGI_ZAMOWIEN  (ticket 265) mapowanie katalogów zamówień partnerów `Nazwa=/ścieżka;…` — druga linia stdin, zapis do .env tak samo jak hasło.
 
 on:
   push:
@@ -43,13 +44,15 @@ jobs:
         env:
           # Przez `env:`, nie przez interpolację w skrypcie — GitHub maskuje wartość w logach; printf to builtin, więc hasło nie trafia do listy procesów.
           SMTP_MAIL_INFO_PASSWORD: ${{ secrets.SMTP_MAIL_INFO_PASSWORD }}
+          # Ticket 265: mapowanie katalogów zamówień partnerów (`Nazwa=/ścieżka;…`) — ścieżki serwera plików nie są w repozytorium.
+          PARTNERZY_KATALOGI_ZAMOWIEN: ${{ secrets.PARTNERZY_KATALOGI_ZAMOWIEN }}
         run: |
           set -euo pipefail
           mkdir -p ~/.ssh && chmod 700 ~/.ssh
           printf '%s\n' "${{ secrets.PROD_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           printf '%s\n' "${{ secrets.PROD_SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
-          printf '%s\n' "$SMTP_MAIL_INFO_PASSWORD" | ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes \
+          printf '%s\n%s\n' "$SMTP_MAIL_INFO_PASSWORD" "$PARTNERZY_KATALOGI_ZAMOWIEN" | ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes \
             -p "${{ secrets.PROD_SSH_PORT }}" \
             "${{ secrets.PROD_SSH_USER }}@${{ secrets.PROD_SSH_HOST }}" \
             'bash /home/admin/domains/agroopony.eu/public_html/bridgeone/_app/repo/tools/deploy-produkcja.sh'
