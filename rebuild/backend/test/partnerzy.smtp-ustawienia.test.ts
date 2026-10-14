@@ -29,7 +29,7 @@ describe("ustawienia SMTP w .env (ticket 263)", () => {
     return w;
   };
 
-  it("dopisuje ustawienia skrzynki firmowej, NIE hasło ani odbiorców; krok tylko produkcyjny", async () => {
+  it("dopisuje ustawienia skrzynki firmowej i odbiorcę (info), NIE hasło; krok tylko produkcyjny", async () => {
     expect(krok().tylkoProdukcja).toBe(true);
     const w = await uruchom({});
     expect(w.wykonane).toEqual([krok().id]);
@@ -41,7 +41,7 @@ describe("ustawienia SMTP w .env (ticket 263)", () => {
     expect(env).toContain("SMTP_OD=info@agroopony.eu\n");
     expect(env).toContain("SMTP_OD_NAZWA=AGROOPONY\n");
     expect(env).not.toContain("SMTP_HASLO");
-    expect(env).not.toContain("POWIADOMIENIA_PARTNERZY_DO");
+    expect(env).toContain("POWIADOMIENIA_PARTNERZY_DO=info@agroopony.eu\n");
   });
 
   it("nie nadpisuje kluczy, które już są ustawione", async () => {
@@ -51,5 +51,30 @@ describe("ustawienia SMTP w .env (ticket 263)", () => {
     expect(env).toContain("SMTP_HOST=inny.example");
     expect(env).toContain("SMTP_PORT=587");
     expect(env).toContain("SMTP_USER=info@agroopony.eu");
+  });
+
+  describe("wiadomość próbna przy wdrożeniu", () => {
+    const test = () => KROKI_WDROZENIA.find((k) => k.id === "2026-10-14-partnerzy-powiadomienia-test-wysylki")!;
+    const bieg = async (env: Record<string, string>) => {
+      const { sqlite, db } = otworzBaze(":memory:");
+      zastosujMigracje(sqlite, KATALOG_SCHEMATU());
+      const w = await uruchomKroki(sqlite, db, [test()], env as NodeJS.ProcessEnv);
+      sqlite.close();
+      return w;
+    };
+
+    it("bez hasła i pełnej konfiguracji krok jest pomijany (nie zapisany) — ruszy przy wdrożeniu, które je ma", async () => {
+      expect(test().tylkoProdukcja).toBe(true);
+      const w = await bieg({ SMTP_HOST: "h", SMTP_USER: "u", SMTP_OD: "u@h.pl", POWIADOMIENIA_PARTNERZY_DO: "a@b.pl" }); // brak SMTP_HASLO
+      expect(w.wykonane).toEqual([]);
+      expect(w.pominieteBrakEnv).toEqual([{ id: test().id, brakuje: ["SMTP_HASLO"] }]);
+    });
+
+    it("błąd SMTP (nieosiągalny serwer) NIE przerywa wdrożenia: krok zostaje odłożony, a hasło nie trafia do logu", async () => {
+      const w = await bieg({ SMTP_HOST: "127.0.0.1", SMTP_PORT: "1", SMTP_USER: "u", SMTP_HASLO: "SuperTajneHaslo123", SMTP_OD: "u@h.pl", POWIADOMIENIA_PARTNERZY_DO: "a@b.pl" });
+      expect(w.wykonane).toEqual([]);
+      expect(w.odlozone).toHaveLength(1);
+      expect(JSON.stringify(w)).not.toContain("SuperTajneHaslo123");
+    });
   });
 });
