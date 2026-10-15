@@ -24,33 +24,33 @@ describe("symulacja ceny partnera", () => {
       { ...baza, kod: "B", nazwa: "Opona B", cenaZakupu: 500, cenaSprzedazy: 530, marzaPct: 6, kodImportu: "IB", waga: 40 },
     ]).run();
     importujTabeleGeis(db, { DE: { wspGabarytowy: 250, kosztPakowania: 0, stawki: [[200, 1]] } });
-    db.insert(partnerKraje).values({ partnerId, kraj: "DE", narzutProc: opcje.doplata ?? 2, mytoEur: 0, pakowanieEur: 0 }).run();
+    db.insert(partnerKraje).values({ partnerId, kraj: "DE", narzutProc: opcje.doplata ?? 8, mytoEur: 0, pakowanieEur: 0 }).run();
     db.insert(partnerMagazyny).values({ partnerId, magazyn: "MO1" }).run();
     return { db, partnerId };
   };
 
-  it("rozbija cenę na składniki: zakup, marża sklepu + dopłata, przesyłka GEIS, kurs; cena = zakup×(1+narzut)/kurs + przesyłka", async () => {
+  it("rozbija cenę na składniki: zakup, narzut (cała marża), przesyłka GEIS, kurs; cena = zakup×(1+narzut)/kurs + przesyłka", async () => {
     const { db, partnerId } = await przygotuj();
     const w = await symulujCeny(db, nbp, partnerId, { kraj: "de", teraz: TERAZ });
     expect(w.kraj).toBe("DE");
     expect(w.kurs).toMatchObject({ kurs: 4 });
     const a = w.wiersze.find((r) => r.kod === "A")!;
-    expect(a).toMatchObject({ zakupPln: 1000, marzaSklepuProc: 6, doplataProc: 2, zrodloDoplaty: "kraj", narzutLacznyProc: 8, kosztyDodatkoweEur: 0 });
+    expect(a).toMatchObject({ zakupPln: 1000, narzutProc: 8, zrodloNarzutu: "kraj", kosztyDodatkoweEur: 0 });
     expect(a.przesylka).toMatchObject({ stawkaEur: 1, paliwoProc: 0, razemEur: 1, progKg: 200 });
     expect(a.cenaEur).toBe(271); // 1000 × 1,08 / 4 + 1
     expect(a.blad).toBeNull();
   });
 
-  it("reguła narzutu zastępuje dopłatę kraju i jest nazwana w rozbiciu", async () => {
+  it("reguła narzutu zastępuje narzut kraju i jest nazwana w rozbiciu", async () => {
     const { db, partnerId } = await przygotuj();
-    db.insert(partnerNarzuty).values({ partnerId, kraj: "DE", nazwa: "Alliance", warunki: JSON.stringify([{ typ: "marka", wartosc: "alliance" }]), wartosc: 5, priorytet: 50, status: "aktywny", zmieniono: "x" }).run();
+    db.insert(partnerNarzuty).values({ partnerId, kraj: "DE", nazwa: "Alliance", warunki: JSON.stringify([{ typ: "marka", wartosc: "alliance" }]), wartosc: 11, priorytet: 50, status: "aktywny", zmieniono: "x" }).run();
     const w = await symulujCeny(db, nbp, partnerId, { kraj: "DE", kody: ["A"], teraz: TERAZ });
     expect(w.wiersze).toHaveLength(1);
-    expect(w.wiersze[0]).toMatchObject({ doplataProc: 5, zrodloDoplaty: "reguła „Alliance”", narzutLacznyProc: 11 });
+    expect(w.wiersze[0]).toMatchObject({ narzutProc: 11, zrodloNarzutu: "reguła „Alliance”" });
     expect(w.wiersze[0]!.cenaEur).toBe(278.5); // 1000 × 1,11 / 4 + 1
   });
 
-  it("pozycja bez wagi nie dostaje ceny i ma powód; dopłata 0 blokuje ceny z komunikatem", async () => {
+  it("pozycja bez wagi nie dostaje ceny i ma powód; narzut 0 % daje cenę po koszcie", async () => {
     const { db, partnerId } = await przygotuj({ waga: null });
     const w = await symulujCeny(db, nbp, partnerId, { kraj: "DE", teraz: TERAZ });
     const a = w.wiersze.find((r) => r.kod === "A")!;
@@ -60,8 +60,8 @@ describe("symulacja ceny partnera", () => {
     expect(w.wiersze.find((r) => r.kod === "B")!.cenaEur).not.toBeNull();
     const zero = await przygotuj({ doplata: 0 });
     const w0 = await symulujCeny(zero.db, nbp, zero.partnerId, { kraj: "DE", teraz: TERAZ });
-    expect(w0.wiersze[0]!.cenaEur).toBeNull();
-    expect(w0.wiersze[0]!.blad).toMatch(/Narzut kraju nie jest ustawiony/);
+    expect(w0.wiersze[0]!.cenaEur).toBe(251); // 1000 / 4 + 1 EUR przesyłki
+    expect(w0.wiersze[0]!.blad).toBeNull();
   });
 
   it("nieznany kraj partnera → błąd; limit próbkuje całą ofertę", async () => {

@@ -85,8 +85,8 @@ export function NarzutyPartnera({ partner }: { partner: SzczegolyPartnera }) {
           <Button size="sm" onClick={() => ustawF({ ...PUSTY })} data-testid="button-regula-dodaj">Dodaj regułę</Button>
         </div>
         <p className="text-xs text-muted-foreground">
-          Dopłata w punktach procentowych DO MARŻY SKLEPU na produkcie (cena = zakup × (1 + marża sklepu + dopłata)), osobna dla tego partnera. Reguła z warunkami (np. marka) bije regułę globalną niezależnie od priorytetu; między regułami z warunkami wygrywa wyższy priorytet
-          (remis: reguła dla jednego kraju, potem starsza). Brak pasującej reguły = dopłata kraju z tabeli krajów powyżej. Uwaga: reguła globalna (bez warunków) obejmuje wszystkie opony i przesłania dopłatę kraju.
+          Narzut w % to cała marża partnera liczona od ceny zakupu (cena = zakup × (1 + narzut)), osobna dla tego partnera; marża sklepu z katalogu nie jest dodawana. Reguła z warunkami (np. marka) bije regułę globalną niezależnie od priorytetu; między regułami z warunkami wygrywa wyższy priorytet
+          (remis: reguła dla jednego kraju, potem starsza). Brak pasującej reguły = narzut kraju z tabeli krajów powyżej. Uwaga: reguła globalna (bez warunków) obejmuje wszystkie opony i przesłania narzut kraju.
         </p>
         {q.isError ? <p className="text-sm text-destructive" role="alert">{komunikatBledu(q.error)}</p> : null}
         {q.isSuccess && reguly.length === 0 ? <p className="text-sm text-muted-foreground" data-testid="text-reguly-pusto">Brak reguł — obowiązuje narzut kraju.</p> : null}
@@ -98,7 +98,7 @@ export function NarzutyPartnera({ partner }: { partner: SzczegolyPartnera }) {
                   <th className="px-2 py-2 font-medium">Nazwa</th>
                   <th className="px-2 py-2 font-medium">Warunki</th>
                   <th className="px-2 py-2 font-medium">Kraj</th>
-                  <th className="px-2 py-2 font-medium">Dopłata %</th>
+                  <th className="px-2 py-2 font-medium">Narzut %</th>
                   <th className="px-2 py-2 font-medium">Priorytet</th>
                   <th className="px-2 py-2 font-medium">Status</th>
                   <th className="px-2 py-2" aria-label="Akcje" />
@@ -127,7 +127,7 @@ export function NarzutyPartnera({ partner }: { partner: SzczegolyPartnera }) {
           <div className="space-y-3 rounded-md border p-3" data-testid="formularz-reguly">
             <div className="flex flex-wrap items-end gap-3 text-xs">
               <label className="space-y-1">Nazwa<Input className="w-56" value={f.nazwa} onChange={(e) => ustawPole("nazwa", e.target.value)} data-testid="input-regula-nazwa" /></label>
-              <label className="space-y-1">Dopłata %<Input className="w-24" inputMode="decimal" value={f.wartosc} onChange={(e) => ustawPole("wartosc", e.target.value)} data-testid="input-regula-wartosc" /></label>
+              <label className="space-y-1">Narzut %<Input className="w-24" inputMode="decimal" value={f.wartosc} onChange={(e) => ustawPole("wartosc", e.target.value)} data-testid="input-regula-wartosc" /></label>
               <label className="space-y-1">Kraj
                 <select className={KLASA_SELECT} value={f.kraj} onChange={(e) => ustawPole("kraj", e.target.value)} data-testid="select-regula-kraj">
                   <option value="">wszystkie kraje</option>

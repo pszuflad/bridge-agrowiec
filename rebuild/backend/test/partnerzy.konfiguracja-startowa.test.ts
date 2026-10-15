@@ -101,17 +101,14 @@ describe("konfiguracja startowa partnerów", () => {
     expect(szczegolyPartnera(db, id("Adtyres"))!.aktywny).toBe(true);
   });
 
-  it("do ustawienia narzutu nic się nie publikuje; po ustawieniu powstaje plik z numerem EAN-dostawca", async () => {
+  it("po ustawieniu narzutu powstaje plik kraju z numerem EAN-dostawca (ticket 275: narzut 0 % nie blokuje już publikacji)", async () => {
     await uruchomKroki(sqlite, db, KROKI_WDROZENIA, {});
     const nbp = { pobierzKursEur: async () => ({ kurs: 4.3, data: "2026-10-12" }) };
     const wyjscie = join(katalog, "out");
-    const przed = await generujPlikiPartnera(db, nbp, id("Adtyres"), { katalog: wyjscie });
-    expect(przed.pliki.every((p) => !p.zapisany)).toBe(true);
-    expect(przed.bledy.some((b) => /Narzut kraju nie jest ustawiony/.test(b))).toBe(true);
     sqlite.prepare("UPDATE partner_kraje SET narzut_proc = 12 WHERE kraj = 'AT'").run();
     const po = await generujPlikiPartnera(db, nbp, id("Adtyres"), { katalog: wyjscie });
-    expect(po.pliki.filter((p) => p.zapisany).map((p) => p.nazwa)).toEqual(["adtyres_agrowiec_at.csv"]);
-    expect(readdirSync(join(wyjscie, "pricelist"))).toEqual(["adtyres_agrowiec_at.csv"]);
+    expect(po.pliki.find((p) => p.nazwa === "adtyres_agrowiec_at.csv")).toMatchObject({ zapisany: true });
+    expect(readdirSync(join(wyjscie, "pricelist"))).toContain("adtyres_agrowiec_at.csv");
     const linie = readFileSync(join(wyjscie, "pricelist", "adtyres_agrowiec_at.csv"), "utf8").split("\n");
     expect(linie[0]).toBe("CatNumber;EAN;ProductName;ProductBrand;ProductModel;ProductSize;PriceEurNet;StockQty;DOT;Warehouse");
     expect(linie.slice(1, -1).map((l) => l.split(";")[0]).sort()).toEqual(["5901234123457-MO1", "5901234123457-MO4"]);

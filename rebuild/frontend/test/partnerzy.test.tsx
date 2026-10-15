@@ -73,6 +73,7 @@ describe("lista partnerów", () => {
     zamockujApi();
     await otworz();
     expect(await screen.findByTestId("text-partnerzy-pusto")).toHaveTextContent("Nie ma jeszcze żadnego partnera");
+    expect(screen.getByTestId("uwaga-marza-od-zakupu")).toHaveTextContent("liczony od ceny zakupu");
   });
 
   it("licznik zamówień: kolumna z podziałem na błędy/zablokowane/do Selly i podsumowanie nad tabelą; partner bez zamówień ma „brak”", async () => {

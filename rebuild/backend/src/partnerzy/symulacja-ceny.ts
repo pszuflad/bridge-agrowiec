@@ -1,4 +1,4 @@
-// Symulacja ceny partnera na prawdziwych produktach (ticket 273): dla kraju partnera pokazuje rozbicie ceny krok po kroku — zakup, marża sklepu, dopłata kraju/reguły,
+// Symulacja ceny partnera na prawdziwych produktach (ticket 273): dla kraju partnera pokazuje rozbicie ceny krok po kroku — zakup, narzut kraju/reguły (cała marża, od ceny zakupu),
 // przesyłka z tabel GEIS (waga, próg, stawka, paliwo, pakowanie, myto), koszty dodatkowe, kurs i cenę końcową. TYLKO ODCZYT: niczego nie zapisuje ani nie wysyła.
 // Cena końcowa pochodzi z `wycenPozycje` — tego samego kodu, którego używa generator cenników — więc symulacja i plik dla partnera nie mogą się rozjechać.
 
@@ -22,11 +22,10 @@ export type WierszSymulacji = {
   dostawca: string;
   stan: number;
   zakupPln: number;
-  marzaSklepuProc: number;
-  doplataProc: number;
-  /** `kraj` (dopłata ustawiona dla kraju) albo nazwa pasującej reguły narzutu. */
-  zrodloDoplaty: string;
-  narzutLacznyProc: number;
+  /** `kraj` (narzut ustawiony dla kraju) albo nazwa pasującej reguły narzutu. */
+  zrodloNarzutu: string;
+  /** Narzut (cała marża partnera, liczona od ceny zakupu) — z reguły albo z kraju. */
+  narzutProc: number;
   waga: number | null;
   wymiary: string | null;
   przesylka: {
@@ -44,7 +43,7 @@ export type WierszSymulacji = {
   } | null;
   kosztyDodatkoweEur: number;
   cenaEur: number | null;
-  /** Powód, dla którego pozycji nie wyceniono (brak wagi/wymiarów/tabeli GEIS, dopłata 0 …). */
+  /** Powód, dla którego pozycji nie wyceniono (brak wagi/wymiarów/tabeli GEIS, cena ≤ 0 …). */
   blad: string | null;
 };
 
@@ -107,8 +106,7 @@ export async function symulujCeny(
   for (const w of wycena.wiersze) {
     const p = w.pozycja;
     const regula = reguly.length ? wybierzZPrzygotowanych(reguly, kraj, p as unknown as Record<string, unknown>) : null;
-    const doplata = regula ? regula.wartosc : k.narzutProc;
-    const marza = Number.isFinite(p.marzaSklepuProc) ? Math.max(0, p.marzaSklepuProc as number) : 0;
+    const narzut = regula ? regula.wartosc : k.narzutProc;
     let przesylka: WierszSymulacji["przesylka"] = null;
     let bladPrzesylki: string | null = null;
     try {
@@ -137,10 +135,8 @@ export async function symulujCeny(
       dostawca: p.dostawca,
       stan: p.stan,
       zakupPln: p.cenaZakupu,
-      marzaSklepuProc: marza,
-      doplataProc: doplata,
-      zrodloDoplaty: regula ? `reguła „${regula.nazwa}”` : "kraj",
-      narzutLacznyProc: marza + doplata,
+      zrodloNarzutu: regula ? `reguła „${regula.nazwa}”` : "kraj",
+      narzutProc: narzut,
       waga: p.waga,
       wymiary: p.dlugosc && p.szerokoscPaczki && p.wysokosc ? `${p.dlugosc}×${p.szerokoscPaczki}×${p.wysokosc} cm` : null,
       przesylka,

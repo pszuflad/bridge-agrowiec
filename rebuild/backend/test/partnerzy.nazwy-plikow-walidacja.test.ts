@@ -33,14 +33,14 @@ describe("ticket 235 — walidacja i szczegóły", () => {
   });
 
   it("kraj: myto i pakowanie (≥ 0, domyślnie 0) oraz opcjonalne paliwo 0–1000 %", () => {
-    expect(walidujUstawieniaKraju({})).toMatchObject({ mytoEur: 0, pakowanieEur: 0, paliwoProc: null });
-    expect(walidujUstawieniaKraju({ mytoEur: 9.92, pakowanieEur: 15, paliwoProc: 44 })).toMatchObject({ mytoEur: 9.92, pakowanieEur: 15, paliwoProc: 44 });
-    for (const zle of [{ mytoEur: -1 }, { pakowanieEur: "5" }, { paliwoProc: -1 }, { paliwoProc: 1001 }]) expect(czyBlad(walidujUstawieniaKraju(zle))).toBe(true);
+    expect(walidujUstawieniaKraju({ narzutProc: 5 })).toMatchObject({ mytoEur: 0, pakowanieEur: 0, paliwoProc: null });
+    expect(walidujUstawieniaKraju({ narzutProc: 5, mytoEur: 9.92, pakowanieEur: 15, paliwoProc: 44 })).toMatchObject({ mytoEur: 9.92, pakowanieEur: 15, paliwoProc: 44 });
+    for (const zle of [{ mytoEur: -1 }, { pakowanieEur: "5" }, { paliwoProc: -1 }, { paliwoProc: 1001 }]) expect(czyBlad(walidujUstawieniaKraju({ narzutProc: 5, ...zle }))).toBe(true);
   });
 
   it("przesylkaStalaEur jest wycofane (ticket 259): pole z żądania jest ignorowane i nie wychodzi z walidacji", () => {
-    expect(walidujUstawieniaKraju({ przesylkaStalaEur: 15 })).not.toHaveProperty("przesylkaStalaEur");
-    expect(czyBlad(walidujUstawieniaKraju({ przesylkaStalaEur: -1 }))).toBe(false);
+    expect(walidujUstawieniaKraju({ narzutProc: 5, przesylkaStalaEur: 15 })).not.toHaveProperty("przesylkaStalaEur");
+    expect(czyBlad(walidujUstawieniaKraju({ narzutProc: 5, przesylkaStalaEur: -1 }))).toBe(false);
   });
 
   describe("z bazą", () => {
