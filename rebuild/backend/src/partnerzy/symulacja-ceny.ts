@@ -31,6 +31,8 @@ export type WierszSymulacji = {
   wymiary: string | null;
   przesylka: {
     wagaRozliczeniowa: number;
+    /** Wymiary użyte do wagi gabarytowej po regule palety (szerokość 60/80, wysokość +10 cm). */
+    wymiaryZPaleta: string;
     progKg: number;
     stawkaEur: number;
     paliwoProc: number;
@@ -113,6 +115,7 @@ export async function symulujCeny(
       const g = kosztPrzesylki(db, kraj, { waga: p.waga, dlugosc: p.dlugosc, szerokosc: p.szerokoscPaczki, wysokosc: p.wysokosc }, data);
       przesylka = {
         wagaRozliczeniowa: g.wagaRozliczeniowa,
+        wymiaryZPaleta: `${p.dlugosc} × ${g.szerokoscZPaleta} × ${g.wysokoscZPaleta} cm`,
         progKg: g.progKg,
         stawkaEur: g.stawka,
         paliwoProc: g.paliwoProc,

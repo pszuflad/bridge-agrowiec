@@ -16,7 +16,7 @@ function Przesylka({ w }: { w: WierszSymulacji }) {
     <div className="space-y-0.5">
       <div className="font-medium">{eur(p.razemEur)} EUR</div>
       <div className="text-muted-foreground">
-        waga rozl. {p.wagaRozliczeniowa.toLocaleString("pl-PL", { maximumFractionDigits: 1 })} kg → próg {p.progKg} kg, stawka {eur(p.stawkaEur)}; paliwo {proc(p.paliwoProc)} ({eur(p.paliwoEur)}); pakowanie GEIS {eur(p.pakowanieGeisEur)}; myto {eur(p.mytoEur)}; pakowanie kraju {eur(p.pakowanieKrajuEur)}
+        {p.wymiaryZPaleta ? `wymiary z paletą ${p.wymiaryZPaleta}, ` : ""}waga rozl. {p.wagaRozliczeniowa.toLocaleString("pl-PL", { maximumFractionDigits: 1 })} kg → próg {p.progKg} kg, stawka {eur(p.stawkaEur)}; paliwo {proc(p.paliwoProc)} ({eur(p.paliwoEur)}); pakowanie GEIS {eur(p.pakowanieGeisEur)}; myto {eur(p.mytoEur)}; pakowanie kraju {eur(p.pakowanieKrajuEur)}
       </div>
     </div>
   );

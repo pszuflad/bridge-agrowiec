@@ -13,6 +13,7 @@ import {
   paliwoNaDzien,
   ustawPaliwo,
   wagaRozliczeniowa,
+  wymiaryZPaleta,
   type TabeleGeisJson,
 } from "../src/partnerzy/transport.js";
 import { KATALOG_SCHEMATU } from "./gate/repo.js";
@@ -22,7 +23,7 @@ const GEIS: TabeleGeisJson = {
   AT: { wspGabarytowy: 200, kosztPakowania: 2, maks: [240, 240, 220], stawki: [[50, 61], [500, 187]] },
 };
 /** Półpaleta z prawdziwej wyceny (karta): 80×60×85 cm, 56 kg, FR 66500 → 175 EUR. */
-const POLPALETA = { waga: 56, dlugosc: 80, szerokosc: 60, wysokosc: 85 };
+const POLPALETA = { waga: 56, dlugosc: 80, szerokosc: 60, wysokosc: 85 }; // z paletą (ticket 274): 80 × 80 × 95
 
 describe("transport GEIS", () => {
   let katalog: string;
@@ -43,9 +44,25 @@ describe("transport GEIS", () => {
 
   it("waga rozliczeniowa to większa z rzeczywistej i gabarytowej", () => {
     const w = wagaRozliczeniowa(POLPALETA, 250);
-    expect(w.gabarytowa).toBeCloseTo(102, 6);
-    expect(w.rozliczeniowa).toBeCloseTo(102, 6);
-    expect(wagaRozliczeniowa({ ...POLPALETA, waga: 150 }, 250).rozliczeniowa).toBe(150);
+    expect(w).toMatchObject({ szerokoscZPaleta: 80, wysokoscZPaleta: 95 });
+    expect(w.gabarytowa).toBeCloseTo(152, 6);
+    expect(w.rozliczeniowa).toBeCloseTo(152, 6);
+    expect(wagaRozliczeniowa({ ...POLPALETA, waga: 200 }, 250).rozliczeniowa).toBe(200);
+  });
+
+  it("reguła palety (Erwin): szerokość ≤55 → 60, ≤80 → 80, powyżej rzeczywista; wysokość +10 cm", () => {
+    expect(wymiaryZPaleta(31, 77)).toEqual({ szerokosc: 60, wysokosc: 87 });
+    expect(wymiaryZPaleta(55, 100)).toEqual({ szerokosc: 60, wysokosc: 110 });
+    expect(wymiaryZPaleta(56, 100)).toEqual({ szerokosc: 80, wysokosc: 110 });
+    expect(wymiaryZPaleta(80, 100)).toEqual({ szerokosc: 80, wysokosc: 110 });
+    expect(wymiaryZPaleta(103, 103)).toEqual({ szerokosc: 103, wysokosc: 113 });
+  });
+
+  it("opona 10.0/75-15.3 do DE: rzeczywiste 45 kg, ale po regule palety 80 kg → próg 100 (rzeczywista tabela GEIS)", () => {
+    importujTabeleGeis(db, { DE: { wspGabarytowy: 200, stawki: [[50, 25], [75, 40], [100, 42], [150, 59]] } });
+    const k = kosztPrzesylki(db, "DE", { waga: 45, dlugosc: 77, szerokosc: 31, wysokosc: 77 }, "2026-10-10");
+    expect(k).toMatchObject({ szerokoscZPaleta: 60, wysokoscZPaleta: 87, progKg: 100, stawka: 42 });
+    expect(k.wagaRozliczeniowa).toBeCloseTo(80.388, 3);
   });
 
   it("wycena wzorcowa: półpaleta 56 kg do FR → próg 200 kg, stawka 163, z paliwem 11 % ≈ 181 EUR", () => {

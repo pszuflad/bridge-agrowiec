@@ -18,7 +18,7 @@ const TERAZ = new Date("2026-10-10T12:00:00.000Z");
 type Nowy = typeof products.$inferInsert;
 const produkt = (kod: string, nad: Partial<Nowy> = {}): Nowy => ({
   kod, nazwa: "Mitas AC85", marka: "MITAS", kategoria: "Rolnicze", dostawca: "MO1", magazyn: "MO1", stan: 5, cenaZakupu: 1000, cenaSprzedazy: 1500, marzaPct: 50,
-  dataAktualizacji: "2026-10-10T00:00:00.000Z", kodImportu: `IMP_${kod}`, ean: "5901234123457", waga: 56, dlugosc: 80, szerokoscPaczki: 60, wysokosc: 85, ...nad,
+  dataAktualizacji: "2026-10-10T00:00:00.000Z", kodImportu: `IMP_${kod}`, ean: "5901234123457", waga: 56, dlugosc: 80, szerokoscPaczki: 60, wysokosc: 60, ...nad,
 });
 
 describe("generator cennika partnera", () => {

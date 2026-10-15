@@ -140,6 +140,7 @@ export type WierszSymulacji = {
   waga: number | null;
   wymiary: string | null;
   przesylka: {
+    wymiaryZPaleta?: string;
     wagaRozliczeniowa: number;
     progKg: number;
     stawkaEur: number;
