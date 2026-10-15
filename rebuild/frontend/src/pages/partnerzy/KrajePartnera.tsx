@@ -44,11 +44,11 @@ function WierszKraju({ partnerId, kraj, nowy, kursNbp }: { partnerId: number; kr
   const zapis = useMutation<void, Error, void>({
     mutationFn: async () => {
       const kodKraju = kod.trim().toUpperCase();
-      const n = liczbaZPola(narzut) ?? 0;
+      const n = liczbaZPola(narzut);
       const k = liczbaZPola(kurs);
       const c = liczbaZPola(koszty) ?? 0;
       if (!/^[A-Z]{2}$/.test(kodKraju)) throw new Error("Kraj to dwuliterowy kod, np. FR.");
-      if (Number.isNaN(n) || n < 0) throw new Error("Narzut musi być liczbą ≥ 0 (w procentach).");
+      if (n === null || Number.isNaN(n) || n <= -100 || n > 1000) throw new Error("Wpisz narzut w procentach, od -100 (wyłącznie) do 1000; 0 = cena po koszcie, wartość ujemna dozwolona.");
       const pal = liczbaZPola(paliwo);
       const my = liczbaZPola(myto) ?? 0;
       const pak = liczbaZPola(pakowanie) ?? 0;
@@ -131,7 +131,7 @@ export function KrajePartnera({ partner }: { partner: SzczegolyPartnera }) {
       <CardContent className="space-y-3 p-4">
         <h2 className="text-sm font-semibold">Kraje, narzuty i kursy</h2>
         <p className="text-xs text-muted-foreground">
-          Dopłata (w punktach procentowych) DO MARŻY SKLEPU na danym produkcie: cena partnera = zakup × (1 + marża sklepu + dopłata) / kurs + przesyłka + koszty; np. marża sklepu 6 % + dopłata 2 % = 8 % od zakupu, więc partner nigdy nie kupi taniej niż klient w sklepie. Koszty dodatkowe w EUR, doliczane do każdej opony. Przesyłka = stawka z tabel GEIS (waga i wymiary opony, z paliwem) + myto + pakowanie kraju. Zmiana paliwa obowiązuje od dziś i nie przelicza wstecz. Dopłata 0 % = ceny dla kraju nie są publikowane. Kurs EUR: NBP i ręczny działają równolegle — gdy wpiszesz kurs ręczny, obowiązuje niższy z dwóch (niższy kurs = wyższa cena w EUR, ochrona przed stratą); puste pole = tylko NBP.
+          Narzut (w %) to cała marża partnera, liczona od ceny zakupu: cena partnera = zakup × (1 + narzut) / kurs + przesyłka + koszty; np. narzut 8 % = zakup + 8 %. Marża sklepu z katalogu nie jest dodawana. Narzut 0 % = cena po koszcie, wartość ujemna = poniżej ceny zakupu. Koszty dodatkowe w EUR, doliczane do każdej opony. Przesyłka = stawka z tabel GEIS (waga i wymiary opony, z paliwem) + myto + pakowanie kraju. Zmiana paliwa obowiązuje od dziś i nie przelicza wstecz. Kurs EUR: NBP i ręczny działają równolegle — gdy wpiszesz kurs ręczny, obowiązuje niższy z dwóch (niższy kurs = wyższa cena w EUR, ochrona przed stratą); puste pole = tylko NBP.
         </p>
         <div className="flex flex-wrap items-center gap-3 rounded-md bg-muted/40 px-3 py-2 text-sm" data-testid="kurs-nbp-teraz">
           {nbp.isPending ? (
@@ -152,7 +152,7 @@ export function KrajePartnera({ partner }: { partner: SzczegolyPartnera }) {
             <thead>
               <tr className="border-b text-left text-xs uppercase tracking-wide text-muted-foreground">
                 <th className="px-2 py-2 font-medium">Kraj</th>
-                <th className="px-2 py-2 font-medium">Dopłata % (do marży sklepu)</th>
+                <th className="px-2 py-2 font-medium">Narzut % (od zakupu)</th>
                 <th className="px-2 py-2 font-medium">Kurs ręczny (opcjonalny)</th>
                 <th className="px-2 py-2 font-medium">Koszty dod. EUR</th>
                 <th className="px-2 py-2 font-medium">Paliwo %</th>

@@ -270,11 +270,11 @@ describe("symulacja ceny (ticket 273)", () => {
     kurs: { kurs: 4.2, zrodlo: "nbp", dataTabeli: "2026-10-13", ostrzezenie: null }, ostrzezenia: [],
     wiersze: [
       {
-        kod: "A", numerPartnera: "123-MO1", nazwa: "Opona A", dostawca: "MO1", stan: 5, zakupPln: 1000, marzaSklepuProc: 6, doplataProc: 2, zrodloDoplaty: "kraj", narzutLacznyProc: 8, waga: 56, wymiary: "80×60×85 cm",
+        kod: "A", numerPartnera: "123-MO1", nazwa: "Opona A", dostawca: "MO1", stan: 5, zakupPln: 1000, narzutProc: 8, zrodloNarzutu: "kraj", waga: 56, wymiary: "80×60×85 cm",
         przesylka: { wagaRozliczeniowa: 102, progKg: 200, stawkaEur: 30, paliwoProc: 10, paliwoEur: 3, pakowanieGeisEur: 1, mytoEur: 2, pakowanieKrajuEur: 0.5, razemEur: 36.5 },
         kosztyDodatkoweEur: 0, cenaEur: 293.64, blad: null,
       },
-      { kod: "B", numerPartnera: null, nazwa: "Opona B", dostawca: "MO1", stan: 3, zakupPln: 500, marzaSklepuProc: 6, doplataProc: 2, zrodloDoplaty: "kraj", narzutLacznyProc: 8, waga: null, wymiary: null, przesylka: null, kosztyDodatkoweEur: 0, cenaEur: null, blad: "Błąd kalkulacji transportu (DE): Brak wagi pozycji." },
+      { kod: "B", numerPartnera: null, nazwa: "Opona B", dostawca: "MO1", stan: 3, zakupPln: 500, narzutProc: 8, zrodloNarzutu: "kraj", waga: null, wymiary: null, przesylka: null, kosztyDodatkoweEur: 0, cenaEur: null, blad: "Błąd kalkulacji transportu (DE): Brak wagi pozycji." },
     ],
   };
 
@@ -294,7 +294,7 @@ describe("symulacja ceny (ticket 273)", () => {
     expect(await screen.findByTestId("symulacja-cena-A")).toHaveTextContent("293,64");
     expect(screen.getByTestId("symulacja-naglowek")).toHaveTextContent("kurs EUR 4,2");
     const wierszA = screen.getByTestId("symulacja-wiersz-A");
-    expect(wierszA).toHaveTextContent("marża sklepu 6 % + dopłata 2 % (kraj)");
+    expect(wierszA).toHaveTextContent("od ceny zakupu (kraj)");
     expect(wierszA).toHaveTextContent("próg 200 kg, stawka 30,00; paliwo 10 % (3,00)");
     expect(screen.getByTestId("symulacja-blad-B")).toHaveTextContent("Brak wagi pozycji");
     expect(cialo).toEqual({ kraj: "DE", kody: ["A", "B"], limit: 10 });

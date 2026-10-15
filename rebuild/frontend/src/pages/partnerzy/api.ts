@@ -133,10 +133,8 @@ export type WierszSymulacji = {
   dostawca: string;
   stan: number;
   zakupPln: number;
-  marzaSklepuProc: number;
-  doplataProc: number;
-  zrodloDoplaty: string;
-  narzutLacznyProc: number;
+  narzutProc: number;
+  zrodloNarzutu: string;
   waga: number | null;
   wymiary: string | null;
   przesylka: {

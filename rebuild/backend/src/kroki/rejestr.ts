@@ -14,6 +14,7 @@ import { usunWszystkieKartyAuto } from "../import/migracje/scal-karty-auto.js";
 import { wyprowadzKatalogiTrackingu } from "../partnerzy/katalogi-trackingu.js";
 import { ustawPlatnoscIDostaweSelly, uzupelnijDanePartnerow } from "../partnerzy/dane-partnerow.js";
 import { zalozZamowieniaSymulacyjne, zalozZamowienieTestowe } from "../partnerzy/zamowienie-testowe.js";
+import { doliczMarzeSklepuDoNarzutow } from "../partnerzy/narzut-cala-marza.js";
 import { ustawNarzutyStartowe } from "../partnerzy/narzuty-startowe.js";
 import { parsujKatalogiPublikacji } from "../partnerzy/publikacja.js";
 import { konfiguracjaSmtp, nadawcaSmtp, parsujAdresy } from "../poczta/nadawca.js";
@@ -301,6 +302,13 @@ export const KROKI_WDROZENIA: Krok[] = [
     opis: "partnerzy B2B: dwa zamówienia symulacyjne w panelu (Adtyres → FR w formacie DOCUMENTORDER, TyreWorld → DE w formacie bestellung) z pełnym adresem dostawy, do sprawdzenia przepływu i „Utwórz w Selly”; odłożone, gdy brak 4 produktów z powiązaniem Selly",
     async uruchom({ db }) {
       return zalozZamowieniaSymulacyjne(db);
+    },
+  },
+  {
+    id: "2026-10-15-partnerzy-narzut-cala-marza",
+    opis: "partnerzy B2B: narzut jest całą marżą od ceny zakupu (marża sklepu z katalogu nie jest już doliczana) — jednorazowo +6 pkt proc. do narzutów krajów i reguł większych od 0 (dawna marża sklepu), tak by ceny partnerów się nie obniżyły; kraje z narzutem 0 % bez zmian",
+    async uruchom({ db }) {
+      return doliczMarzeSklepuDoNarzutow(db);
     },
   },
 ];

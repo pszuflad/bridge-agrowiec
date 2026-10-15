@@ -57,7 +57,7 @@ describe("API reguł narzutów i wycena", () => {
     const id = Number((await request(s.app).post("/api/partnerzy").set(auth).send({ nazwa: "P" })).body.id);
     expect((await request(s.app).get(`/api/partnerzy/${id}/narzuty`).set(auth)).body).toEqual({ reguly: [] });
 
-    for (const zle of [{}, { nazwa: "X", wartosc: 0 }, { nazwa: "X", wartosc: 5, kraj: "POL" }, { nazwa: "X", wartosc: 5, warunki: [{ typ: "cokolwiek", wartosc: "a" }] }, { nazwa: "X", wartosc: 5, priorytet: 1.5 }])
+    for (const zle of [{}, { nazwa: "X", wartosc: -100 }, { nazwa: "X", wartosc: 5, kraj: "POL" }, { nazwa: "X", wartosc: 5, warunki: [{ typ: "cokolwiek", wartosc: "a" }] }, { nazwa: "X", wartosc: 5, priorytet: 1.5 }])
       expect((await request(s.app).post(`/api/partnerzy/${id}/narzuty`).set(auth).send(zle)).status).toBe(400);
 
     // reguła zawężona do kraju, którego partner nie ma, jest odrzucana (nigdy by nie zadziałała)
@@ -81,20 +81,20 @@ describe("API reguł narzutów i wycena", () => {
     ustawPaliwo(db, "FR", 0, "2026-01-01");
     await request(s.app).put(`/api/partnerzy/${id}/magazyny`).set(auth).send({ magazyny: ["MO1"] });
     const wyc = wycenPozycje(db, id, wybierzPozycje(db, id).pozycje, { DE: 4, FR: 4 }, "2026-10-12");
-    // Wariant B (ticket 255): marża sklepu na produkcie (tu 50 %) + dopłata kraju/reguły. zakup 1000 PLN, kurs 4: DE 1000×(1+0,50+0,25)/4 + 50 = 487,5; FR 1000×(1+0,50+0,10)/4 + 50 = 450
-    expect(wyc.wiersze[0]!.ceny).toEqual({ DE: 487.5, FR: 450 });
+    // Ticket 275: narzut to cała marża od zakupu (marża sklepu 50 % na produkcie nie wchodzi). zakup 1000 PLN, kurs 4: DE 1000×(1+0,25)/4 + 50 = 362,5; FR 1000×(1+0,10)/4 + 50 = 325
+    expect(wyc.wiersze[0]!.ceny).toEqual({ DE: 362.5, FR: 325 });
 
     // bez reguł te same liczby co przed zmianą: usunięcie wszystkich reguł nie zmienia ceny FR (narzut kraju 10 %)
     // PATCH (wyłączenie) → DE wraca do narzutu kraju; usunięcie → 404 przy ponownej próbie
     const patch = await request(s.app).patch(`/api/partnerzy/${id}/narzuty/${nowa.body.id}`).set(auth).send({ status: "nieaktywny" });
     expect(patch.body.status).toBe("nieaktywny");
-    expect(wycenPozycje(db, id, wybierzPozycje(db, id).pozycje, { DE: 4, FR: 4 }, "2026-10-12").wiersze[0]!.ceny).toEqual({ DE: 450, FR: 450 });
+    expect(wycenPozycje(db, id, wybierzPozycje(db, id).pozycje, { DE: 4, FR: 4 }, "2026-10-12").wiersze[0]!.ceny).toEqual({ DE: 325, FR: 325 });
     expect((await request(s.app).delete(`/api/partnerzy/${id}/narzuty/${nowa.body.id}`).set(auth)).status).toBe(200);
     expect((await request(s.app).delete(`/api/partnerzy/${id}/narzuty/${nowa.body.id}`).set(auth)).status).toBe(404);
     expect((await request(s.app).patch(`/api/partnerzy/${id}/narzuty/99999`).set(auth).send({ nazwa: "x" })).status).toBe(404);
   });
 
-  it("kraj bez narzutu (0 %) ale z regułą pasującą do pozycji — reguła daje cenę; bez pasującej reguły pozycja nie jest publikowana", async () => {
+  it("kraj z narzutem 0 % i regułą pasującą do pozycji — reguła daje cenę; bez pasującej reguły pozycja idzie po koszcie (0 %)", async () => {
     s = await stworzSrodowiskoTestowe();
     const auth = { Authorization: `Bearer ${await token()}` };
     const id = Number((await request(s.app).post("/api/partnerzy").set(auth).send({ nazwa: "P2" })).body.id);
@@ -107,11 +107,11 @@ describe("API reguł narzutów i wycena", () => {
     await request(s.app).put(`/api/partnerzy/${id}/magazyny`).set(auth).send({ magazyny: ["MO1"] });
     await request(s.app).post(`/api/partnerzy/${id}/narzuty`).set(auth).send({ nazwa: "tylko Mitas", wartosc: 20, warunki: [{ typ: "marka", wartosc: "mitas" }] });
     const wyc = wycenPozycje(db, id, wybierzPozycje(db, id).pozycje, { DE: 4 }, "2026-10-12");
-    expect(wyc.wiersze.map((x) => x.ceny.DE)).toEqual([475, null]); // 1000×(1+0,50+0,20)/4 + 50; Alliance bez reguły i bez narzutu kraju → pominięta
-    expect(wyc.bledy).toHaveLength(1);
+    expect(wyc.wiersze.map((x) => x.ceny.DE)).toEqual([350, 300]); // Mitas: 1000×(1+0,20)/4 + 50; Alliance bez reguły: narzut kraju 0 % → 1000/4 + 50
+    expect(wyc.bledy).toHaveLength(0);
   });
 
-  it("bez reguł cena = narzut kraju, a komunikat o braku narzutu zostaje dotychczasowy; nowe pola warunków (konstrukcja, średnica) trafiają do pozycji", async () => {
+  it("bez reguł cena = narzut kraju (0 % = po koszcie); nowe pola warunków (konstrukcja, średnica) trafiają do pozycji", async () => {
     s = await stworzSrodowiskoTestowe();
     const auth = { Authorization: `Bearer ${await token()}` };
     const id = Number((await request(s.app).post("/api/partnerzy").set(auth).send({ nazwa: "P3" })).body.id);
@@ -127,10 +127,11 @@ describe("API reguł narzutów i wycena", () => {
     const pozycje = wybierzPozycje(db, id).pozycje;
     expect(pozycje[0]).toMatchObject({ konstrukcja: "Radial", srednica: 38 });
     const bez = wycenPozycje(db, id, pozycje, { DE: 4 }, "2026-10-12");
-    expect(bez.bledy[0]!.powod).toBe("Narzut kraju nie jest ustawiony (0 %) — ceny nie są publikowane.");
+    expect(bez.bledy).toHaveLength(0);
+    expect(bez.wiersze[0]!.ceny.DE).toBe(300); // 1000×(1+0)/4 + 50
     await request(s.app).put(`/api/partnerzy/${id}/kraje/DE`).set(auth).send({ narzutProc: 10 });
-    expect(wycenPozycje(db, id, pozycje, { DE: 4 }, "2026-10-12").wiersze[0]!.ceny.DE).toBe(450); // 1000×(1+0,50+0,10)/4 + 50
+    expect(wycenPozycje(db, id, pozycje, { DE: 4 }, "2026-10-12").wiersze[0]!.ceny.DE).toBe(325); // 1000×(1+0,10)/4 + 50
     await request(s.app).post(`/api/partnerzy/${id}/narzuty`).set(auth).send({ nazwa: "radial 38", wartosc: 20, warunki: [{ typ: "konstrukcja", wartosc: "radi" }, { typ: "srednica", wartosc: "38" }] });
-    expect(wycenPozycje(db, id, pozycje, { DE: 4 }, "2026-10-12").wiersze[0]!.ceny.DE).toBe(475); // reguła: 1000×(1+0,50+0,20)/4 + 50
+    expect(wycenPozycje(db, id, pozycje, { DE: 4 }, "2026-10-12").wiersze[0]!.ceny.DE).toBe(350); // reguła: 1000×(1+0,20)/4 + 50
   });
 });

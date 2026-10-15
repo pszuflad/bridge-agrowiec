@@ -64,7 +64,7 @@ export function SymulacjaCeny({ partner }: { partner: SzczegolyPartnera }) {
           <div className="space-y-2" data-testid="wynik-symulacji">
             <p className="text-xs text-muted-foreground" data-testid="symulacja-naglowek">
               Kraj {wynik.kraj}; kurs EUR {wynik.kurs ? `${wynik.kurs.kurs.toLocaleString("pl-PL", { maximumFractionDigits: 4 })} (${wynik.kurs.zrodlo}${wynik.kurs.dataTabeli ? `, tabela NBP z ${wynik.kurs.dataTabeli}` : ""})` : "— brak"}; pozycji w ofercie: {wynik.pozycjeWybrane}.
-              Formuła: <code>{wynik.formula}</code> (zakup w PLN, narzut = marża sklepu + dopłata kraju/reguły).
+              Formuła: <code>{wynik.formula}</code> (zakup w PLN, narzut = cała marża od ceny zakupu, z kraju albo reguły).
             </p>
             {wynik.ostrzezenia.map((o) => <p key={o} className="text-xs text-amber-600">{o}</p>)}
             <div className="overflow-x-auto">
@@ -89,8 +89,8 @@ export function SymulacjaCeny({ partner }: { partner: SzczegolyPartnera }) {
                       </td>
                       <td className="p-1.5 text-right">{eur(w.zakupPln)}</td>
                       <td className="p-1.5">
-                        <div className="font-medium">{proc(w.narzutLacznyProc)}</div>
-                        <div className="text-muted-foreground">marża sklepu {proc(w.marzaSklepuProc)} + dopłata {proc(w.doplataProc)} ({w.zrodloDoplaty})</div>
+                        <div className="font-medium">{proc(w.narzutProc)}</div>
+                        <div className="text-muted-foreground">od ceny zakupu ({w.zrodloNarzutu})</div>
                       </td>
                       <td className="p-1.5"><Przesylka w={w} /></td>
                       <td className="p-1.5 text-right">{eur(w.kosztyDodatkoweEur)}</td>

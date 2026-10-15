@@ -24,7 +24,7 @@ export function walidujRegule(cialo: unknown, czesciowe: boolean): Partial<DaneR
   }
   if ("wartosc" in cialo || !czesciowe) {
     const v = cialo.wartosc;
-    if (typeof v !== "number" || !Number.isFinite(v) || v <= 0 || v > 1000) return { blad: "Pole `wartosc` (narzut w %) musi być liczbą > 0 i ≤ 1000." };
+    if (typeof v !== "number" || !Number.isFinite(v) || v <= -100 || v > 1000) return { blad: "Pole `wartosc` (narzut w % od ceny zakupu; 0 i wartości ujemne dozwolone) musi być liczbą > -100 i ≤ 1000." };
     w.wartosc = v;
   }
   if ("kraj" in cialo) {
