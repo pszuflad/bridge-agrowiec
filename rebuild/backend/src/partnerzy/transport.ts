@@ -1,7 +1,7 @@
 // Koszt przesyłki GEIS dla partnerów (karta PARTNERZY, ticket 212 / PRT-2.2).
 //
 // V1: stawka CAŁEGO KRAJU (kolumna 1 tabel GEIS), koszt dla JEDNEJ sztuki (przesyłka pojedyncza), w całości wchodzi do ceny opony.
-// Waga rozliczeniowa = większa z rzeczywistej i gabarytowej (objętość w m³ × współczynnik kraju). Stawka = pierwszy próg ≥ waga
+// Waga rozliczeniowa = większa z rzeczywistej i gabarytowej (objętość w m³ × współczynnik kraju; od ticketu 274 z regułą palety Erwina: szerokość 60/80, wysokość +10 cm). Stawka = pierwszy próg ≥ waga
 // rozliczeniowa. Opłata paliwowa to ręcznie wpisywany PROCENT z historią okresów (`paliwo_historia`) — zmiana nie przelicza wstecz.
 // Brak wagi/wymiarów, wymiary ponad limit kraju albo waga ponad najwyższy próg = `BladTransportu` (pozycja pomijana i logowana,
 // NIGDY koszt 0).
@@ -25,6 +25,9 @@ export type KosztPrzesylki = {
   wagaRozliczeniowa: number;
   wagaRzeczywista: number;
   wagaGabarytowa: number;
+  /** Wymiary użyte do wagi gabarytowej po regule palety (cm). */
+  szerokoscZPaleta: number;
+  wysokoscZPaleta: number;
   progKg: number;
   stawka: number;
   paliwoProc: number;
@@ -35,12 +38,30 @@ export type KosztPrzesylki = {
 
 const dodatnia = (v: number | null | undefined): v is number => typeof v === "number" && Number.isFinite(v) && v > 0;
 
-/** max(rzeczywista, gabarytowa); gabarytowa = dł × szer × wys [m³] × współczynnik (kg/m³). */
-export function wagaRozliczeniowa(p: Paczka, wspGabarytowy: number): { rozliczeniowa: number; rzeczywista: number; gabarytowa: number } {
+/**
+ * Reguła palety w wadze gabarytowej (ticket 274) — zasada Erwina Wojtysiaka z 21.06.2023, którą liczył stary system partnerów (zmiany z 18.05.2023):
+ * szerokość paczki ≤ 55 cm liczy się jako 60 cm, ≤ 80 cm jako 80 cm, powyżej — rzeczywista; wysokość doliczana o 10 cm palety.
+ */
+export const PALETA = { szerokoscPolpalety: 55, szerokoscPolpaletyDoliczona: 60, szerokoscPalety: 80, wysokoscPalety: 10 } as const;
+
+export function wymiaryZPaleta(szerokosc: number, wysokosc: number): { szerokosc: number; wysokosc: number } {
+  const szer = szerokosc <= PALETA.szerokoscPolpalety ? PALETA.szerokoscPolpaletyDoliczona : szerokosc <= PALETA.szerokoscPalety ? PALETA.szerokoscPalety : szerokosc;
+  return { szerokosc: szer, wysokosc: wysokosc + PALETA.wysokoscPalety };
+}
+
+/**
+ * max(rzeczywista, gabarytowa); gabarytowa = dł × szer × wys [m³] × współczynnik (kg/m³), gdzie szerokość i wysokość są liczone z paletą (`wymiaryZPaleta`),
+ * a długość to długość paczki. Wymiary przed paletą zostają do kontroli limitów przesyłki (`kosztPrzesylki`).
+ */
+export function wagaRozliczeniowa(
+  p: Paczka,
+  wspGabarytowy: number,
+): { rozliczeniowa: number; rzeczywista: number; gabarytowa: number; szerokoscZPaleta: number; wysokoscZPaleta: number } {
   if (!dodatnia(p.waga)) throw new BladTransportu("Brak wagi pozycji.");
   if (!dodatnia(p.dlugosc) || !dodatnia(p.szerokosc) || !dodatnia(p.wysokosc)) throw new BladTransportu("Brak wymiarów pozycji.");
-  const gabarytowa = ((p.dlugosc * p.szerokosc * p.wysokosc) / 1_000_000) * wspGabarytowy;
-  return { rozliczeniowa: Math.max(p.waga, gabarytowa), rzeczywista: p.waga, gabarytowa };
+  const z = wymiaryZPaleta(p.szerokosc, p.wysokosc);
+  const gabarytowa = ((p.dlugosc * z.szerokosc * z.wysokosc) / 1_000_000) * wspGabarytowy;
+  return { rozliczeniowa: Math.max(p.waga, gabarytowa), rzeczywista: p.waga, gabarytowa, szerokoscZPaleta: z.szerokosc, wysokoscZPaleta: z.wysokosc };
 }
 
 /** Opłata paliwowa [%] obowiązująca w dniu `data` (`YYYY-MM-DD`); brak wpisu = 0 %. */
@@ -89,6 +110,8 @@ export function kosztPrzesylki(db: Baza, kraj: string, paczka: Paczka, data: str
     wagaRozliczeniowa: w.rozliczeniowa,
     wagaRzeczywista: w.rzeczywista,
     wagaGabarytowa: w.gabarytowa,
+    szerokoscZPaleta: w.szerokoscZPaleta,
+    wysokoscZPaleta: w.wysokoscZPaleta,
     progKg: stawka.progKg,
     stawka: stawka.stawka,
     paliwoProc,
