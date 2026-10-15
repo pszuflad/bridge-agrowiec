@@ -13,6 +13,9 @@ export type PodgladPrzesylki = {
   wagaRozliczeniowa: number;
   wagaRzeczywista: number;
   wagaGabarytowa: number;
+  /** Wymiary po regule palety, z których policzono wagę gabarytową (cm). */
+  szerokoscZPaleta: number;
+  wysokoscZPaleta: number;
   progKg: number;
   /** Baza przed paliwem: stawka GEIS. */
   baza: number;
@@ -34,7 +37,7 @@ export function podgladKosztuPrzesylki(db: Baza, partnerId: number, kraj: string
   const g = kosztPrzesylki(db, kraj, paczka, data);
   const paliwo = (g.stawka * g.paliwoProc) / 100;
   return {
-    zrodlo: "geis", wagaRozliczeniowa: g.wagaRozliczeniowa, wagaRzeczywista: g.wagaRzeczywista, wagaGabarytowa: g.wagaGabarytowa, progKg: g.progKg,
+    zrodlo: "geis", wagaRozliczeniowa: g.wagaRozliczeniowa, wagaRzeczywista: g.wagaRzeczywista, wagaGabarytowa: g.wagaGabarytowa, szerokoscZPaleta: g.szerokoscZPaleta, wysokoscZPaleta: g.wysokoscZPaleta, progKg: g.progKg,
     baza: g.stawka, paliwoProc: g.paliwoProc, paliwoEur: paliwo, pakowanieGeisEur: g.kosztPakowania, ...dodatki,
     razemEur: g.koszt + dodatki.mytoEur + dodatki.pakowanieKrajuEur,
   };

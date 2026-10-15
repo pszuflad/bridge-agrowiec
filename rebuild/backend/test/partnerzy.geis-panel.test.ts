@@ -82,15 +82,15 @@ describe("API GEIS", () => {
     await request(s.app).put(`/api/partnerzy/${id}/kraje/FR`).set(auth).send({ narzutProc: 10, mytoEur: 9.92, pakowanieEur: 15, paliwoProc: 44 });
     const paczka = { partnerId: id, kraj: "FR", waga: 60, dlugosc: 100, szerokosc: 100, wysokosc: 100 };
 
-    // gabaryt: 1 m³ × 250 = 250 kg > 60 kg → próg 200 nie wystarcza (250 > 200) → błąd; mniejsza paczka: 0,4 m³ × 250 = 100 kg → próg 100
+    // gabaryt: 1 m × 1 m × (1 m + 10 cm palety) × 250 = 275 kg > 200 → błąd; mniejsza paczka 80×50×100: szerokość 50 → 60, wysokość 110 → 0,528 m³ × 250 = 132 kg → próg 200
     const za_duza = await request(s.app).post("/api/partnerzy/geis/podglad-kosztu").set(auth).send(paczka);
     expect(za_duza.status).toBe(400);
     expect(za_duza.body.error).toMatch(/przekracza najwyższy próg/);
 
     const ok = await request(s.app).post("/api/partnerzy/geis/podglad-kosztu").set(auth).send({ ...paczka, dlugosc: 80, szerokosc: 50, wysokosc: 100 });
     expect(ok.status).toBe(200);
-    expect(ok.body).toMatchObject({ zrodlo: "geis", wagaRozliczeniowa: 100, progKg: 100, baza: 150, paliwoProc: 44, mytoEur: 9.92, pakowanieKrajuEur: 15 });
-    expect(ok.body.razemEur).toBeCloseTo(150 * 1.44 + 2 + 9.92 + 15, 6); // pakowanie GEIS (2) z arkusza testowego
+    expect(ok.body).toMatchObject({ zrodlo: "geis", wagaRozliczeniowa: 132, progKg: 200, baza: 260, paliwoProc: 44, mytoEur: 9.92, pakowanieKrajuEur: 15 });
+    expect(ok.body.razemEur).toBeCloseTo(260 * 1.44 + 2 + 9.92 + 15, 6); // pakowanie GEIS (2) z arkusza testowego
 
     expect((await request(s.app).post("/api/partnerzy/geis/podglad-kosztu").set(auth).send({ ...paczka, kraj: "DE" })).status).toBe(400);
     expect((await request(s.app).post("/api/partnerzy/geis/podglad-kosztu").set(auth).send({ ...paczka, partnerId: 999 })).status).toBe(404);
