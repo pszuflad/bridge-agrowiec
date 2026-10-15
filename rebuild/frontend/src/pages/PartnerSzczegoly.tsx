@@ -15,6 +15,7 @@ import { NarzutyPartnera } from "./partnerzy/NarzutyPartnera";
 import { MagazynyPartnera, WykluczeniaPartnera } from "./partnerzy/MagazynyIWykluczenia";
 import { KolumnyPliku, PolaObliczeniowe } from "./partnerzy/PolaIKolumny";
 import { PodgladPliku } from "./partnerzy/PodgladPliku";
+import { SymulacjaCeny } from "./partnerzy/SymulacjaCeny";
 import { UstawieniaPartnera } from "./partnerzy/UstawieniaPartnera";
 import { ZamowieniaPartnera } from "./partnerzy/ZamowieniaPartnera";
 
@@ -52,6 +53,7 @@ export function PartnerSzczegoly() {
           <PolaObliczeniowe key={`p-${JSON.stringify(data.polaObliczeniowe)}-${data.kraje.length}`} partner={data} />
           <KolumnyPliku key={`k-${JSON.stringify(data.kolumny)}-${data.polaObliczeniowe.length}-${data.kraje.length}`} partner={data} />
           <PodgladPliku partner={data} />
+          <SymulacjaCeny key={`s-${data.kraje.map((k) => k.kraj).join(",")}`} partner={data} />
           <ZamowieniaPartnera partner={data} />
           <LogiPartnera partner={data} />
         </>
