@@ -39,8 +39,6 @@ export type PozycjaEksportu = {
   wysokosc: number | null;
   wagaAutoUzupelniona: boolean | null;
   wagaSzacowana: boolean | null;
-  /** Marża sklepu na tym produkcie (`products.marza_pct`, % narzutu na zakup) — baza wyceny partnera (ticket 255, wariant B): cena = zakup × (1 + marża sklepu + dopłata kraju). Brak = 0. */
-  marzaSklepuProc?: number;
   /** Pola do warunków reguł narzutów (ticket 247) — opcjonalne, wypełnia je `wybierzPozycje`. */
   konstrukcja?: string | null;
   srednica?: number | null;
@@ -96,7 +94,6 @@ export function wybierzPozycje(db: Baza, partnerId: number): WynikSelekcji {
       stan: products.stan,
       dot: products.dot,
       cenaZakupu: products.cenaZakupu,
-      marzaSklepuProc: products.marzaPct,
       waga: products.waga,
       dlugosc: products.dlugosc,
       szerokoscPaczki: products.szerokoscPaczki,
@@ -160,27 +157,15 @@ export function wycenPozycje(
   const kraje = db.select().from(partnerKraje).where(eq(partnerKraje.partnerId, partnerId)).orderBy(asc(partnerKraje.kraj)).all();
   const wynik: WynikWyceny = { wiersze: [], bledy: [], ostrzezenia: [] };
   const ostrzezeniaWidziane = new Set<string>();
-  const narzutBrakWidziany = new Set<string>();
   // Reguły narzutów partnera (ticket 247): pasująca reguła zastępuje narzut kraju; brak reguły = narzut kraju.
   const reguly = przygotujReguly(db.select().from(partnerNarzuty).where(eq(partnerNarzuty.partnerId, partnerId)).all());
   for (const pozycja of pozycje) {
     const ceny: Record<string, number | null> = {};
     for (const k of kraje) {
       const regula = reguly.length ? wybierzZPrzygotowanych(reguly, k.kraj, pozycja as unknown as Record<string, unknown>) : null;
-      // Wariant B (decyzja użytkowniczki 2026-10-13, jak w starym systemie): „narzut” kraju/reguły to DOPŁATA w punktach procentowych DO marży sklepu na tym
-      // produkcie — cena partnera = zakup × (1 + marża sklepu + dopłata). Dzięki temu partner nigdy nie kupi taniej niż klient w sklepie polskim.
-      const doplataProc = regula ? regula.wartosc : k.narzutProc;
-      const marzaSklepu = Number.isFinite(pozycja.marzaSklepuProc) ? Math.max(0, pozycja.marzaSklepuProc as number) : 0;
-      const narzutProc = marzaSklepu + doplataProc;
-      if (!(doplataProc > 0)) {
-        // Dopłata 0 = jeszcze nieustawiona: nie publikujemy cen, dopóki użytkownik nie ustawi dopłaty kraju albo reguły (zabezpieczenie przed wypuszczeniem cen sklepu).
-        ceny[k.kraj] = null;
-        if (!narzutBrakWidziany.has(k.kraj)) {
-          narzutBrakWidziany.add(k.kraj);
-          wynik.bledy.push({ kod: "*", kraj: k.kraj, powod: reguly.length === 0 ? "Narzut kraju nie jest ustawiony (0 %) — ceny nie są publikowane." : "Narzut kraju nie jest ustawiony (0 %) i żadna reguła nie pasuje do części pozycji — ich ceny nie są publikowane (ustaw narzut kraju albo regułę)." });
-        }
-        continue;
-      }
+      // Ticket 275: narzut kraju/reguły to CAŁA marża partnera, liczona od ceny zakupu: cena = zakup × (1 + narzut). Marża sklepu z katalogu nie wchodzi do wyceny.
+      // Narzut 0 % i ujemny są dozwolone (świadoma decyzja); pozycja, której cena wyjdzie ≤ 0, jest pomijana z błędem w kalkulatorze.
+      const narzutProc = regula ? regula.wartosc : k.narzutProc;
       try {
         const kurs = kursy[k.kraj];
         if (kurs === undefined) throw new BladKalkulacji(pozycja.kod, `Brak kursu EUR dla kraju ${k.kraj}.`);

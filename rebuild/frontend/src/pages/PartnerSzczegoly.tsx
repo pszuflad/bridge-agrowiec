@@ -35,6 +35,9 @@ export function PartnerSzczegoly() {
           </Link>
         }
       />
+      <p className="text-xs text-muted-foreground" data-testid="uwaga-marza-od-zakupu">
+        Narzut (marża) partnera jest liczony od ceny zakupu i jest całą marżą: cena = cena zakupu × (1 + narzut). Marża sklepu z katalogu nie jest dodawana. Narzut 0 % = cena po koszcie, wartość ujemna = poniżej ceny zakupu.
+      </p>
       {isError ? (
         <p className="rounded-md bg-destructive/10 px-3.5 py-3 text-sm text-destructive" role="alert" data-testid="text-partner-blad">{komunikatBledu(error)}</p>
       ) : isPending ? (

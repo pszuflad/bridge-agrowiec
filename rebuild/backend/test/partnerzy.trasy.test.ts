@@ -88,14 +88,18 @@ describe("trasy /api/partnerzy", () => {
     const a = await dodaj();
     const fr = await put(`/api/partnerzy/${a.id}/kraje/fr`, { narzutProc: 0.12, kosztyDodatkowe: 3 });
     expect(fr.body.kraje).toEqual([expect.objectContaining({ kraj: "FR", narzutProc: 0.12, kursZrodlo: "nbp", kursReczny: null, kosztyDodatkowe: 3 })]);
-    await put(`/api/partnerzy/${a.id}/kraje/DE`, { kursZrodlo: "reczny", kursReczny: 4.3 });
+    await put(`/api/partnerzy/${a.id}/kraje/DE`, { narzutProc: 5, kursZrodlo: "reczny", kursReczny: 4.3 });
     const nadpis = await put(`/api/partnerzy/${a.id}/kraje/FR`, { narzutProc: 0.2 });
     expect(nadpis.body.kraje.map((k: { kraj: string }) => k.kraj)).toEqual(["DE", "FR"]);
     expect(nadpis.body.kraje.find((k: { kraj: string }) => k.kraj === "FR").narzutProc).toBe(0.2);
-    expect((await put(`/api/partnerzy/${a.id}/kraje/IT`, { kursReczny: 0 })).status).toBe(400); // kurs ręczny, jeśli jest, musi być > 0
-    expect((await put(`/api/partnerzy/${a.id}/kraje/IT`, { kursReczny: -4 })).status).toBe(400);
+    expect((await put(`/api/partnerzy/${a.id}/kraje/IT`, { narzutProc: 5, kursReczny: 0 })).status).toBe(400); // kurs ręczny, jeśli jest, musi być > 0
+    expect((await put(`/api/partnerzy/${a.id}/kraje/IT`, { narzutProc: 5, kursReczny: -4 })).status).toBe(400);
     expect((await put(`/api/partnerzy/${a.id}/kraje/FRA`, {})).status).toBe(400);
-    expect((await put(`/api/partnerzy/${a.id}/kraje/NL`, { narzutProc: -1 })).status).toBe(400);
+    expect((await put(`/api/partnerzy/${a.id}/kraje/NL`, { narzutProc: -100 })).status).toBe(400); // narzut ≤ -100 % dałby cenę zerową
+    expect((await put(`/api/partnerzy/${a.id}/kraje/NL`, {})).status).toBe(400); // narzut trzeba podać jawnie (0 % = cena po koszcie)
+    expect((await put(`/api/partnerzy/${a.id}/kraje/NL`, { narzutProc: -5 })).status).toBe(200); // ujemny i 0 % dozwolone
+    expect((await put(`/api/partnerzy/${a.id}/kraje/NL`, { narzutProc: 0 })).status).toBe(200);
+    await del(`/api/partnerzy/${a.id}/kraje/NL`);
     expect((await del(`/api/partnerzy/${a.id}/kraje/FR`)).body.kraje).toHaveLength(1);
     expect((await del(`/api/partnerzy/${a.id}/kraje/FR`)).status).toBe(404);
   });

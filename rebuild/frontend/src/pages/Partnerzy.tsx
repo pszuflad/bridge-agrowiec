@@ -101,6 +101,9 @@ export function Partnerzy() {
         title="Partnerzy B2B"
         subtitle="Partnerzy, którym Bridge generuje cenniki (EUR). Każdy ma własne magazyny, kraje, narzuty i harmonogram."
       />
+      <p className="text-xs text-muted-foreground" data-testid="uwaga-marza-od-zakupu">
+        Narzut (marża) partnera jest liczony od ceny zakupu i jest całą marżą: cena = cena zakupu × (1 + narzut). Marża sklepu z katalogu nie jest dodawana. Narzut 0 % = cena po koszcie, wartość ujemna = poniżej ceny zakupu.
+      </p>
 
       <Card>
         <CardContent className="p-4">

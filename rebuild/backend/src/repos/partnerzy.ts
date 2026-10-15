@@ -175,8 +175,10 @@ export function walidujUstawieniaPartnera(
 /** Waliduje ustawienia kraju partnera (pełny komplet pól; brakujące dostają wartości domyślne). */
 export function walidujUstawieniaKraju(cialo: unknown): UstawieniaKrajuZPaliwem | BladWalidacji {
   if (!jestObiektem(cialo)) return { blad: "Ciało żądania musi być obiektem JSON." };
-  const narzutProc = cialo.narzutProc ?? 0;
-  if (!liczbaSkonczona(narzutProc) || narzutProc < 0) return { blad: "Pole `narzutProc` musi być liczbą ≥ 0." };
+  // Ticket 275: 0 % jest dozwolone (cena po koszcie), więc brak pola nie może po cichu znaczyć 0 — narzut trzeba podać jawnie.
+  const narzutProc = cialo.narzutProc;
+  if (narzutProc === undefined) return { blad: "Pole `narzutProc` jest wymagane (narzut w % od ceny zakupu; 0 i wartości ujemne dozwolone)." };
+  if (!liczbaSkonczona(narzutProc) || narzutProc <= -100 || narzutProc > 1000) return { blad: "Pole `narzutProc` (narzut w % od ceny zakupu; 0 i wartości ujemne dozwolone) musi być liczbą > -100 i ≤ 1000." };
   const kursZrodlo = cialo.kursZrodlo ?? "nbp";
   if (!wSpisie(ZRODLA_KURSU, kursZrodlo)) return { blad: "Pole `kursZrodlo` musi mieć wartość `nbp` albo `reczny`." };
   const kursReczny = cialo.kursReczny ?? null;

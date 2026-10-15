@@ -68,7 +68,7 @@ describe("publikacja do katalogu partnera", () => {
     return id;
   };
 
-  it("serwis: po wygenerowaniu kopiuje plik do katalogu partnera; bez wpisu mapowania nie publikuje; narzut 0 % nic nie publikuje", async () => {
+  it("serwis: po wygenerowaniu kopiuje plik do katalogu partnera; bez wpisu mapowania nie publikuje; narzut 0 % publikuje po koszcie", async () => {
     const cel = join(katalog, "ftp-adtyres");
     mkdirSync(cel);
     const id = partner("Adtyres", 12);
@@ -85,7 +85,7 @@ describe("publikacja do katalogu partnera", () => {
     const cel0 = join(katalog, "ftp-tw");
     mkdirSync(cel0);
     await stworzSerwisPartnerow({ db, klientNbp: NBP, katalogBazowy: join(katalog, "p"), katalogiPublikacji: new Map([["tyreworld", cel0]]) }).generujTeraz(id0);
-    expect(existsSync(join(cel0, "plik_at.csv"))).toBe(false);
+    expect(existsSync(join(cel0, "plik_at.csv"))).toBe(true); // 0 % = cena po koszcie, bez blokady (ticket 275)
   });
 
   it("niedostępny katalog docelowy: błąd w logu partnera, generowanie się nie wywraca", async () => {
