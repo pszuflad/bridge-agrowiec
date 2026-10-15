@@ -552,6 +552,25 @@ export function trasyPartnerzy({ db, serwis, odbiorEmail, klientSelly, sellyZamo
     }
   });
 
+  /** Symulacja ceny na prawdziwych produktach z rozbiciem składników (ticket 273): `{kraj, kody?, limit?}`; tylko odczyt. */
+  router.post("/api/partnerzy/:id/symulacja-ceny", requireAuth, async (req, res) => {
+    const id = idZParametru(req, res);
+    if (id === null) return;
+    if (!serwis) return void res.status(503).json({ error: "Symulacja ceny nie jest skonfigurowana na tym serwerze." });
+    const cialo = (req.body ?? {}) as { kraj?: unknown; kody?: unknown; limit?: unknown };
+    if (typeof cialo.kraj !== "string" || !/^[A-Za-z]{2}$/.test(cialo.kraj.trim())) return void res.status(400).json({ error: "Podaj kraj (dwuliterowy kod, np. DE)." });
+    const kody = Array.isArray(cialo.kody) ? cialo.kody.filter((k): k is string => typeof k === "string").slice(0, 50) : undefined;
+    const limit = typeof cialo.limit === "number" && Number.isFinite(cialo.limit) ? cialo.limit : undefined;
+    try {
+      res.json(await serwis.symulujCeny(id, { kraj: cialo.kraj, kody, limit }));
+    } catch (e) {
+      const komunikat = e instanceof Error ? e.message : "";
+      if (/nie ma kraju|Nie ma partnera/i.test(komunikat)) return void res.status(404).json({ error: komunikat });
+      console.error("[partnerzy] symulacja ceny nie powiodła się:", komunikat);
+      res.status(500).json({ error: "Symulacja ceny nie powiodła się." });
+    }
+  });
+
   /** Pobranie PEŁNEGO pliku partnera z podglądu (ticket 260): `?nazwa=<plik z podglądu>`; bez zapisu na dysk i bez wysyłki. */
   router.get("/api/partnerzy/:id/podglad/plik", requireAuth, async (req, res) => {
     const id = idZParametru(req, res);

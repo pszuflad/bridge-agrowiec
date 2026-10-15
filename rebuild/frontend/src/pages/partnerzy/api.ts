@@ -125,6 +125,47 @@ export async function pobierzPodglad(id: number): Promise<WynikPodgladu> {
   return (await (await zadanie("POST", `${KLUCZ_PARTNERZY}/${id}/podglad`, {})).json()) as WynikPodgladu;
 }
 
+/** Symulacja ceny na prawdziwych produktach z rozbiciem składników (ticket 273) — tylko odczyt, ta sama wycena co generowanie cenników. */
+export type WierszSymulacji = {
+  kod: string;
+  numerPartnera: string | null;
+  nazwa: string;
+  dostawca: string;
+  stan: number;
+  zakupPln: number;
+  marzaSklepuProc: number;
+  doplataProc: number;
+  zrodloDoplaty: string;
+  narzutLacznyProc: number;
+  waga: number | null;
+  wymiary: string | null;
+  przesylka: {
+    wagaRozliczeniowa: number;
+    progKg: number;
+    stawkaEur: number;
+    paliwoProc: number;
+    paliwoEur: number;
+    pakowanieGeisEur: number;
+    mytoEur: number;
+    pakowanieKrajuEur: number;
+    razemEur: number;
+  } | null;
+  kosztyDodatkoweEur: number;
+  cenaEur: number | null;
+  blad: string | null;
+};
+export type WynikSymulacji = {
+  kraj: string;
+  formula: string;
+  kurs: { kurs: number; zrodlo: string; dataTabeli: string | null; ostrzezenie: string | null } | null;
+  pozycjeWybrane: number;
+  wiersze: WierszSymulacji[];
+  ostrzezenia: string[];
+};
+export async function symulujCene(id: number, cialo: { kraj: string; kody?: string[]; limit?: number | undefined }): Promise<WynikSymulacji> {
+  return (await (await zadanie("POST", `${KLUCZ_PARTNERZY}/${id}/symulacja-ceny`, cialo)).json()) as WynikSymulacji;
+}
+
 /**
  * Pobranie PEŁNEGO pliku partnera z podglądu (ticket 260): `GET …/podglad/plik?nazwa=`. Pobieramy `fetch`em z nagłówkiem autoryzacji (zwykły link nie niesie tokenu),
  * a plik zapisujemy przez tymczasową kotwicę — jak archiwum importów i CSV usuniętych Selly. Nic nie jest zapisywane ani wysyłane do partnera.

@@ -113,6 +113,7 @@ describe("POST /api/partnerzy/:id/generuj", () => {
       return { pliki: [], bledy: ["jakiś błąd"], ostrzezenia: [], kursy: {}, pozycjeWybrane: 0, usunieteZArchiwum: 0 };
     },
     podglad: async () => ({ pliki: [], bledy: [], ostrzezenia: [], pozycjeWybrane: 0 }),
+    symulujCeny: async () => ({ kraj: "DE", formula: "", zaokraglanie: "", kurs: null, pozycjeWybrane: 0, wiersze: [], ostrzezenia: [] }),
     pelnyPlik: async () => null,
     tick: async () => [],
     uruchom: () => undefined,
