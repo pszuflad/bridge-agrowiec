@@ -1,6 +1,6 @@
 # Podręcznik Bridge — rozdział 8: Analityka
 
-> Wersja robocza (2026-10-16). Konwencje: [rozdział 0](00-start-i-nawigacja.md).
+> Konwencje: [rozdział 0](00-start-i-nawigacja.md).
 > Ten ekran **tylko pokazuje dane** (nic tu nie edytujesz) — wszystkie ćwiczenia są bezpieczne także na produkcji.
 
 📍 **Jak tu wejść:** menu po lewej → **Analityka** (ósma pozycja od góry, ikona wykresu). Ekran ładuje się chwilę dłużej niż

@@ -1,6 +1,6 @@
 # Podręcznik Bridge — rozdział 10: Konfiguracja
 
-> Wersja robocza (2026-10-16). Konwencje: [rozdział 0](00-start-i-nawigacja.md).
+> Konwencje: [rozdział 0](00-start-i-nawigacja.md).
 > ⚠ To **najgroźniejszy** ekran: są tu operacje na całym katalogu i na importach. Ćwiczenia z ⚠ rób wyłącznie
 > na środowisku testowym (**https://training.agroopony.eu**). **Nigdy nie potwierdzaj „Usuń wszystko z katalogu" na produkcji.**
 

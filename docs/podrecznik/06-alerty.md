@@ -1,6 +1,6 @@
 # Podręcznik Bridge — rozdział 6: Alerty
 
-> Wersja robocza (2026-10-16). Konwencje: [rozdział 0](00-start-i-nawigacja.md).
+> Konwencje: [rozdział 0](00-start-i-nawigacja.md).
 > Zmiana statusu alertu nie zmienia katalogu, ale jest zapisywana. Zalecamy środowisko testowe
 > (**https://training.agroopony.eu**); oglądanie jest bezpieczne wszędzie.
 

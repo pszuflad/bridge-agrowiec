@@ -1,6 +1,6 @@
 # Podręcznik Bridge — rozdział 0: Start i nawigacja po panelu
 
-> **Wersja robocza do oceny** (2026-10-16). Spis wszystkich rozdziałów: [README.md](README.md).
+> Spis wszystkich rozdziałów: [README.md](README.md).
 >
 > **Gdzie ćwiczyć:** ćwiczenia z oznaczeniem ⚠ **zmieniają dane**. Wykonuj je na **środowisku testowym:
 > https://training.agroopony.eu**, nie na produkcji (`bridgeone.agroopony.eu`). Ćwiczenia bez ⚠ tylko oglądają

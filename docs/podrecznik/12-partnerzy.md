@@ -1,6 +1,6 @@
 # Podręcznik Bridge — rozdział 12: Partnerzy B2B
 
-> Wersja robocza (2026-10-16). Konwencje: [rozdział 0](00-start-i-nawigacja.md).
+> Konwencje: [rozdział 0](00-start-i-nawigacja.md).
 > ⚠ To nowy, rozbudowany moduł. Ćwiczenia z ⚠ rób na środowisku testowym (**https://training.agroopony.eu**).
 
 📍 **Jak tu wejść:** menu po lewej → **Partnerzy** (trzynasta, ostatnia pozycja od góry, ikona uścisku dłoni).

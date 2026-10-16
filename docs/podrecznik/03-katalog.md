@@ -1,6 +1,6 @@
 # Podręcznik Bridge — rozdział 3: Katalog
 
-> Wersja robocza (2026-10-16). Konwencje i słownik kierunków (np. „prawy górny róg"): [rozdział 0](00-start-i-nawigacja.md).
+> Konwencje i słownik kierunków (np. „prawy górny róg"): [rozdział 0](00-start-i-nawigacja.md).
 >
 > **Gdzie ćwiczyć:** ćwiczenia z oznaczeniem ⚠ **zmieniają dane**. Wykonuj je na **środowisku
 > testowym: https://training.agroopony.eu**, nie na produkcji (`bridgeone.agroopony.eu`).

@@ -1,6 +1,6 @@
 # Podręcznik Bridge — rozdział 1: Pulpit
 
-> Wersja robocza (2026-10-16). Konwencje i słownik kierunków: [rozdział 0](00-start-i-nawigacja.md).
+> Konwencje i słownik kierunków: [rozdział 0](00-start-i-nawigacja.md).
 > Ćwiczenia na tym ekranie **tylko oglądają dane** — są bezpieczne także na produkcji.
 
 📍 **Jak tu wejść:** menu po lewej → **Pulpit** (pierwsza pozycja od góry). Pulpit otwiera się też zaraz po zalogowaniu.

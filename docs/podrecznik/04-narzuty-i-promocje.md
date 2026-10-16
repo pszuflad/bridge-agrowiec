@@ -1,6 +1,6 @@
 # Podręcznik Bridge — rozdział 4: Narzuty i promocje
 
-> Wersja robocza (2026-10-16). Konwencje: [rozdział 0](00-start-i-nawigacja.md).
+> Konwencje: [rozdział 0](00-start-i-nawigacja.md).
 > ⚠ Reguły i promocje **przeliczają ceny w całym Katalogu**. Ćwiczenia wykonuj na środowisku testowym
 > (**https://training.agroopony.eu**).
 

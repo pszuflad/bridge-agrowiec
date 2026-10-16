@@ -1,6 +1,6 @@
 # Podręcznik Bridge — rozdział 11: Selly
 
-> Wersja robocza (2026-10-16). Konwencje: [rozdział 0](00-start-i-nawigacja.md).
+> Konwencje: [rozdział 0](00-start-i-nawigacja.md).
 > ⛔ **Na produkcji ten ekran steruje żywym sklepem Selly.pl.** „Wyślij do Selly" tworzy i zmienia produkty w sklepie
 > i **nie da się tego cofnąć z panelu**. Ćwicz tylko na środowisku testowym (**https://training.agroopony.eu**),
 > gdzie integracja jest **celowo wyłączona**; produkcyjnych ćwiczeń tu nie ma.

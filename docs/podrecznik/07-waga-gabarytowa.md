@@ -1,6 +1,6 @@
 # Podręcznik Bridge — rozdział 7: Waga gabarytowa
 
-> Wersja robocza (2026-10-16). Konwencje: [rozdział 0](00-start-i-nawigacja.md).
+> Konwencje: [rozdział 0](00-start-i-nawigacja.md).
 > ⚠ **Lista przewoźników jest wspólna dla wszystkich użytkowników** — jej zmiana (dodanie, usunięcie, nowy dzielnik)
 > widzi cała firma. Ćwiczenia modyfikujące listę rób na środowisku testowym (**https://training.agroopony.eu**).
 

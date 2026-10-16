@@ -1,6 +1,6 @@
 # Podręcznik Bridge — rozdział 5: Atrybuty
 
-> Wersja robocza (2026-10-16). Konwencje: [rozdział 0](00-start-i-nawigacja.md).
+> Konwencje: [rozdział 0](00-start-i-nawigacja.md).
 > ⚠ Edycja i akceptacja wartości **przepisuje produkty w całym katalogu**. Ćwiczenia — tylko na środowisku testowym
 > (**https://training.agroopony.eu**).
 

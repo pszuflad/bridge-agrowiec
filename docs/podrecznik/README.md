@@ -1,6 +1,6 @@
 # Podręcznik użytkownika Bridge
 
-> **Wersja robocza do oceny** (2026-10-16). Pisany na podstawie aktualnego kodu panelu. Każdy rozdział ma:
+> Pisany na podstawie aktualnego kodu panelu. Każdy rozdział ma:
 > **📍 jak tu wejść** (dokładnie, gdzie kliknąć), opis ekranu, sekcje funkcji z blokami **✍️ Ćwiczenia** i
 > kryterium **✅ Umiesz, gdy…**.
 >

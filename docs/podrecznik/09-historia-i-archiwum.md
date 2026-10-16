@@ -1,6 +1,6 @@
 # Podręcznik Bridge — rozdział 9: Historia i Archiwum importów
 
-> Wersja robocza (2026-10-16). Konwencje: [rozdział 0](00-start-i-nawigacja.md).
+> Konwencje: [rozdział 0](00-start-i-nawigacja.md).
 > Oba ekrany **tylko pokazują** dane (Archiwum pozwala pobierać pliki) — ćwiczenia są bezpieczne także na produkcji.
 
 ---

@@ -1,6 +1,6 @@
 # Podręcznik Bridge — rozdział 2: Staging (poczekalnia)
 
-> Wersja robocza (2026-10-16). Konwencje: [rozdział 0](00-start-i-nawigacja.md).
+> Konwencje: [rozdział 0](00-start-i-nawigacja.md).
 > ⚠ Ćwiczenia z akceptacją/odrzuceniem **zmieniają katalog** — wykonuj je tylko na środowisku testowym
 > (**https://training.agroopony.eu**).
 
