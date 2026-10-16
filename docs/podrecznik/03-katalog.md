@@ -1,11 +1,14 @@
-# Podręcznik Bridge — rozdział 1: Katalog
+# Podręcznik Bridge — rozdział 3: Katalog
 
-> **Wersja robocza do oceny** (2026-10-13). Na razie tylko ten rozdział — chodzi o sprawdzenie,
-> czy taki format (opis + „Ćwiczenia") jest dobry, zanim powstaną kolejne.
+> Wersja robocza (2026-10-16). Konwencje i słownik kierunków (np. „prawy górny róg"): [rozdział 0](00-start-i-nawigacja.md).
 >
 > **Gdzie ćwiczyć:** ćwiczenia z oznaczeniem ⚠ **zmieniają dane**. Wykonuj je na **środowisku
 > testowym: https://training.agroopony.eu**, nie na produkcji (`bridgeone.agroopony.eu`).
 > Ćwiczenia bez ⚠ tylko oglądają dane i są bezpieczne wszędzie.
+
+---
+
+📍 **Jak tu wejść:** menu po lewej → **Katalog** (trzecia pozycja od góry, ikona pudełka). Skróty: kafelek „Produkty w katalogu" na Pulpicie.
 
 ---
 
@@ -31,15 +34,16 @@ z cenników dostawców. Tu:
 Od góry:
 
 1. **Nagłówek „Katalog produktów"** z podtytułem (liczba pozycji albo dane wybranego dostawcy) oraz
-   dwoma przyciskami po prawej: **Kolumny** i **Pobierz CSV**.
+   dwoma przyciskami w **prawym górnym rogu**: **Kolumny** (obok niego mała plakietka np. `15/57`) i **Pobierz CSV**.
 2. **Zakładki dostawców** — „Wszyscy", potem każdy dostawca (MO1, MO2…), na końcu
    „Nieobecne w imporcie". Każda ma **liczbę pozycji**. Czerwona kropka przy dostawcy = ostatni import
    zakończył się błędem; żółta = dostawca wstrzymany.
-3. **Pasek filtrów:** pole „Szukaj", listy „Marka" i „Kategoria", lista statusu, a po prawej licznik
+3. **Pasek filtrów** (biała karta pod zakładkami; od lewej): pole „Szukaj", listy „Marka" i „Kategoria", lista statusu, a po prawej licznik
    „wyświetlono X / Y".
 4. **Tabela produktów.** Trzy kolumny są zawsze przyklejone do lewej: **Nazwa**, **EAN**, **Dostawca**.
    Na końcu każdego wiersza jest menu **⋮ (Akcje)**.
-5. **Paginacja** na dole (pojawia się, gdy wyników jest więcej niż na jednej stronie).
+5. **Paginacja** — **na samym dole tabeli** (trzeba zjechać pod ostatni wiersz): po lewej „Na stronie: 25 / 50 / 100 / Wszystkie",
+   po prawej **Poprzednia** i **Następna**. Pojawia się tylko, gdy wyników jest więcej niż na jednej stronie.
 
 ---
 
@@ -114,6 +118,8 @@ Filtry **łączą się** (np. dostawca + marka + „Brak EANu").
 
 ## 5. Wybór kolumn (przycisk „Kolumny")
 
+📍 **Prawy górny róg** nagłówka strony → przycisk **Kolumny** (lewy z dwóch przycisków).
+
 Tabela ma ponad 50 kolumn, ale domyślnie widać tylko najważniejsze (15). Przycisk **Kolumny** (z licznikiem
 np. `16/57`) otwiera listę z haczykami:
 
@@ -138,7 +144,8 @@ Ważne:
 
 ## 6. Edycja produktu ⚠
 
-W ostatniej kolumnie wiersza kliknij **⋮ (Akcje) → Edytuj**. Otwiera się okno **„Edycja produktu"**:
+📍 **Na samym końcu wiersza** (po prawej stronie tabeli; przy szerokiej tabeli jest przyklejona do prawej krawędzi)
+kliknij trzy pionowe kropki **⋮ (Akcje) → Edytuj**. Otwiera się okno **„Edycja produktu"**:
 
 - **Góra:** Nazwa, Producent, Kategoria, Dostawca *(tylko do odczytu)*, Kod dostawcy, Stan magazynowy, VAT %,
   Cena zakupu, Cena sprzedaży, EAN, Status, Link do zdjęcia, Zastosowanie.
@@ -177,6 +184,8 @@ od następnego importu pole znów będzie brane z pliku dostawcy.
 
 ## 7. Wstrzymanie i aktywacja produktu ⚠
 
+📍 **⋮ (Akcje)** na końcu wiersza → **Wstrzymaj** / **Aktywuj** (trzecia pozycja menu, pod linią oddzielającą).
+
 **⋮ → Wstrzymaj** zmienia status produktu na „wstrzymany"; ta sama pozycja menu dla wstrzymanego produktu
 nazywa się **Aktywuj** i przywraca status „aktywny". Nie ma potwierdzenia — efekt widać od razu
 (komunikat „Wstrzymano" / „Aktywowano" i zmiana w kolumnie *status*).
@@ -192,6 +201,8 @@ Status możesz też zmienić w oknie edycji (pole **Status**).
 
 ## 8. Usuwanie produktu ⚠
 
+📍 **⋮ (Akcje)** na końcu wiersza → **Usuń** (ostatnia, czerwona pozycja menu).
+
 **⋮ → Usuń** (czerwone) pyta: *„Usunąć [kod]?"*. **Usuń** potwierdza, **Anuluj** zamyka okno.
 Po usunięciu pojawia się komunikat „Usunięto produkt". **Tej operacji nie cofniesz z poziomu Katalogu** —
 rób to rozważnie.
@@ -206,6 +217,8 @@ rób to rozważnie.
 ---
 
 ## 9. Pobieranie CSV (przycisk „Pobierz CSV")
+
+📍 **Prawy górny róg** nagłówka strony → przycisk **Pobierz CSV** (prawy z dwóch przycisków). Plik zapisze się w folderze „Pobrane" Twojej przeglądarki.
 
 Przycisk po prawej w nagłówku pobiera plik CSV z produktami **aktualnie wybranej zakładki dostawcy**
 (albo wszystkich, gdy jesteś na „Wszyscy").
@@ -230,6 +243,8 @@ Przycisk po prawej w nagłówku pobiera plik CSV z produktami **aktualnie wybran
 ---
 
 ## 10. Zakładka „Nieobecne w imporcie" ⚠
+
+📍 Rząd zakładek pod nagłówkiem → **ostatnia zakładka po prawej** („Nieobecne w imporcie" z liczbą na plakietce). Pod zakładką zamiast filtrów katalogu pojawia się własny opis, dwa przyciski i tabela.
 
 Gdy produkt przez kilka dni nie pojawia się w cenniku dostawcy (domyślnie **7 dni**, dla dostawców z cennikiem
 rocznym — od razu), system **wstrzymuje go automatycznie** i umieszcza na tej liście do decyzji. Licznik na zakładce
