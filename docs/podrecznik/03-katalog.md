@@ -45,6 +45,21 @@ Od góry:
 5. **Paginacja** — **na samym dole tabeli** (trzeba zjechać pod ostatni wiersz): po lewej „Na stronie: 25 / 50 / 100 / Wszystkie",
    po prawej **Poprzednia** i **Następna**. Pojawia się tylko, gdy wyników jest więcej niż na jednej stronie.
 
+
+**Katalog — ekran główny (po zjechaniu na dół widać paginację)**
+
+![Katalog — ekran główny (po zjechaniu na dół widać paginację)](img/03-katalog.png)
+
+1. **Szukaj** — wpisuj, lista zawęża się na bieżąco
+2. Lista **Marka** (zaznaczasz wiele)
+3. Lista **Kategoria**
+4. Lista **Status** (Dostępne, Brak EANu, Brak wagi…)
+5. **Licznik** „wyświetlono X / Y"
+6. **Nagłówek kolumny** — klik sortuje
+7. **Nazwa** — klik rozwija pełną nazwę
+8. **⋮ (Akcje)** — Edytuj / Wstrzymaj / Usuń
+9. **Paginacja** — rozmiar strony i przyciski Poprzednia / Następna
+
 ---
 
 ## 3. Szukanie i filtrowanie
@@ -131,6 +146,24 @@ Ważne:
   ustawienia domyślne.
 - **Te same kolumny trafiają do pliku CSV** (patrz niżej). Tabela i eksport zawsze się zgadzają.
 
+
+**Lista „Kolumny"**
+
+![Lista „Kolumny"](img/03-katalog-kolumny.png)
+
+1. Przycisk **Kolumny** (z licznikiem 16/60)
+2. **Wszystkie / Domyślne / Żadna**
+3. **Haczyki** — zaznacz kolumnę, by ją pokazać
+
+
+**Lista „Kolumny"**
+
+![Lista „Kolumny"](img/03-katalog-kolumny.png)
+
+1. Przycisk **Kolumny** (z licznikiem 16/60)
+2. **Wszystkie / Domyślne / Żadna**
+3. **Haczyki** — zaznacz kolumnę, by ją pokazać
+
 ### Ćwiczenia 5 — kolumny
 1. Kliknij **Kolumny**. Odczytaj licznik na przycisku.
 2. Zaznacz **Waga** i **Link-do-zdjecia**. Zamknij listę (kliknij poza nią) i przewiń tabelę w prawo — nowe kolumny są widoczne.
@@ -166,6 +199,29 @@ od następnego importu pole znów będzie brane z pliku dostawcy.
 > ⚠ **Uważaj przy zmianie nazwy.** Nazwa produktu przechodzi przez pamięć nazw i poprawki ręczne, więc po
 > kolejnym imporcie lub akceptacji w Stagingu może zachować się inaczej, niż się spodziewasz. Zmieniaj nazwy
 > świadomie i najpierw przećwicz na środowisku testowym.
+
+
+**Menu ⋮ (Akcje) w wierszu**
+
+![Menu ⋮ (Akcje) w wierszu](img/03-katalog-akcje.png)
+
+1. **Edytuj** — okno edycji produktu
+2. **Historia** — wyszarzona (nieaktywna)
+3. **Wstrzymaj / Aktywuj**
+4. **Usuń** (czerwone)
+
+
+**Okno „Edycja produktu"**
+
+![Okno „Edycja produktu"](img/03-katalog-edycja.png)
+
+1. Pole **Nazwa**
+2. **Dostawca** — wyszarzone, nie do zmiany
+3. **Stan magazynowy** — pole liczbowe
+4. **Status** — lista aktywny / wstrzymany
+5. **Parametry techniczne**
+6. **Anuluj** — zamyka bez zapisu
+7. **Zapisz zmiany**
 
 ### Ćwiczenia 6 — edycja ⚠ (tylko środowisko testowe)
 1. Znajdź dowolny produkt (szukajką). Kliknij **⋮ → Edytuj**.

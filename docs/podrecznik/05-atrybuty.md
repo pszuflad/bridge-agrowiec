@@ -23,7 +23,28 @@ czy dodać je do słownika, poprawić, zmapować jako alias albo odrzucić.
 3. Gdy otworzysz rodzaj: u góry link **← Wróć do kafli**, pole „Nowa wartość…", szukajka i tabela
    (Wartość + Akcje: ikona podglądu, **Edytuj**, **Usuń**).
 
+
+**Atrybuty — kafle rodzajów**
+
+![Atrybuty — kafle rodzajów](img/05-atrybuty.png)
+
+1. **Do akceptacji** (liczba = kolejka)
+2. **Nowy rodzaj**
+3. **Dodaj wartość**
+4. **Kafel rodzaju** — klik otwiera wartości
+
 ## 1. Przeglądanie wartości
+
+
+**Panel wartości wybranego rodzaju**
+
+![Panel wartości wybranego rodzaju](img/05-atrybuty-wartosci.png)
+
+1. **← Wróć do kafli**
+2. Pole **Nowa wartość** i **+ Dodaj**
+3. **Szukaj**
+4. **Edytuj**
+5. **Usuń**
 
 ### ✍️ Ćwiczenia 5.1
 1. Menu po lewej → **Atrybuty**. Odczytaj, ile rodzajów (kafli) widzisz.
@@ -74,6 +95,19 @@ Trzy decyzje na każdej pozycji:
 > i akceptacja przepisze wszystkie pasujące produkty na tę formę.
 >
 > **Wyczyść pending** to nie trwałe odrzucenie: jeśli te same wartości pojawią się w kolejnym imporcie, wrócą do kolejki.
+
+
+**Kolejka „Do akceptacji"**
+
+![Kolejka „Do akceptacji"](img/05-atrybuty-pending.png)
+
+1. **Do akceptacji** — klik wraca do kafli
+2. **Szukaj wartości**
+3. **Wystąpień** — klik pokazuje produkty
+4. **Sugerowane aliasy**
+5. **Akceptuj**
+6. **Edytuj** (akceptuj z poprawką)
+7. **Odrzuć**
 
 ### ✍️ Ćwiczenia 5.4 ⚠ (środowisko testowe)
 1. Kliknij **Do akceptacji** (prawy górny róg). Odczytaj liczbę pozycji.

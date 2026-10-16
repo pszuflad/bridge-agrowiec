@@ -24,6 +24,17 @@ synchronizacji — tylko zmiany w katalogu.
 - **Tabela:** Data, Typ (kolorowa odznaka), Dostawca, Użytkownik, Pozycji (ile produktów dotyczy wpis), treść zmiany.
 - **Na dole:** „Na stronie:" i przyciski stron — da się dojść do najstarszych wpisów (bez limitu).
 
+
+**Historia zmian**
+
+![Historia zmian](img/09-historia.png)
+
+1. **Szukaj** po kodzie, dostawcy lub treści
+2. Lista **Typ** (Importy / Eksporty / Edycje)
+3. Lista **Dostawca**
+4. **Tabela**: data, typ, dostawca, użytkownik, liczba pozycji
+5. **Na stronie** i strony
+
 ### ✍️ Ćwiczenia 9A — Historia
 1. Menu po lewej → **Historia**. Odczytaj kilka najnowszych wpisów.
 2. Z listy **Typ** wybierz **Edycje**. Co widzisz? (Twoje zmiany z Katalogu, akceptacje z Atrybutów.)
@@ -54,6 +65,18 @@ gdy chcesz **pobrać oryginał** cennika i porównać go z katalogiem.
 
 > Listy Dostawca i Miesiąc pokazują tylko to, co jest na aktualnie przefiltrowanej liście — np. po wybraniu statusu BŁĄD
 > zostaną w nich tylko dostawcy z błędami. To nie usterka.
+
+
+**Archiwum importów**
+
+![Archiwum importów](img/09-archiwum.png)
+
+1. **Odśwież**
+2. **Dostawca**
+3. **Miesiąc**
+4. **Status** (OK / BŁĄD)
+5. **Zajętość archiwum**
+6. **Pobierz** — zapisuje plik pod nazwą od dostawcy
 
 ### ✍️ Ćwiczenia 9B — Archiwum
 1. Menu po lewej → **Archiwum importów**. Odczytaj pasek zajętości.

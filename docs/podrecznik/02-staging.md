@@ -26,6 +26,21 @@ Do kolejki trafiają: **nowe** produkty, **braki w cenniku** (pozycje, których 
    Cena sprzedaży, Zmiana, Powód — oraz **Akcje** na końcu wiersza.
 4. **Na dole**: „Na stronie:", przyciski stron i przechodzenie między stronami.
 
+
+**Staging — ekran główny**
+
+![Staging — ekran główny](img/02-staging.png)
+
+1. **Akceptuj wszystkie (N)** — wszystko wg filtra
+2. **Odrzuć wszystkie (N)**
+3. **Szukaj** po kodzie, nazwie, dostawcy, EAN
+4. Lista **Typ sprawy** (Nowe, Braki w cenniku, Zmiany kluczowe, Błędy)
+5. **Kolumny** — wybór widocznych kolumn
+6. **Akceptuj widoczne / Odrzuć widoczne** — cała strona
+7. **Haczyki** — zaznacz pozycje
+8. **Szczegóły** — podgląd i edycja pozycji
+9. **Na stronie** i przechodzenie między stronami
+
 ### Typ sprawy (lista rozwijana)
 | Opcja | Co pokazuje |
 |---|---|
@@ -66,6 +81,17 @@ Przyciski na dole: **Zamknij**, w razie potrzeby **Odrzuć** (dla zmian kluczowy
   wkleja ją do pola.
 - Przy pozycji „Brak w cenniku" okno informuje, że po akceptacji produkt zostanie **wstrzymany**, a jego stan wyzerowany.
 - **Zapisz** zapisuje Twoje poprawki w zgłoszeniu; samą pozycję akceptujesz potem z listy (haczyk + Akceptuj).
+
+
+**Okno „Szczegóły" pozycji**
+
+![Okno „Szczegóły" pozycji](img/02-staging-szczegoly.png)
+
+1. **Nagłówek okna** — typ zmiany i kod pozycji
+2. **Podgląd różnic** — co się zmienia
+3. **Pola do edycji** — Twoja zmiana zapisze się jako poprawka
+4. **Zamknij** — wyjście bez zmian
+5. **Zapisz** — zapisuje poprawki w zgłoszeniu
 
 ### ✍️ Ćwiczenia 2.2 — szczegóły ⚠ (środowisko testowe)
 1. Wybierz typ **Nowe produkty**. W pierwszym wierszu kliknij **Akcje → Szczegóły**.

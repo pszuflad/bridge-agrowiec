@@ -27,6 +27,17 @@ Nagłówek „Integracja Selly.pl", a pod nim **siedem kart jedna pod drugą** (
 > Sekcje czytające dane lokalne (status pliku CSV, mapowanie, historia) działają normalnie.
 > Nie myl tego z **Wygeneruj CSV teraz** — ten przycisk **działa** i plik po nim powstaje.
 
+
+**Integracja Selly — karty jedna pod drugą**
+
+![Integracja Selly — karty jedna pod drugą](img/11-selly.png)
+
+1. **Status połączenia**
+2. **Wygeneruj CSV teraz** — działa też na środowisku testowym
+3. **Mapowanie dostawców**: W Bridge / W Selly
+4. **Sync dostawcy** — ⛔ na produkcji zmienia żywy sklep
+5. **Historia operacji**
+
 ## 1. Plik CSV
 
 📍 Druga karta od góry — **„Codzienna synchronizacja CSV"**.

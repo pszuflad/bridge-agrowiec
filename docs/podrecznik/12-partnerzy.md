@@ -19,6 +19,16 @@ Nagłówek „Partnerzy B2B" (podtytuł: „Partnerzy, którym Bridge generuje c
 - **Tabela:** Partner, Status (odznaka Aktywny/Nieaktywny), Harmonogram, Ostatnie generowanie (data + opis),
   a na końcu wiersza (po prawej): **Aktywuj / Dezaktywuj** i **Konfiguruj**.
 
+
+**Lista partnerów**
+
+![Lista partnerów](img/12-partnerzy.png)
+
+1. Pole **Nazwa nowego partnera**
+2. **Dodaj partnera**
+3. **Aktywuj / Dezaktywuj**
+4. **Konfiguruj** — ekran partnera
+
 ### ✍️ Ćwiczenia 12.1 ⚠ (środowisko testowe)
 1. Menu po lewej → **Partnerzy**. Przejrzyj kolumny tabeli.
 2. W polu „Nazwa nowego partnera" wpisz `Test Partner` i kliknij **Dodaj partnera**. Nowy wiersz ma status **Nieaktywny**.

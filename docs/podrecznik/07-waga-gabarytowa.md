@@ -24,6 +24,20 @@ u GEIS-a (dzielnik 10 000) = **15 kg**.
    przyciski **Edytuj listę** (a po kliknięciu — **Gotowe**) oraz **Przywróć domyślne**.
 4. **Na samym dole strony** — drugi kalkulator **„Waga paletowa (opony)"**, liczony innym wzorem.
 
+
+**Waga gabarytowa — cały ekran (po wpisaniu przykładowych wymiarów)**
+
+![Waga gabarytowa — cały ekran (po wpisaniu przykładowych wymiarów)](img/07-waga.png)
+
+1. **Długość / Szerokość / Wysokość** w cm
+2. **Waga rzeczywista** (opcjonalnie)
+3. Lista **Przewoźnik**
+4. **Oblicz wagę gabarytową**
+5. **Wynik** — waga do wyceny to większa z dwóch
+6. **Edytuj listę** przewoźników
+7. **Przywróć domyślne**
+8. **Waga paletowa** — drugi kalkulator, na dole strony
+
 ## 1. Kalkulator
 
 ### ✍️ Ćwiczenia 7.1

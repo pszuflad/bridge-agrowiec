@@ -34,6 +34,16 @@ Przyciski zależą od sposobu dostarczania:
 - **Zaakceptuj mniejszy cennik** — pojawia się, gdy nowy plik ma wyraźnie mniej pozycji niż poprzedni (zabezpieczenie);
   zaakceptuj, jeśli to zamierzone, i uruchom synchronizację ponownie.
 
+
+**Konfiguracja — zakładka Dostawcy**
+
+![Konfiguracja — zakładka Dostawcy](img/10-konfiguracja-dostawcy.png)
+
+1. **Zakładki** konfiguracji (8)
+2. **Synchronizuj** — pobiera cennik z adresu URL
+3. **Wgraj plik** — dla dostawców „upload"/„mail"
+4. **Zmień** — ustawienia dostawcy (URL, częstotliwość)
+
 ### ✍️ Ćwiczenia 10.1 ⚠ (środowisko testowe)
 1. Menu po lewej → **Konfiguracja** → zakładka **Dostawcy**. Znajdź dostawcę z adresem URL.
 2. Odczytaj status i „ostatnią próbę". Kliknij **Synchronizuj** i poczekaj na komunikat.
@@ -51,6 +61,14 @@ Dwie karty i tabela:
 W oknie wgrywania: wybierasz pliki z dysku (albo przeciągasz je na ramkę), przy każdym widać dostawcę i pewność
 rozpoznania; błędnie rozpoznane poprawiasz listą „— wybierz —". **Importuj do staging** wysyła pozycje do kolejki;
 podsumowanie mówi m.in. „Do akceptacji w stagingu", „Nowe", „Zmienione", „Braki w cenniku", „Bez zmian".
+
+
+**Konfiguracja — Wgrywanie ręczne**
+
+![Konfiguracja — Wgrywanie ręczne](img/10-konfiguracja-wgrywanie.png)
+
+1. **Wgraj pliki** — auto-detekcja dostawcy
+2. **Wgraj plik** — wymuszony dostawca
 
 ### ✍️ Ćwiczenia 10.2 ⚠ (środowisko testowe)
 1. Zakładka **Wgrywanie ręczne** → **Wgraj pliki**. Wybierz z dysku testowy cennik (lub pobierz go z **Archiwum importów**).
@@ -82,6 +100,17 @@ Karty narzędzi do utrzymania katalogu:
   zapisuje tylko zaznaczone. Link jest potem chroniony przed nadpisaniem przez import.
 - **Usuń wszystko z katalogu** — *NIEODWRACALNE.* Pyta twardym okienkiem przeglądarki. **Nie używaj poza środowiskiem
   testowym i tylko z pełną świadomością.**
+
+
+**Konfiguracja — zakładka Katalog**
+
+![Konfiguracja — zakładka Katalog](img/10-konfiguracja-katalog.png)
+
+1. **Zapisz jako domyślne** — kolumny katalogu
+2. **Dociągnij wagę**
+3. **Oszacuj pozostałe wagi**
+4. **Pokaż propozycje zdjęć**
+5. ⛔ **Usuń wszystko z katalogu** — nieodwracalne!
 
 ### ✍️ Ćwiczenia 10.3 ⚠ (środowisko testowe)
 1. Zakładka **Katalog** → karta „Dziedziczenie wagi". Kliknij **Dociągnij wagę**. Przeczytaj komunikat (ile uzupełniono / pominięto).

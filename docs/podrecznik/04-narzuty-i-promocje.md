@@ -27,6 +27,18 @@ Nagłówek „Narzuty i promocje", pod nim **dwie zakładki**: **Narzuty** (otwa
 W wierszu po prawej są dwie ikonki: **ołówek (Edytuj)** i **kosz (Usuń)**. W kolumnie **Status** narzutu możesz
 **kliknąć plakietkę** („aktywny"/„nieaktywny"), aby włączyć lub wyłączyć regułę bez usuwania.
 
+
+**Narzuty i promocje — zakładka Narzuty**
+
+![Narzuty i promocje — zakładka Narzuty](img/04-narzuty.png)
+
+1. Zakładka **Narzuty**
+2. Zakładka **Promocje**
+3. **Dodaj regułę**
+4. **Status** — klik włącza/wyłącza regułę
+5. **Ołówek (Edytuj)** i **kosz (Usuń)**
+6. Karta **Symulator ceny**
+
 ---
 
 ## 1. Dodawanie reguły narzutu ⚠
@@ -46,6 +58,19 @@ Okno **„Nowa reguła cenowa"**:
 Jeśli reguła spowodowałaby cenę sprzedaży **poniżej ceny zakupu**, pojawia się dodatkowe okno
 **„Uwaga: sprzedaż poniżej ceny zakupu"** z liczbą produktów, których to dotyczy — **Anuluj** wraca do formularza,
 **Zapisz mimo to** zapisuje.
+
+
+**Okno „Nowa reguła cenowa"**
+
+![Okno „Nowa reguła cenowa"](img/04-narzuty-dialog.png)
+
+1. **Typ reguły**: Narzut lub Promocja
+2. **Nazwa** reguły
+3. **Reguła globalna** (wszystkie produkty)
+4. **+ Dodaj warunek**
+5. **Wartość narzutu (%)**
+6. **Anuluj**
+7. **Zapisz regułę**
 
 ### ✍️ Ćwiczenia 4.1 — nowy narzut ⚠ (środowisko testowe)
 1. Menu po lewej → **Narzuty i promocje** → zakładka **Narzuty**. Zobacz istniejące reguły.
@@ -92,6 +117,15 @@ Formularz jest taki sam jak dla narzutu, ale typ to „Promocja", wartość to *
 - Po dacie końca **sama się wyłącza** (status „zakończona") — zostaje na liście, ale nie wpływa już na ceny.
 - Zmiana bywa widoczna z kilkuminutowym opóźnieniem.
 - Koniec nie może być przed startem (komunikat „Niepoprawne daty").
+
+
+**Zakładka Promocje**
+
+![Zakładka Promocje](img/04-promocje.png)
+
+1. Zakładka **Promocje**
+2. **Dodaj promocję**
+3. Kolumny **Rabat, Start, Koniec, Status**
 
 ### ✍️ Ćwiczenia 4.4 — promocja ⚠ (środowisko testowe)
 1. Przejdź do zakładki **Promocje**. Zobacz statusy istniejących promocji.

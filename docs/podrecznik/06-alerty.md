@@ -34,6 +34,17 @@ pojedyncze wpisy z datami. Po prawej każdej grupy/wpisu są przyciski zmiany st
 
 Można też zaznaczyć wiele alertów i zmienić status hurtem; komunikat mówi, ile alertów zmieniono.
 
+
+**Alerty — zakładka Import**
+
+![Alerty — zakładka Import](img/06-alerty-import.png)
+
+1. Zakładka **Import** (domyślna)
+2. Zakładka **Katalog**
+3. **Szukaj w treści**
+4. **Status** (domyślnie Nierozwiązane)
+5. **Typ** alertu
+
 ### ✍️ Ćwiczenia 6.1 — alerty z importu ⚠ (środowisko testowe)
 1. Menu po lewej → **Alerty**. Upewnij się, że otwarta jest zakładka **Import**.
 2. Zmień **Status** na „Wszystkie statusy" i zobacz, ile się zmieniło w liczbie wpisów. Wróć do „Nierozwiązane".
@@ -54,6 +65,16 @@ o potwierdzenie**. Pomyłkę cofasz po jednym, przyciskiem **Otwórz ponownie**.
 
 Każdy alert ma kolorowy pasek poziomu i opis, np. „KOD · Nazwa (marża -3,2%, zakup 100 zł, sprzedaż 97 zł)".
 Dzięki temu od razu wiadomo, który produkt poprawić (w **Katalogu**: **⋮ → Edytuj** albo zmiana narzutu w **Narzutach**).
+
+
+**Alerty — zakładka Katalog**
+
+![Alerty — zakładka Katalog](img/06-alerty-katalog.png)
+
+1. Zakładka **Katalog**
+2. Lista **Poziom** (Krytyczny / Ostrzeżenie / Info)
+3. Lista **Status**
+4. **Zaakceptuj wszystko** — rozwiązuje wszystkie widoczne, bez pytania
 
 ### ✍️ Ćwiczenia 6.2 — alerty katalogowe ⚠ (środowisko testowe)
 1. W Alertach kliknij zakładkę **Katalog**. Poczekaj na „Liczenie alertów z katalogu…".

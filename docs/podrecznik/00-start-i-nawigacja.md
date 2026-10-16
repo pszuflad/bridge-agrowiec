@@ -39,6 +39,16 @@ Każdy rozdział ma tę samą budowę:
 
 📍 Wejdź na adres panelu (produkcja `bridgeone.agroopony.eu`, ćwiczenia: `training.agroopony.eu`).
 
+
+**Ekran logowania**
+
+![Ekran logowania](img/00-logowanie.png)
+
+1. Pole **Email** (Twój login)
+2. Pole **Hasło** z ikonką oka (pokazuje/ukrywa hasło)
+3. Haczyk **Zapamiętaj mnie**
+4. Przycisk **Zaloguj się**
+
 Ekran logowania ma tylko wycentrowaną kartę „Zaloguj się" — **menu po lewej tu nie ma** (tak ma być).
 
 - **Email** (twój login) i **Hasło**. Ikonka oka w polu hasła pokazuje/ukrywa wpisane znaki.
@@ -58,25 +68,18 @@ Ekran logowania ma tylko wycentrowaną kartę „Zaloguj się" — **menu po lew
 
 Panel ma stały układ:
 
-```
-┌────────────┬───────────────────────────────────────────┐
-│ BridgeOne  │  Nagłówek strony (tytuł + podtytuł)       │
-│            │                       [przyciski akcji ►] │ ← prawy górny róg
-│ Pulpit     ├───────────────────────────────────────────┤
-│ Staging    │  Zakładki: [Wszyscy] [MO1] [MO2] …        │
-│ Katalog    ├───────────────────────────────────────────┤
-│ Narzuty…   │  Filtry / szukajka                        │
-│ Atrybuty   ├───────────────────────────────────────────┤
-│ Alerty     │  Tabela lub karty z treścią               │
-│ …          │                                           │
-│            │                         ◄ Poprzednia  Następna ►
-│ ─────────  │                                           │
-│ Tryb ciemny│                                           │
-│ [AB] Imię  │                                           │
-│ Moje konto │                                           │
-│ Wyloguj    │                                           │
-└────────────┴───────────────────────────────────────────┘
-```
+**Rzeczywisty wygląd panelu (przykład: ekran Katalog)**
+
+![Rzeczywisty wygląd panelu (przykład: ekran Katalog)](img/00-uklad-ekranu.png)
+
+1. **Menu po lewej** — lista wszystkich ekranów (aktywny podświetlony)
+2. **Nagłówek strony** — tytuł i podtytuł
+3. **Prawy górny róg** — przyciski akcji ekranu
+4. **Zakładki** (tu: dostawcy)
+5. **Pasek filtrów** — szukajka i listy wyboru
+6. **Tabela** z danymi (nagłówki kolumn sortują)
+7. **Dół menu** — Tryb ciemny, Twoje konto, Moje konto, Wyloguj
+
 
 ### Menu po lewej — wszystkie ekrany (od góry do dołu)
 
@@ -144,6 +147,17 @@ Ekran ma dwie karty:
 - **Dane konta** — Imię i nazwisko oraz Email (login). Tylko do odczytu.
 - **Zmiana hasła** — pola **Aktualne hasło**, **Nowe hasło**, **Powtórz nowe hasło** i przycisk **Zmień hasło**.
   Pod polami pojawiają się czerwone podpowiedzi: „Za krótkie", „Musi być inne niż aktualne", „Hasła nie są identyczne".
+
+
+**Ekran „Moje konto"**
+
+![Ekran „Moje konto"](img/13-moje-konto.png)
+
+1. **Dane konta** (tylko do odczytu)
+2. **Aktualne hasło**
+3. **Nowe hasło** i **Powtórz**
+4. **Zmień hasło**
+5. **Moje konto** i **Wyloguj** — na dole menu po lewej
 
 ### ✍️ Ćwiczenia 5 — konto (⚠ tylko środowisko testowe)
 1. Menu po lewej → na dole **Moje konto**. Sprawdź, czy imię i email się zgadzają.

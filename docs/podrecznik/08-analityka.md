@@ -31,6 +31,16 @@ dostępność, marża i rotacja. Każdy raport można pobrać jako CSV.
 | **Dostępność** | historia dostępności pozycji (4.1), tempo schodzenia z magazynu (4.2), sezonowy wzorzec cen (4.4) |
 | **Marża i rotacja** | marża per dostawca/kategoria/marka, rotacja / produkty bez aktualizacji, cykl życia modelu (4.6) |
 
+
+**Analityka — ekran główny**
+
+![Analityka — ekran główny](img/08-analityka.png)
+
+1. **Kafle** — liczą całość, nie reagują na filtry
+2. **Filtry globalne** — działają we wszystkich zakładkach
+3. **Zakładki**: Dostawcy · EAN i ceny · Ceny w czasie · Dostępność · Marża i rotacja
+4. **CSV** — pobiera pełny zbiór danych tej karty
+
 ## 1. Filtry globalne
 
 Filtry wspólne dla wszystkich zakładek: ustawiasz raz, a tabele i wykresy się zawężają. Listy rozwijane mają własną

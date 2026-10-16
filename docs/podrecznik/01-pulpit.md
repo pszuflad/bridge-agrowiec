@@ -28,7 +28,26 @@ Od góry do dołu:
    aktualizacja ceny, Ostatnia aktualizacja stanu magazynowego, Produkty, Status. Status „Błąd" (czerwony) lub
    „Wstrzymany" (szary) wymaga uwagi.
 
+
+**Pulpit — kafelki i powiadomienia**
+
+![Pulpit — kafelki i powiadomienia](img/01-pulpit.png)
+
+1. Kafelek **Produkty w katalogu** (klik → Katalog)
+2. Kafelek **Oczekujące w staging** (klik → Staging)
+3. Kafelek **Aktywne alerty** (klik → Alerty)
+4. Kafelek **Ostatni eksport CSV** (klik → Historia)
+5. Karta **Najnowsze powiadomienia**
+6. Link **Zobacz wszystkie** (→ Alerty)
+
 > **Uwaga:** na kafelku „Aktywne alerty" liczą się razem alerty z importu i alerty katalogowe (np. ujemna marża).
+
+
+**Pulpit — tabela dostawców (po zjechaniu w dół)**
+
+![Pulpit — tabela dostawców (po zjechaniu w dół)](img/01-pulpit-dostawcy.png)
+
+1. Tabela **Ostatnia aktywność dostawców** — sprawdź kolumnę Status
 
 ### ✍️ Ćwiczenia 1 — czytanie Pulpitu
 1. Menu po lewej → **Pulpit**. Odczytaj z kafelka „Produkty w katalogu" liczbę pozycji.
